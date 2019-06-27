@@ -12,22 +12,22 @@
                     <Input v-model="id" prefix="md-person" placeholder="请输入账号" clearable size="large"/>
                     <Input v-model="password" type="password" @keyup.enter.native="login" prefix="md-lock" placeholder="请输入密码" clearable size="large"/>
                     <Button type="primary" class="btn" size="large" shape="circle" @click="login">登录</Button>
-                    <div class="box-body-foot">没有账号？<span style="color: #2db7f5" @click="register=!register">点击注册</span></div>
+                    <div class="box-body-foot">没有账号？<span style="color: #2db7f5;cursor:pointer" @click="register=!register">点击注册</span></div>
                     <Modal
                         v-model="register"
                         title="注册"
                         ok-text="注册"
                         width="460"
                         @on-ok="ok">
-                        <Row style="margin-bottom: 7px;" align="middle" type="flex">
-                            <Col span="4" class-name="vertical-middle">用户名：</Col>
-                            <Col span="20" ><Input class="register-input"></Input></Col>
-                        </Row>
-                        <Row style="margin-bottom: 7px;" align="middle" type="flex">
-                            <Col span="4" style="">密码：</Col>
+                        <Row align="middle" type="flex">
+                            <Col span="4">用户名：</Col>
                             <Col><Input class="register-input"></Input></Col>
                         </Row>
-                        <Row style="margin-bottom: 7px;" align="middle" type="flex">
+                        <Row align="middle" type="flex">
+                            <Col span="4">密码：</Col>
+                            <Col><Input class="register-input"></Input></Col>
+                        </Row>
+                        <Row align="middle" type="flex">
                             <Col span="4" style=""> 确认密码：</Col>
                             <Col><Input class="register-input"></Input></Col>
                         </Row>
@@ -116,7 +116,7 @@
     .register-input{
         width: 300px;
     }
-    .vertical-middle{
-        vertical-align: middle;
+    .ivu-row-flex{
+        margin-bottom: 7px;
     }
 </style>
