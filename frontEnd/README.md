@@ -27,4 +27,16 @@ npm run e2e
 npm test
 ```
 
+##ThirdParty Library
+``` bash
+# install iView
+npm install iView --save
+
+# install js-cookie
+npm install js-cookie --save
+
+# install vue-resource
+npm install vue-resource --save
+```
+
 For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
