@@ -9,8 +9,20 @@
         </Steps>
         <Divider/>
         <div class="form" v-show="current == 0">
-            <Form :model="project" :label-width="80">
-
+            <Form ref="basicInfo" :model="basicInfo" :rules="ruleBasicInfo" :label-width="80">
+                <FormItem label="作品名称">
+                    <Input v-model="basicInfo.project" placeholder="请输入作品名称"></Input>
+                </FormItem>
+                <FormItem label="院系名称">
+                    <Input v-model="basicInfo.college" placeholder="请输入院系名称"></Input>
+                </FormItem>
+                <FormItem label="Select">
+                    <Select v-model="basicInfo.type">
+                        <Option value="beijing">New York</Option>
+                        <Option value="shanghai">London</Option>
+                        <Option value="shenzhen">Sydney</Option>
+                    </Select>
+                </FormItem>
             </Form>
             <Row>
                 <Col span="10">作品名称</Col>
@@ -69,6 +81,14 @@
         data(){
             return{
                 current: 0,
+                basicInfo:{
+                    project: '',
+                    college: '',
+                    type: '',
+                },
+                ruleBasicInfo:{
+
+                }
             }
         },
         methods:{
