@@ -17,52 +17,24 @@ import Config
 app = Flask(__name__)
 CORS(app, resources=r'/*')
 
-#合法的后缀集
+# 合法的后缀集
 ALLOWED_EXTENSIONS_PIC = ['png', 'jpg', 'JPG', 'PNG', 'gif', 'GIF']
-ALLOWED_EXTENSIONS_VIDEO = ['mp4', 'MP4','flv','FLV']
-ALLOWED_EXTENSIONS_DOC = ['pdf','PDF']
+ALLOWED_EXTENSIONS_VIDEO = ['mp4', 'MP4', 'flv', 'FLV']
+ALLOWED_EXTENSIONS_DOC = ['pdf', 'PDF']
 
 
 @app.route('/apply')
 def homework1():
     return render_template('apply.html')
 
-# @app.route('/upload',methods=['post','get'])
-# def up_photo():
-#
-
 
 class FError(Exception):
     pass
 
 
-class User(Resource):
-    def get(self):
-        s = ['User', 'Andy']
-        t = dict()
-        t['data'] = s
-        return jsonify(t)
-
-
-class Greeting(Resource):  # 路由带参数
-    def get(self, hello_name=None, goodbye_name=None):
-        res = {"state": "fail"}
-        try:
-            if hello_name:
-                res['state'] = 'success'
-                res['content'] = 'Hello! ' + hello_name
-            elif goodbye_name:
-                res['state'] = 'success'
-                res['content'] = 'Goodbye! ' + goodbye_name
-        except:
-            res['content'] = "It seems that you didn't input right parameter"
-        finally:
-            return jsonify(res)
-
-
-class Up_photo(Resource):
+class UpPhoto(Resource):
     def post(self):
-        res = {"state" : "fail"}
+        res = {"state": "fail"}
         try:
             img = request.files.get('img')
             basedir = os.path.abspath(os.path.dirname(__file__))
@@ -76,14 +48,15 @@ class Up_photo(Resource):
             img.save(file_path)
             res['state'] = "success"
             res['url'] = Config.DOMAIN_NAME + '/static/photo/' + file_name
-            return dumps(res,ensure_ascii=False)
         except:
-            return dumps(res,ensure_ascii=False)
+            pass
+        finally:
+            return jsonify(res)
 
 
-class Up_video(Resource):
+class UpVideo(Resource):
     def post(self):
-        res = {"state" : "fail"}
+        res = {"state": "fail"}
         try:
             video = request.files.get('video')
             basedir = os.path.abspath(os.path.dirname(__file__))
@@ -97,14 +70,15 @@ class Up_video(Resource):
             video.save(file_path)
             res['state'] = "success"
             res['url'] = Config.DOMAIN_NAME + '/static/video/' + file_name
-            return dumps(res,ensure_ascii=False)
         except:
-            return dumps(res,ensure_ascii=False)
+            pass
+        finally:
+            return jsonify(res)
 
 
-class Up_doc(Resource):
+class UpDoc(Resource):
     def post(self):
-        res = {"state" : "fail"}
+        res = {"state": "fail"}
         try:
             doc = request.files.get('doc')
             basedir = os.path.abspath(os.path.dirname(__file__))
@@ -118,19 +92,48 @@ class Up_doc(Resource):
             doc.save(file_path)
             res['state'] = "success"
             res['url'] = Config.DOMAIN_NAME + '/static/doc/' + file_name
-            return dumps(res,ensure_ascii=False)
         except:
-            return dumps(res,ensure_ascii=False)
+            pass
+        finally:
+            return jsonify(res)
 
+'''
+    参数：
+        1.作品编码workCode
+        2.封面作品名称mainTitle
+        3.院系名称department
+        4.类别用于封面打钩mainType(取值'type1','type2')
+        5.姓名name
+        6.学号stuId
+        7.出生年月birthday
+        8.学历education(取值'A','B','C','D',后续生成pdf再转换)
+        9.专业major
+        10.入学时间enterTime
+        11.作品全称totalTitle
+        12.通讯地址address
+        13.联系电话phone
+        14.邮箱email
+        15.申报者情况applier[{
+                        'name': 'xxx',
+                        'stuId': 'xxx',
+                        'education': 'xxx',
+                        'phone': 'xxx',
+                        'email'： 'xxx'}]
+        16.
+'''
+class Store(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+        
 
 # 添加api资源
 api = Api(app)
-api.add_resource(User, "/api/v1/user", endpoint="user")
-api.add_resource(Greeting, "/api/v1/hello/<string:hello_name>", endpoint="hello")
-api.add_resource(Greeting, "/api/v1/goodbye/<string:goodbye_name>", endpoint="goodbye")
-api.add_resource(Up_photo,"/api/v1/up_photo",endpoint="up_photo")
-api.add_resource(Up_video,"/api/v1/up_video",endpoint="up_video")
-api.add_resource(Up_doc,"/api/v1/up_doc",endpoint="up_doc")
+api.add_resource(UpPhoto, "/api/v1/up_photo", endpoint="upPhoto")
+api.add_resource(UpVideo, "/api/v1/up_video", endpoint="upVideo")
+api.add_resource(UpDoc, "/api/v1/up_doc", endpoint="upDoc")
+api.add_resource(Store, "/api/v1/store", endpoint="store")
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", debug=True)

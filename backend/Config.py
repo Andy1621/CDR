@@ -1,5 +1,5 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# author：S.Li time:2019/6/2
-
-DOMAIN_NAME = 'http://qsz.lkc1621.xyz'
+HOST = '139.199.96.196'
+PORT_DB = 27017
+PORT_ES = 9200
+DATABASE = 'CDR'
+DOMAIN_NAME = "http://help.lkc1621.xyz"
