@@ -1,18 +1,22 @@
 <template>
     <div>
-        <Button type="primary">asdsa</Button>
+        <NavBar></NavBar>
     </div>
 </template>
 
 <script>
-export default {
-    name: 'index',
-    data () {
-        return {
+    import NavBar from '../components/NavBar.vue'
+    export default {
+        components:{
+            NavBar
+        },
+        name: 'index',
+        data () {
+            return {
 
+            }
         }
     }
-}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

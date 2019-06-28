@@ -8,6 +8,13 @@ import 'iview/dist/styles/iview.css';
 import VueResource from 'vue-resource';
 import cookie from 'js-cookie'
 
+import '../static/css/bootstrap.min.css'
+import '../static/css/style.css'
+import '../static/css/main.css'
+
+import $ from 'jquery/dist/jquery.min'
+import $$ from 'bootstrap/dist/js/bootstrap.min.js'
+
 Vue.use(iView);
 Vue.use(VueResource)
 
