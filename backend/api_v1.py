@@ -119,14 +119,80 @@ class UpDoc(Resource):
                         'education': 'xxx',
                         'phone': 'xxx',
                         'email'： 'xxx'}]
-        16.
+        16.表2作品名称title
+        17.表2作品类型type
+        18.作品总体情况说明description
+        19.创新点creation
+        20.关键词keyword
 '''
 class Store(Resource):
     def post(self):
         res = {"state": "fail"}
         try:
             data = request.get_json()
-        
+            workCOde = data.get('workCode')
+            mainTitle = ''
+            if data.get('mainTitle'):
+                mainTitle = data.get('mainTitle')
+            department = ''
+            if data.get('department'):
+                department = data.get('department')
+            mainType = ''
+            if data.get('mainType'):
+                mainType = data.get('mainType')
+            name = ''
+            if data.get('name'):
+                name = data.get('name')
+            stuId = ''
+            if data.get('stuId'):
+                stuId = data.get('stuId')
+            birthday = ''
+            if data.get('birthday'):
+                birthday = data.get('birthday')
+            education = ''
+            if data.get('education'):
+                education = data.get('education')
+            major = ''
+            if data.get('major'):
+                major = data.get('major')
+            enterTime = ''
+            if data.get('enterTime'):
+                enterTime = data.get('enterTime')
+            totalTitle = ''
+            if data.get('totalTitle'):
+                totalTitle = data.get('totalTitle')
+            address = ''
+            if data.get('address'):
+                address = data.get('address')
+            phone = ''
+            if data.get('phone'):
+                phone = data.get('phone')
+            email = ''
+            if data.get('email'):
+                email = data.get('email')
+            applier = list()
+            if data.get('applier'):
+                applier = data.get('applier')
+            title = ''
+            if data.get('title'):
+                title = data.get('title')
+            type = ''
+            if data.get('type'):
+                type = data.get('type')
+            description = ''
+            if data.get('description'):
+                description = data.get('description')
+            creation = ''
+            if data.get('creation'):
+                creation = data.get('creation')
+            keyword = ''
+            if data.get('keyword'):
+                keyword = data.get('keyword')
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
 
 # 添加api资源
 api = Api(app)

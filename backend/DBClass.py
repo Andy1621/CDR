@@ -30,3 +30,9 @@ class DbOperate:
         db = self.client[Config.DATABASE]
         col = db[name]
         return col
+
+    '''
+    保存申报信息
+    '''
+    def storeInfomation(self):
+        pass
