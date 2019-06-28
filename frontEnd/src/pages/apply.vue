@@ -1,5 +1,6 @@
 <template>
     <div class="body">
+        <NavBar></NavBar>
         <h1>作品提交内容填写</h1>
         <Steps :current="current" style="margin: 30px">
             <Step title="作品基本信息" content=""></Step>
@@ -27,26 +28,38 @@
         <div class="form" v-show="current == 1">
             <h4 style="margin-bottom: 20px">第一作者信息</h4>
             <Form ref="authorInfo" :model="authorInfo" :rules="ruleAuthorInfo" :label-width="80">
-                <FormItem label="姓名" prop="name">
-                    <Input v-model="authorInfo.name" placeholder="请输入姓名"></Input>
-                </FormItem>
-                <FormItem label="学号" prop="stu_id">
-                    <Input v-model="authorInfo.stu_id" placeholder="请输入学号"></Input>
-                </FormItem>
+                <Row>
+                    <Col span="12">
+                        <FormItem label="姓名" prop="name">
+                            <Input v-model="authorInfo.name" placeholder="请输入姓名"></Input>
+                        </FormItem>
+                    </Col>
+                    <Col span="12">
+                        <FormItem label="学号" prop="stu_id">
+                            <Input v-model="authorInfo.stu_id" placeholder="请输入学号"></Input>
+                        </FormItem>
+                    </Col>
+                </Row>
                 <FormItem label="出生年月" prop="birth">
                     <DatePicker v-model="authorInfo.birth" type="month" placeholder="请选择出生年月"></DatePicker>
                 </FormItem>
-                <FormItem label="现学历" prop="edu_background">
-                    <Select v-model="authorInfo.edu_background">
-                        <Option value="A">A.专科</Option>
-                        <Option value="B">B.大学本科</Option>
-                        <Option value="C">C.硕士研究生</Option>
-                        <Option value="D">D.博士研究生</Option>
-                    </Select>
-                </FormItem>
-                <FormItem label="专业" prop="major">
-                    <Input v-model="authorInfo.major" placeholder="请输入专业名称"></Input>
-                </FormItem>
+                <Row>
+                    <Col span="12">
+                        <FormItem label="现学历" prop="edu_background">
+                            <Select v-model="authorInfo.edu_background">
+                                <Option value="A">A.专科</Option>
+                                <Option value="B">B.大学本科</Option>
+                                <Option value="C">C.硕士研究生</Option>
+                                <Option value="D">D.博士研究生</Option>
+                            </Select>
+                        </FormItem>
+                    </Col>
+                    <Col span="12">
+                        <FormItem label="专业" prop="major">
+                            <Input v-model="authorInfo.major" placeholder="请输入专业名称"></Input>
+                        </FormItem>
+                    </Col>
+                </Row>
                 <FormItem label="入学时间" prop="school_date">
                     <Row>
                         <Col span="12">
@@ -60,14 +73,55 @@
                 <FormItem label="通讯地址" prop="address">
                     <Input v-model="authorInfo.address" placeholder="请输入通讯地址"></Input>
                 </FormItem>
-                <FormItem label="联系电话" prop="phone">
-                    <Input v-model="authorInfo.phone" placeholder="请输入联系电话"></Input>
-                </FormItem>
-                <FormItem label="邮箱" prop="email">
-                    <Input v-model="authorInfo.email" placeholder="请输入邮箱"></Input>
-                </FormItem>
+                <Row>
+                    <Col span="12">
+                        <FormItem label="联系电话" prop="phone">
+                            <Input v-model="authorInfo.phone" placeholder="请输入联系电话"></Input>
+                        </FormItem>
+                    </Col>
+                    <Col span="12">
+                        <FormItem label="邮箱" prop="email">
+                            <Input v-model="authorInfo.email" placeholder="请输入邮箱"></Input>
+                        </FormItem>
+                    </Col>
+                </Row>
+                <h4 style="margin-bottom: 20px">合作者信息</h4>
+                <Button :disabled="authorInfo.cooperators.length>=4" @click="add_cooperator">添加合作者</Button>
+                <Button :disabled="authorInfo.cooperators.length==0" @click="del_cooperator">删除合作者</Button>
+                <Row v-for="(item,index) in authorInfo.cooperators" :key="index">
+                    <h5>合作者{{index+1}}</h5>
+                    <Col span="8">
+                        <FormItem label="姓名" :key="index" :prop="'cooperators.'+ index +'.name'" :rules="{required: true, message:'姓名不能为空', trigger: 'blur'}">
+                            <Input v-model="item.name" placeholder=""></Input>
+                        </FormItem>
+                    </Col>
+                    <Col span="8">
+                        <FormItem label="学号" :key="index" :prop="'cooperators.'+ index +'.stu_id'" :rules="{required: true, message:'学号不能为空', trigger: 'blur'}">
+                            <Input v-model="item.stu_id" placeholder=""></Input>
+                        </FormItem>
+                    </Col>
+                    <Col span="8">
+                        <FormItem label="现学历" :key="index" :prop="'cooperators.'+ index +'.edu'" :rules="{required: true, message:'请选择现学历', trigger: 'change'}">
+                            <Select v-model="item.edu">
+                                <Option value="A">A.专科</Option>
+                                <Option value="B">B.大学本科</Option>
+                                <Option value="C">C.硕士研究生</Option>
+                                <Option value="D">D.博士研究生</Option>
+                            </Select>
+                        </FormItem>
+                    </Col>
+                    <Col span="12">
+                        <FormItem label="联系电话" :key="index" :prop="'cooperators.'+ index +'.phone'" :rules="{required: true, message:'联系电话不能为空', trigger: 'blur'}">
+                            <Input v-model="item.phone" placeholder=""></Input>
+                        </FormItem>
+                    </Col>
+                    <Col span="12">
+                        <FormItem label="邮箱"  :key="index" :prop="'cooperators.'+ index +'.email'" :rules="{required: true, message:'邮箱为空或格式错误', type: 'email', trigger: 'blur'}">
+                            <Input v-model="item.email" placeholder=""></Input>
+                        </FormItem>
+                    </Col>
+                </Row>
             </Form>
-            <h4 style="margin-bottom: 20px">合作者信息</h4>
         </div>
         <div class="form" v-show="current == 2">
             <Form ref="projectInfo" :model="projectInfo" :rules="ruleProjectInfo" :label-width="80">
@@ -96,7 +150,7 @@
             </Form>
         </div>
         <div class="form" v-show="current == 3">
-            <h4>作品图片上传</h4>
+            <h4 style="margin-bottom: 20px">作品图片上传</h4>
             <div class="demo-upload-list" v-for="item in uploadList">
                 <template v-if="item.status === 'finished'">
                     <img :src="item.url">
@@ -130,19 +184,36 @@
             <Modal title="预览图片" v-model="visible">
                 <img :src="imgUrl" v-if="visible" style="width: 100%">
             </Modal>
-            <h4>作品视频上传</h4>
+            <Divider/>
+            <h4 style="margin-bottom: 20px">作品视频上传</h4>
+            <Upload
+                ref="uploadVideo"
+                :show-upload-list="true"
+                :on-success="handleSuccessVideo"
+                :format="['mp4','flv']"
+                :max-size="102400"
+                :on-format-error="handleFormatErrorVideo"
+                :on-exceeded-size="handleMaxSizeVideo"
+                :before-upload="handleBeforeUploadVideo"
+                action="http://127.0.0.1:5000/api/v1/up_video"
+                style="display: inline-block">
+                <Button :disabled="uploadVideoList.length>=1" icon="ios-videocam" style="width: 100px">上传</Button>
+            </Upload>
         </div>
         <Button type="primary" :disabled="current == 0" @click="pre_step">上一步</Button>
         <Button type="primary" :disabled="current == 3" @click="next_step">下一步</Button>
-        <br>
-        <Button type="primary" @click="save_data">保存</Button>
+        <Button type="primary" @click="save_data" style="margin-left: 20px">保存到草稿箱</Button>
         <Button type="success" v-show="current == 3">提交</Button>
     </div>
 </template>
 
 <script>
+    import NavBar from '../components/NavBar.vue'
     export default {
         name: "apply",
+        components:{
+            NavBar
+        },
         data(){
             return{
                 current: 3,
@@ -175,6 +246,7 @@
                     address: '',
                     phone: '',
                     email: '',
+                    cooperators: []
                 },
                 ruleAuthorInfo:{
                     name: [
@@ -208,6 +280,9 @@
                         { required: true, message: '邮箱不能为空', trigger: 'blur' },
                         { type: 'email', message: '邮箱格式错误', trigger: 'blur' }
                     ],
+                    cooperators: [
+                        { required:true, message: '不能为空', trigger: 'blur' }
+                    ]
                 },
                 // project info
                 projectInfo:{
@@ -236,22 +311,37 @@
                 },
                 // upload
                 defaultList: [
-                    {
-                        'name': 'a42bdcc1178e62b4694c830f028db5c0',
-                        'url': 'http://127.0.0.1:5000/static/photo/1561694068_32.3-2.png'
-                    },
-                    {
-                        'name': 'bc7521e033abdd1e92222d733590f104',
-                        'url': 'http://127.0.0.1:5000/static/photo/Test123.png'
-                    },
+                    // {
+                    //     'name': 'file1',
+                    //     'url': 'http://127.0.0.1:5000/static/photo/1561694068_32.3-2.png'
+                    // },
+                    // {
+                    //     'name': 'file2',
+                    //     'url': 'http://127.0.0.1:5000/static/photo/Test123.png'
+                    // },
                 ],
                 imgUrl: '',
                 visible: false,
                 uploadList: [],
+                uploadVideoList: [],
             }
         },
         methods:{
+            add_cooperator(){
+                console.log(this.authorInfo.cooperators);
+                this.authorInfo.cooperators.push({
+                    name: '',
+                    stu_id: '',
+                    edu: '',
+                    phone: '',
+                    email: '',
+                });
+            },
+            del_cooperator(){
+                this.authorInfo.cooperators.pop();
+            },
             next_step(){
+                console.log(this.authorInfo.cooperators)
                 var check_name;
                 switch (this.current){
                     case 0:
@@ -274,7 +364,7 @@
                     } else {
                         this.$Message.error('信息有误');
                     }
-                })
+                });
                 this.save_data();
             },
             pre_step(){
@@ -284,7 +374,6 @@
             save_data(){
                 // save data function
             },
-
             //upload
             handleView (name) {
                 this.imgUrl = name;
@@ -297,14 +386,16 @@
             handleSuccess (res, file) {
                 // file.url = URL.createObjectURL(file.raw);
                 console.log(res)
+                if(res.state == 'fail')
+                    this.$Message.error('上传失败');
                 console.log(file)
                 file.url = 'https://o5wwk8baw.qnssl.com/7eb99afb9d5f317c912f08b5212fd69a/avatar';
-                file.name = '7eb99afb9d5f317c912f08b5212fd69a';
+                file.name = 'defaultfile';
             },
             handleFormatError (file) {
                 this.$Notice.warning({
                     title: '文件格式错误',
-                    desc: '文件 ' + file.name + ' 格式错误请选择 jpg 或 png文件'
+                    desc: '文件 ' + file.name + ' 格式错误请选择 jpg 或 png 格式'
                 });
             },
             handleMaxSize (file) {
@@ -322,19 +413,52 @@
                 }
                 return check;
             },
+            //upload video
+            handleSuccessVideo (res, file) {
+                // file.url = URL.createObjectURL(file.raw);
+                console.log(res);
+                if(res.state == 'fail')
+                    this.$Message.error('上传失败');
+                console.log(file)
+                file.url = 'file/url';
+                // file.name = 'filename.flv';
+            },
+            handleFormatErrorVideo (file) {
+                this.$Notice.warning({
+                    title: '文件格式错误',
+                    desc: '文件 ' + file.name + ' 格式错误请选择 mp4 或 flv 格式'
+                });
+            },
+            handleMaxSizeVideo (file) {
+                this.$Notice.warning({
+                    title: '文件过大',
+                    desc: '文件  ' + file.name + ' 过大，不能超过100M'
+                });
+            },
+            handleBeforeUploadVideo () {
+                const check = this.uploadVideoList.length < 1;
+                if (!check) {
+                    this.$Notice.warning({
+                        title: '最多只能上传1个视频'
+                    });
+                }
+                return check;
+            },
             //upload end
         },
         mounted () {
             this.uploadList = this.$refs.upload.fileList;
+            this.uploadVideoList = this.$refs.uploadVideo.fileList;
         }
     }
 </script>
 
 <style scoped>
     .body{
-        margin-left: 24%;
+        /*margin-left: 30%;*/
         border: 1px dashed black;
-        margin-top: 60px;
+        border-radius: 20px;
+        margin: 100px 0px 50px 30%;
         padding: 20px;
         width: 50%;
         text-align: center;
@@ -344,7 +468,6 @@
     }
     .form{
         text-align: left;
-        min-height: 300px;
         padding: 10px;
         margin-bottom: 30px;
         font-size: 15px;
