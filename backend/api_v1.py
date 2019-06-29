@@ -8,6 +8,9 @@
 @desc:
 '''
 import os
+import shutil
+import time
+
 from flask import Flask, render_template, jsonify, request
 from flask_restful import Api, Resource
 from flask_cors import *
@@ -41,11 +44,12 @@ class UpPhoto(Resource):
             img = request.files.get('img')
             basedir = os.path.abspath(os.path.dirname(__file__))
             path = basedir + "/static/photo/"
-            #取后缀，判断是否在范围中
+            # 取后缀，判断是否在范围中
             ext = os.path.splitext(img.filename)[1]
             if ext[1:] not in ALLOWED_EXTENSIONS_PIC:
+                res['content'] = 'File''s type is not allowed'
                 raise FError("Error")
-            file_name = request.form.get('name')
+            file_name = img.filename
             file_path = path + file_name
             img.save(file_path)
             res['state'] = "success"
@@ -60,13 +64,14 @@ class UpVideo(Resource):
     def post(self):
         res = {"state": "fail"}
         try:
-            video = request.files.get('video')
+            video = request.files.get('file')
             basedir = os.path.abspath(os.path.dirname(__file__))
             path = basedir + "/static/video/"
             ext = os.path.splitext(video.filename)[1]
             if ext[1:] not in ALLOWED_EXTENSIONS_VIDEO:
+                res['content'] = 'File''s type is not allowed'
                 raise FError("Error")
-            file_name = request.form.get('name')
+            file_name = video.filename
             file_path = path + file_name
             print(file_path)
             video.save(file_path)
@@ -82,13 +87,14 @@ class UpDoc(Resource):
     def post(self):
         res = {"state": "fail"}
         try:
-            doc = request.files.get('doc')
+            doc = request.files.get('file')
             basedir = os.path.abspath(os.path.dirname(__file__))
             path = basedir + "/static/doc/"
             ext = os.path.splitext(doc.filename)[1]
             if ext[1:] not in ALLOWED_EXTENSIONS_DOC:
+                res['content'] = 'File''s type is not allowed'
                 raise FError("Error")
-            file_name = request.form.get('name')
+            file_name = doc.filename
             file_path = path + file_name
             print(file_path)
             doc.save(file_path)
@@ -98,6 +104,28 @@ class UpDoc(Resource):
             pass
         finally:
             return jsonify(res)
+
+
+class DeleteFile(Resource):
+    def get(self):
+        res = {"state": "fail"}
+        try:
+            data = request.form
+            file_type = data.get('type')  # video/ doc/ photo
+            file_name = data.get('file_name')
+            basedir = os.path.abspath(os.path.dirname(__file__))
+            path = basedir + "/static/" + file_type + "/"
+            file_path = path + file_name
+            if not os.path.exists(file_path):
+                res['content'] = 'The file does not exists'
+                raise FError("Error")
+            os.remove(file_path)
+            res['state'] = 'success'
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
 
 '''
     参数：
@@ -121,35 +149,85 @@ class UpDoc(Resource):
                         'education': 'xxx',
                         'phone': 'xxx',
                         'email'： 'xxx'}]
-        16.
+        16.表2作品名称title
+        17.表2作品类型type
+        18.作品总体情况说明description
+        19.创新点creation
+        20.关键词keyword
 '''
 class Store(Resource):
     def post(self):
         res = {"state": "fail"}
         try:
             data = request.get_json()
+            workCOde = data.get('workCode')
+            mainTitle = ''
+            if data.get('mainTitle'):
+                mainTitle = data.get('mainTitle')
+            department = ''
+            if data.get('department'):
+                department = data.get('department')
+            mainType = ''
+            if data.get('mainType'):
+                mainType = data.get('mainType')
+            name = ''
+            if data.get('name'):
+                name = data.get('name')
+            stuId = ''
+            if data.get('stuId'):
+                stuId = data.get('stuId')
+            birthday = ''
+            if data.get('birthday'):
+                birthday = data.get('birthday')
+            education = ''
+            if data.get('education'):
+                education = data.get('education')
+            major = ''
+            if data.get('major'):
+                major = data.get('major')
+            enterTime = ''
+            if data.get('enterTime'):
+                enterTime = data.get('enterTime')
+            totalTitle = ''
+            if data.get('totalTitle'):
+                totalTitle = data.get('totalTitle')
+            address = ''
+            if data.get('address'):
+                address = data.get('address')
+            phone = ''
+            if data.get('phone'):
+                phone = data.get('phone')
+            email = ''
+            if data.get('email'):
+                email = data.get('email')
+            applier = list()
+            if data.get('applier'):
+                applier = data.get('applier')
+            title = ''
+            if data.get('title'):
+                title = data.get('title')
+            type = ''
+            if data.get('type'):
+                type = data.get('type')
+            description = ''
+            if data.get('description'):
+                description = data.get('description')
+            creation = ''
+            if data.get('creation'):
+                creation = data.get('creation')
+            keyword = ''
+            if data.get('keyword'):
+                keyword = data.get('keyword')
         except:
             pass
+        finally:
+            return jsonify(res)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#######################################################################################################################
+"""
+登录
+"""
 class Login(Resource):
     def post(self):
         data = request.get_json()
@@ -165,6 +243,9 @@ class Login(Resource):
 
 
 
+"""
+注册
+"""
 class Register(Resource):  # 注册请求
     def post(self):
         data = request.get_json()
@@ -176,12 +257,16 @@ class Register(Resource):  # 注册请求
         res = db.create_user(password, email, username, email_code)
         return dumps(res, ensure_ascii=False)
 
+##############################################################################################################3
+
 # 添加api资源
 api = Api(app)
 api.add_resource(UpPhoto, "/api/v1/up_photo", endpoint="upPhoto")
 api.add_resource(UpVideo, "/api/v1/up_video", endpoint="upVideo")
 api.add_resource(UpDoc, "/api/v1/up_doc", endpoint="upDoc")
 api.add_resource(Store, "/api/v1/store", endpoint="store")
+api.add_resource(DeleteFile, "/api/v1/delete_file", endpoint="deleteFile")
+
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", debug=True)

@@ -59,6 +59,8 @@
               </li>
             <li><router-link :to="{path:'/accountInfo'}" class=""><i class="lnr lnr-text-format"></i> <span>对账信息</span></router-link></li>
             <li><router-link :to="{path:'/ruleImport'}" class=""><i class="lnr lnr-linearicons"></i> <span>规则导入</span></router-link></li>
+            <li><router-link :to="{path:'/apply'}" class=""><i class="lnr lnr-linearicons"></i> <span>项目申请</span></router-link></li>
+            <li><router-link :to="{path:'/myProject'}" class=""><i class="lnr lnr-linearicons"></i> <span>我的项目</span></router-link></li>
           </ul>
         </nav>
       </div>
