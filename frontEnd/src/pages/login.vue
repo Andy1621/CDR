@@ -18,10 +18,11 @@
                         title="注册"
                         ok-text="注册"
                         width="460"
+                        :mask-closable="false"
                         @on-ok="ok">
                         <LInput v-model="idRegister" labelContent="用户名：" :disabled="isProfessor?true:false"></LInput>
-                        <LInput v-model="password" labelContent="密码："></LInput>
-                        <LInput v-model="passwordConform" labelContent="确认密码："></LInput>
+                        <LInput v-model="passwordRegister" labelContent="密码：" inputType="password"></LInput>
+                        <LInput v-model="passwordConform" labelContent="确认密码：" inputType="password"></LInput>
                         <br>
                         <LInput v-if="!isProfessor" v-model="stuID" labelContent="学号："></LInput>
                         <LInput v-if="!isProfessor" v-model="name" labelContent="姓名："></LInput>
@@ -52,6 +53,7 @@
                 idRegister:'',
                 isProfessor: false,
                 password:'',
+                passwordRegister:'',
                 passwordConform:'',
                 stuID:'',
                 name:'',
@@ -99,6 +101,10 @@
                 })*/
             },
             ok () {
+                if (this.passwordRegister!=this.passwordConform)
+                {
+                    alert("两次输入的密码不相同！")
+                }
                 /*let data = {
                     id: this.id,
                     password: this.password,

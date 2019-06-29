@@ -15,11 +15,13 @@ from flask import Flask, render_template, jsonify, request
 from flask_restful import Api, Resource
 from flask_cors import *
 from json import dumps
-import Config
+from backend.encrypt import encode
+from backend import Config
+from backend.DBClass import DbOperate
 
 app = Flask(__name__)
 CORS(app, resources=r'/*')
-
+db = DbOperate()
 # 合法的后缀集
 ALLOWED_EXTENSIONS_PIC = ['png', 'jpg', 'JPG', 'PNG', 'gif', 'GIF']
 ALLOWED_EXTENSIONS_VIDEO = ['mp4', 'MP4', 'flv', 'FLV']
@@ -31,10 +33,12 @@ def homework1():
     return render_template('apply.html')
 
 
+# 自定义异常——出现错误时抛出
 class FError(Exception):
     pass
 
 
+# 上传照片
 class UpPhoto(Resource):
     def post(self):
         res = {"state": "fail"}
@@ -58,6 +62,7 @@ class UpPhoto(Resource):
             return jsonify(res)
 
 
+# 上传视频
 class UpVideo(Resource):
     def post(self):
         res = {"state": "fail"}
@@ -81,6 +86,7 @@ class UpVideo(Resource):
             return jsonify(res)
 
 
+# 上传文档
 class UpDoc(Resource):
     def post(self):
         res = {"state": "fail"}
@@ -104,6 +110,7 @@ class UpDoc(Resource):
             return jsonify(res)
 
 
+# 删除附件
 class DeleteFile(Resource):
     def get(self):
         res = {"state": "fail"}
@@ -221,6 +228,41 @@ class Store(Resource):
         finally:
             return jsonify(res)
 
+
+#######################################################################################################################
+"""
+登录
+"""
+class Login(Resource):
+    def post(self):
+        data = request.get_json()
+        password = data.get('password')
+        password = encode(password)
+        username = data.get('username')
+        res = {"state": "fail"}
+        try:
+            res = db.compare_password(password, username)
+            return dumps(res, ensure_ascii=False)
+        except:
+            return dumps(res, ensure_ascii=False)
+
+
+
+"""
+注册
+"""
+class Register(Resource):  # 注册请求
+    def post(self):
+        data = request.get_json()
+        password = data.get('password')
+        password = encode(password)
+        email = data.get('email')
+        username = data.get('username')
+        email_code = data.get('email_code')
+        res = db.create_user(password, email, username, email_code)
+        return dumps(res, ensure_ascii=False)
+
+##############################################################################################################3
 
 # 添加api资源
 api = Api(app)
