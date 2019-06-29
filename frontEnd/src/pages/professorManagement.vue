@@ -5,8 +5,17 @@
 </template>
 
 <script>
+    import NavBar from '../components/NavBar.vue'
     export default {
-        name: "professorManagement"
+        components:{
+            NavBar
+        },
+        name: 'professorManagement',
+        data () {
+            return {
+
+            }
+        }
     }
 </script>
 

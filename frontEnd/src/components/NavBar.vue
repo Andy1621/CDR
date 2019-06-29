@@ -1,8 +1,8 @@
 <template>
   <div id="wrapper">
     <nav class="navbar navbar-default navbar-fixed-top">
-      <div class="brand">
-        <router-link :to="{path:'/'}"><img alt="Klorofil Logo" class="img-responsive logo"></router-link>
+      <div class="brand" style="padding: 10px 0px 0px 10px">
+        <router-link :to="{path:'/'}"><img src="../../static/picture/melon.png" width="150px" alt="997雨我无瓜" class="img-responsive logo"></router-link>
       </div>
       <div class="container-fluid">
         <div id="navbar-menu">
@@ -21,7 +21,7 @@
               </ul>
             </li>-->
             <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><img class="img-circle" alt=""> <span>{{name}}</span> <i class="icon-submenu lnr lnr-chevron-down"></i></a>
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown"> <span>{{name}}</span> <i class="icon-submenu lnr lnr-chevron-down"></i></a>
               <ul class="dropdown-menu">
                 <!--<li style="display: none" @click="info"><a><i class="lnr lnr-cog"></i> <span>个人资料</span></a></li>-->
                 <li @click="logout"><a><i class="lnr lnr-exit"></i> <span>退出登录</span></a></li>
