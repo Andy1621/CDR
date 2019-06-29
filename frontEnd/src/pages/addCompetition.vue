@@ -5,8 +5,17 @@
 </template>
 
 <script>
+    import NavBar from '../components/NavBar.vue'
     export default {
-        name: "addCompetition"
+        components:{
+            NavBar
+        },
+        name: 'addCompetition',
+        data () {
+            return {
+
+            }
+        }
     }
 </script>
 
