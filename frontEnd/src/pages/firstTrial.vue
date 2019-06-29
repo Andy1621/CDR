@@ -4,9 +4,9 @@
     <div class="body">
       <h3>作品申请表</h3>
       <Steps :current="current" style="margin: 30px">
-        <Step title="作品基本信息" content=""></Step>
-        <Step title="申请者信息" content=""></Step>
-        <Step title="作品详细信息" content=""></Step>
+        <Step title="作品基本信息" content="" @click.native="jump_0"></Step>
+        <Step title="申请者信息" content="" @click.native="jump_1"></Step>
+        <Step title="作品详细信息" content="" @click.native="jump_2"></Step>
       </Steps>
       <div class="form" v-show="current == 0">
         <Form ref="basicInfo" :model="basicInfo" :rules="ruleBasicInfo" :label-width="80">
@@ -375,6 +375,15 @@
             alert(res);
           });
         },
+        jump_0(){
+          this.current = 0;
+        },
+        jump_1(){
+          this.current = 1;
+        },
+        jump_2(){
+          this.current = 2;
+        }
         },
       mounted () {
         //设置Message默认属性
