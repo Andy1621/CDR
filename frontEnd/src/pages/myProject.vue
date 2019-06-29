@@ -53,6 +53,9 @@
                                         click: () => {
                                             this.$router.push({
                                                 path: '/apply',
+                                                query: {
+                                                    projectID: params.row.projectID
+                                                }
                                             })
                                         }
                                     }

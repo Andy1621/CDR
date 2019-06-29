@@ -277,7 +277,31 @@ class RegisterExpert(Resource):
         res = db.create_user_expert(mail, username)
         return dumps(res, ensure_ascii=False)
 
-##############################################################################################################3
+##############################################################################################################
+'''
+初审改变作品状态
+    proj_id：项目id（字符串）   result：初审结果（字符串 'True' 'False'）
+'''
+class FirstTrialChange(Resource):
+    def post(self):
+        data = request.get_json()
+        proj_id = data.get('proj_id')
+        result = data.get('result')
+        res = db.first_trial_change(proj_id, result)
+        return dumps(res, ensure_ascii=False)
+
+'''
+获取提交表数据
+    proj_id：项目id（字符串）
+'''
+class GetTableInfo(Resource):
+    def post(self):
+        data = request.get_json()
+        proj_id = data.get('proj_id')
+        res = db.get_table_info(proj_id)
+        return dumps(res, ensure_ascii=False)
+
+################################################################################################################
 
 # 添加api资源
 api = Api(app)
@@ -286,6 +310,8 @@ api.add_resource(UpVideo, "/api/v1/up_video", endpoint="upVideo")
 api.add_resource(UpDoc, "/api/v1/up_doc", endpoint="upDoc")
 api.add_resource(Store, "/api/v1/store", endpoint="store")
 api.add_resource(DeleteFile, "/api/v1/delete_file", endpoint="deleteFile")
+api.add_resource(FirstTrialChange, "/api/vi/first_trial_change", endpoint="firstTrialChange")
+api.add_resource(GetTableInfo, "/api/vi/get_table_info", endpoint="getTableInfo")
 
 
 if __name__ == "__main__":
