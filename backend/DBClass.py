@@ -10,7 +10,7 @@
 
 from pymongo import MongoClient
 from elasticsearch import Elasticsearch
-import Config
+from . import Config
 
 
 class DbOperate:
@@ -36,3 +36,49 @@ class DbOperate:
     '''
     def storeInfomation(self):
         pass
+
+
+    '''
+    检查邮箱是否已注册
+    '''
+    def check_mail(self, mail):
+        user_list = self.getCol("user")
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
+            test = user_list.find_one({'mail': mail})
+            # 邮箱已被注册
+            if test:
+                res['reason'] = '邮箱已被注册'
+            else:
+                res['reason'] = ""
+                res['state'] = 'success'
+            return res
+        except:
+            return res
+
+    '''
+    注册学生用户
+    '''
+    def create_user_student(self, mail, username, password, ID, department, field, admission_year, phone):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
+            check = self.check_mail(mail)
+            if check['state'] == 'false':
+                res['reason'] = check['reason']
+                return res
+            new_student = {'username': username,
+                           'mail': mail,
+                           'password': password,
+                           'user_type': 'user',
+                           'ID': ID,
+                           'department': department,
+                           'field': field,
+                           'admission_year': admission_year,
+                           'phone': phone
+                           }
+            user_list = self.getCol("user")
+            user_list.insert_one(new_student)
+            return res
+        except:
+            return res
+
