@@ -8,6 +8,7 @@
 @desc:
 '''
 import os
+import shutil
 import time
 
 from flask import Flask, render_template, jsonify, request
@@ -44,8 +45,9 @@ class UpPhoto(Resource):
             # 取后缀，判断是否在范围中
             ext = os.path.splitext(img.filename)[1]
             if ext[1:] not in ALLOWED_EXTENSIONS_PIC:
+                res['content'] = 'File''s type is not allowed'
                 raise FError("Error")
-            file_name = str(round(time.time())) + ext
+            file_name = img.filename
             file_path = path + file_name
             img.save(file_path)
             res['state'] = "success"
@@ -60,13 +62,14 @@ class UpVideo(Resource):
     def post(self):
         res = {"state": "fail"}
         try:
-            video = request.files.get('video')
+            video = request.files.get('file')
             basedir = os.path.abspath(os.path.dirname(__file__))
             path = basedir + "/static/video/"
             ext = os.path.splitext(video.filename)[1]
             if ext[1:] not in ALLOWED_EXTENSIONS_VIDEO:
+                res['content'] = 'File''s type is not allowed'
                 raise FError("Error")
-            file_name = str(round(time.time())) + ext
+            file_name = video.filename
             file_path = path + file_name
             print(file_path)
             video.save(file_path)
@@ -82,13 +85,14 @@ class UpDoc(Resource):
     def post(self):
         res = {"state": "fail"}
         try:
-            doc = request.files.get('doc')
+            doc = request.files.get('file')
             basedir = os.path.abspath(os.path.dirname(__file__))
             path = basedir + "/static/doc/"
             ext = os.path.splitext(doc.filename)[1]
             if ext[1:] not in ALLOWED_EXTENSIONS_DOC:
+                res['content'] = 'File''s type is not allowed'
                 raise FError("Error")
-            file_name = str(round(time.time())) + ext
+            file_name = doc.filename
             file_path = path + file_name
             print(file_path)
             doc.save(file_path)
@@ -98,6 +102,28 @@ class UpDoc(Resource):
             pass
         finally:
             return jsonify(res)
+
+
+class DeleteFile(Resource):
+    def get(self):
+        res = {"state": "fail"}
+        try:
+            data = request.form
+            file_type = data.get('type')  # video/ doc/ photo
+            file_name = data.get('file_name')
+            basedir = os.path.abspath(os.path.dirname(__file__))
+            path = basedir + "/static/" + file_type + "/"
+            file_path = path + file_name
+            if not os.path.exists(file_path):
+                res['content'] = 'The file does not exists'
+                raise FError("Error")
+            os.remove(file_path)
+            res['state'] = 'success'
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
 
 '''
     参数：
@@ -202,6 +228,8 @@ api.add_resource(UpPhoto, "/api/v1/up_photo", endpoint="upPhoto")
 api.add_resource(UpVideo, "/api/v1/up_video", endpoint="upVideo")
 api.add_resource(UpDoc, "/api/v1/up_doc", endpoint="upDoc")
 api.add_resource(Store, "/api/v1/store", endpoint="store")
+api.add_resource(DeleteFile, "/api/v1/delete_file", endpoint="deleteFile")
+
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", debug=True)

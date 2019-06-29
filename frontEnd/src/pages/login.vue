@@ -20,7 +20,6 @@
                         width="460"
                         @on-ok="ok">
                         <LInput v-model="idRegister" labelContent="用户名：" :disabled="isProfessor?true:false"></LInput>
-
                         <LInput v-model="password" labelContent="密码："></LInput>
                         <LInput v-model="passwordConform" labelContent="确认密码："></LInput>
                         <br>
@@ -126,18 +125,19 @@
 
 <style scoped>
     .box-login{
-        width: 310px;
-        height: 420px;
+        width: 20%;
+        height: 53%;
+        min-height: 400px;
+        min-width: 320px;
         position: absolute;
-        left: 590px;
-        top: 200px;
+        left: 40%;
+        top: 23%;
         text-align: center;
         font-weight: lighter;
     }
     .box-body{
-        width: 340px;
-        height: 380px;
-        margin: 10px;
+        width: 100%;
+        height: 100%;
         padding: 10px;
         border-radius: 8px;
         background-color: #FFFFFF;

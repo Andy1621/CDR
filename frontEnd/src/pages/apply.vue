@@ -13,13 +13,13 @@
             <div class="form" v-show="current == 0">
                 <Form ref="basicInfo" :model="basicInfo" :rules="ruleBasicInfo" :label-width="80">
                     <FormItem label="作品名称" prop="project">
-                        <Input v-model="basicInfo.project" placeholder="请输入作品名称"></Input>
+                        <Input v-model="basicInfo.project" :disabled="readonly" placeholder="请输入作品名称"></Input>
                     </FormItem>
                     <FormItem label="院系名称" prop="college">
-                        <Input v-model="basicInfo.college" placeholder="请输入院系名称"></Input>
+                        <Input v-model="basicInfo.college" :disabled="readonly" placeholder="请输入院系名称"></Input>
                     </FormItem>
                     <FormItem label="作品类别" prop="type">
-                        <Select v-model="basicInfo.type">
+                        <Select v-model="basicInfo.type" :disabled="readonly">
                             <Option value="invention">科技发明制作</Option>
                             <Option value="article">调查报告和学术论文</Option>
                         </Select>
@@ -32,22 +32,22 @@
                     <Row>
                         <Col span="12">
                             <FormItem label="姓名" prop="name">
-                                <Input v-model="authorInfo.name" placeholder="请输入姓名"></Input>
+                                <Input v-model="authorInfo.name" :disabled="readonly" placeholder="请输入姓名"></Input>
                             </FormItem>
                         </Col>
                         <Col span="12">
                             <FormItem label="学号" prop="stu_id">
-                                <Input v-model="authorInfo.stu_id" placeholder="请输入学号"></Input>
+                                <Input v-model="authorInfo.stu_id" :disabled="readonly" placeholder="请输入学号"></Input>
                             </FormItem>
                         </Col>
                     </Row>
                     <FormItem label="出生年月" prop="birth">
-                        <DatePicker v-model="authorInfo.birth" type="month" placeholder="请选择出生年月"></DatePicker>
+                        <DatePicker v-model="authorInfo.birth" type="month" :disabled="readonly" placeholder="请选择出生年月"></DatePicker>
                     </FormItem>
                     <Row>
                         <Col span="12">
                             <FormItem label="现学历" prop="edu_background">
-                                <Select v-model="authorInfo.edu_background">
+                                <Select v-model="authorInfo.edu_background" :disabled="readonly">
                                     <Option value="A">A.专科</Option>
                                     <Option value="B">B.大学本科</Option>
                                     <Option value="C">C.硕士研究生</Option>
@@ -57,53 +57,54 @@
                         </Col>
                         <Col span="12">
                             <FormItem label="专业" prop="major">
-                                <Input v-model="authorInfo.major" placeholder="请输入专业名称"></Input>
+                                <Input v-model="authorInfo.major" :disabled="readonly" placeholder="请输入专业名称"></Input>
                             </FormItem>
                         </Col>
                     </Row>
                     <FormItem label="入学时间" prop="school_date">
                         <Row>
                             <Col span="12">
-                                <DatePicker v-model="authorInfo.school_date" type="month" placeholder="请选择入学时间"></DatePicker>
+                                <DatePicker v-model="authorInfo.school_date" type="month" :disabled="readonly" placeholder="请选择入学时间"></DatePicker>
                             </Col>
                         </Row>
                     </FormItem>
                     <FormItem label="作品全称" prop="project">
-                        <Input v-model="authorInfo.project" placeholder="请输入作品全称"></Input>
+                        <Input v-model="authorInfo.project" :disabled="readonly" placeholder="请输入作品全称"></Input>
                     </FormItem>
                     <FormItem label="通讯地址" prop="address">
-                        <Input v-model="authorInfo.address" placeholder="请输入通讯地址"></Input>
+                        <Input v-model="authorInfo.address" :disabled="readonly" placeholder="请输入通讯地址"></Input>
                     </FormItem>
                     <Row>
                         <Col span="12">
                             <FormItem label="联系电话" prop="phone">
-                                <Input v-model="authorInfo.phone" placeholder="请输入联系电话"></Input>
+                                <Input v-model="authorInfo.phone" :disabled="readonly" placeholder="请输入联系电话"></Input>
                             </FormItem>
                         </Col>
                         <Col span="12">
                             <FormItem label="邮箱" prop="email">
-                                <Input v-model="authorInfo.email" placeholder="请输入邮箱"></Input>
+                                <Input v-model="authorInfo.email" :disabled="readonly" placeholder="请输入邮箱"></Input>
                             </FormItem>
                         </Col>
                     </Row>
                     <h4 style="margin-bottom: 20px">合作者信息</h4>
-                    <Button :disabled="authorInfo.cooperators.length>=4" @click="add_cooperator">添加合作者</Button>
-                    <Button :disabled="authorInfo.cooperators.length==0" @click="del_cooperator">删除合作者</Button>
+                    <h5 v-show="authorInfo.cooperators.length==0">暂无合作者</h5>
+                    <Button :disabled="authorInfo.cooperators.length>=4" v-show="!readonly" @click="add_cooperator">添加合作者</Button>
+                    <Button :disabled="authorInfo.cooperators.length==0" v-show="!readonly" @click="del_cooperator">删除合作者</Button>
                     <Row v-for="(item,index) in authorInfo.cooperators" :key="index">
                         <h5>合作者{{index+1}}</h5>
                         <Col span="8">
                             <FormItem label="姓名" :key="index" :prop="'cooperators.'+ index +'.name'" :rules="{required: true, message:'姓名不能为空', trigger: 'blur'}">
-                                <Input v-model="item.name" placeholder=""></Input>
+                                <Input v-model="item.name" :disabled="readonly" placeholder=""></Input>
                             </FormItem>
                         </Col>
                         <Col span="8">
                             <FormItem label="学号" :key="index" :prop="'cooperators.'+ index +'.stu_id'" :rules="{required: true, message:'学号不能为空', trigger: 'blur'}">
-                                <Input v-model="item.stu_id" placeholder=""></Input>
+                                <Input v-model="item.stu_id" :disabled="readonly" placeholder=""></Input>
                             </FormItem>
                         </Col>
                         <Col span="8">
                             <FormItem label="现学历" :key="index" :prop="'cooperators.'+ index +'.edu'" :rules="{required: true, message:'请选择现学历', trigger: 'change'}">
-                                <Select v-model="item.edu">
+                                <Select v-model="item.edu" :disabled="readonly">
                                     <Option value="A">A.专科</Option>
                                     <Option value="B">B.大学本科</Option>
                                     <Option value="C">C.硕士研究生</Option>
@@ -113,12 +114,12 @@
                         </Col>
                         <Col span="12">
                             <FormItem label="联系电话" :key="index" :prop="'cooperators.'+ index +'.phone'" :rules="{required: true, message:'联系电话不能为空', trigger: 'blur'}">
-                                <Input v-model="item.phone" placeholder=""></Input>
+                                <Input v-model="item.phone" :disabled="readonly" placeholder=""></Input>
                             </FormItem>
                         </Col>
                         <Col span="12">
                             <FormItem label="邮箱"  :key="index" :prop="'cooperators.'+ index +'.email'" :rules="{required: true, message:'邮箱为空或格式错误', type: 'email', trigger: 'blur'}">
-                                <Input v-model="item.email" placeholder=""></Input>
+                                <Input v-model="item.email" :disabled="readonly" placeholder=""></Input>
                             </FormItem>
                         </Col>
                     </Row>
@@ -127,10 +128,10 @@
             <div class="form" v-show="current == 2">
                 <Form ref="projectInfo" :model="projectInfo" :rules="ruleProjectInfo" :label-width="80">
                     <FormItem label="作品全称" prop="project">
-                        <Input v-model="projectInfo.project" placeholder="请输入作品全称"></Input>
+                        <Input v-model="projectInfo.project" :disabled="readonly" placeholder="请输入作品全称"></Input>
                     </FormItem>
                     <FormItem label="作品分类" prop="type">
-                        <Select v-model="projectInfo.type">
+                        <Select v-model="projectInfo.type" :disabled="readonly">
                             <Option value="A">A.机械与控制（包括机械、仪器仪表、自动化控制、工程、交通、建筑等）</Option>
                             <Option value="B">B.信息技术（包括计算机、电信、通讯、电子等）</Option>
                             <Option value="C">C.数理（包括数学、物理、地球与空间科学等）</Option>
@@ -140,13 +141,13 @@
                         </Select>
                     </FormItem>
                     <FormItem label="作品情况" prop="introduction">
-                        <Input v-model="projectInfo.introduction" type="textarea" :maxlength="800" :rows="4" :autosize="{minRows: 4,maxRows: 4}" placeholder="请输入作品整体情况说明（不超过800字）"></Input>
+                        <Input v-model="projectInfo.introduction" :disabled="readonly" type="textarea" :maxlength="800" :rows="4" :autosize="{minRows: 4,maxRows: 4}" placeholder="请输入作品整体情况说明（不超过800字）"></Input>
                     </FormItem>
                     <FormItem label="创新点" prop="innovation">
-                        <Input v-model="projectInfo.innovation" type="textarea" :rows="3" :autosize="{minRows: 3,maxRows: 3}" placeholder="1-5条体现作品主要创意的创新点"></Input>
+                        <Input v-model="projectInfo.innovation" :disabled="readonly" type="textarea" :rows="3" :autosize="{minRows: 3,maxRows: 3}" placeholder="1-5条体现作品主要创意的创新点"></Input>
                     </FormItem>
                     <FormItem label="关键词" prop="keyword">
-                        <Input v-model="projectInfo.keyword" type="textarea" :rows="3" :autosize="{minRows: 3,maxRows: 3}" placeholder="4-7个体现作品核心技术和问题的关键词"></Input>
+                        <Input v-model="projectInfo.keyword" :disabled="readonly" type="textarea" :rows="3" :autosize="{minRows: 3,maxRows: 3}" placeholder="4-7个体现作品核心技术和问题的关键词"></Input>
                     </FormItem>
                 </Form>
             </div>
@@ -157,7 +158,7 @@
                         <img :src="item.url">
                         <div class="demo-upload-list-cover">
                             <Icon type="ios-eye-outline" @click.native="handleView(item.url)"></Icon>
-                            <Icon type="ios-trash-outline" @click.native="handleRemove(item)"></Icon>
+                            <Icon type="ios-trash-outline" @click.native="handleRemove(item)" v-show="!readonly"></Icon>
                         </div>
                     </template>
                     <template v-else>
@@ -165,6 +166,7 @@
                     </template>
                 </div>
                 <Upload
+                    v-show="!readonly"
                     ref="upload"
                     :show-upload-list="false"
                     :default-file-list="defaultList"
@@ -198,13 +200,14 @@
                     :before-upload="handleBeforeUploadVideo"
                     action="http://127.0.0.1:5000/api/v1/up_video"
                     style="display: inline-block">
-                    <Button :disabled="uploadVideoList.length>=1" icon="ios-videocam" style="width: 100px">上传</Button>
+                    <Button :disabled="uploadVideoList.length>=1" v-show="!readonly" icon="ios-videocam" style="width: 100px">上传</Button>
                 </Upload>
             </div>
+            <Button type="" v-show="current == 3" @click="check_table">预览表格</Button>
             <Button type="primary" :disabled="current == 0" @click="pre_step">上一步</Button>
             <Button type="primary" :disabled="current == 3" @click="next_step">下一步</Button>
-            <Button type="primary" @click="save_data" style="margin-left: 20px">保存到草稿箱</Button>
-            <Button type="success" v-show="current == 3">提交</Button>
+            <Button type="primary" v-show="!readonly" @click="save_data" style="margin-left: 20px">保存到草稿箱</Button>
+            <Button type="success" v-show="current == 3 && !readonly">提交</Button>
         </div>
     </div>
 </template>
@@ -219,6 +222,7 @@
         data(){
             return{
                 current: 3,
+                readonly: false,
                 //basic info
                 basicInfo:{
                     project: '',
@@ -321,6 +325,10 @@
                     //     'name': 'file2',
                     //     'url': 'http://127.0.0.1:5000/static/photo/Test123.png'
                     // },
+                    {
+                        'name': 'file3',
+                        'url': 'https://o5wwk8baw.qnssl.com/7eb99afb9d5f317c912f08b5212fd69a/avatar'
+                    }
                 ],
                 imgUrl: '',
                 visible: false,
@@ -344,37 +352,52 @@
             },
             next_step(){
                 console.log(this.authorInfo.cooperators)
-                var check_name;
-                switch (this.current){
-                    case 0:
-                        check_name = 'basicInfo';
-                        break;
-                    case 1:
-                        check_name = 'authorInfo';
-                        break;
-                    case 2:
-                        check_name = 'projectInfo';
-                        break;
-                    case 3:
-                        check_name = 'basicInfo';
-                        break;
+                if(this.readonly){
+                    this.current += 1;
                 }
-                this.$refs[check_name].validate((valid) => {
-                    if (valid) {
-                        // this.$Message.success('Success!');
-                        this.current += 1;
-                    } else {
-                        this.$Message.error('信息有误');
+                else{
+                    var check_name;
+                    switch (this.current){
+                        case 0:
+                            check_name = 'basicInfo';
+                            break;
+                        case 1:
+                            check_name = 'authorInfo';
+                            break;
+                        case 2:
+                            check_name = 'projectInfo';
+                            break;
+                        case 3:
+                            check_name = 'basicInfo';
+                            break;
                     }
-                });
-                this.save_data();
+                    this.$refs[check_name].validate((valid) => {
+                        if (valid) {
+                            // this.$Message.success('Success!');
+                            this.current += 1;
+                        } else {
+                            this.$Message.error('信息有误');
+                        }
+                    });
+                    this.save_data();
+                }
             },
             pre_step(){
-                this.current -= 1;
-                this.save_data();
+                if(this.readonly){
+                    this.current -= 1;
+                }
+                else{
+                    this.current -= 1;
+                    this.save_data();
+                }
+            },
+            check_table(){
+                // check table
+                this.$Message.info('Check Table')
             },
             save_data(){
                 // save data function
+                this.$Message.info('Save Data')
             },
             //upload
             handleView (name) {
@@ -451,6 +474,11 @@
         mounted () {
             this.uploadList = this.$refs.upload.fileList;
             this.uploadVideoList = this.$refs.uploadVideo.fileList;
+            //设置Message默认属性
+            this.$Message.config({
+                top: 100,
+                duration: 1,
+            });
         }
     }
 </script>
