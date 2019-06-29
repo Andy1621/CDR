@@ -1,7 +1,7 @@
 <template>
     <Row align="middle" type="flex">
         <Col span="4"> {{labelContent}}</Col>
-        <Col><Input class="register-input" @input="handleInput" :value="textContent" :disabled="disabled"></Input></Col>
+        <Col><Input class="register-input" @input="handleInput" :value="textContent" :disabled="disabled" :type="inputType"></Input></Col>
     </Row>
 </template>
 
@@ -15,7 +15,8 @@
         props: [
             'textContent',
             'labelContent',
-            'disabled'
+            'disabled',
+            'inputType'
         ],
         methods:{
             handleInput(){
