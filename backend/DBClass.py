@@ -11,6 +11,10 @@
 from pymongo import MongoClient
 from utils import replace_apply_html
 import Config
+from email.mime.text import MIMEText
+from email.header import Header
+import smtplib
+
 
 
 class DbOperate:
@@ -188,31 +192,29 @@ class DbOperate:
             return res
  
     '''
-    发送邮件
+    校团委发送邮件
     '''
-    def send_mail(self, mail):
-        msg = MIMEText('hello, send by Python...', 'plain', 'utf-8')
-        # 输入Email地址和口令:
-        from_addr = input('quezzjuly@163.com')
-        password = input('julyjuly')
-        # 输入SMTP服务器地址:
-        smtp_server = input('smtp.163.com')
-        # 输入收件人地址:
-        to_addr = input('julytony@163.com')
-        server = smtplib.SMTP(smtp_server, 25)  # SMTP协议默认端口是25
-        server.set_debuglevel(1)
-        server.login(from_addr, password)
-        server.sendmail(from_addr, [to_addr], msg.as_string())
-        server.quit()
-        '''
-        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+    def send_mail(self, mail, header, message):
         try:
-
-            res['state'] = 'success'
-            return res
+            msg = MIMEText(message, 'plain', 'utf-8')
+            msg['Subject'] = Header(header, 'utf-8')
+            msg['From'] = '校团委 <team_997ywwg@163.com>'
+            msg['To'] = '<' + mail + '>'
+            # 输入Email地址和口令:
+            from_addr = 'team_997ywwg@163.com'
+            password = 'nxdmdyzxcxk233'
+            # 输入SMTP服务器地址:
+            smtp_server = 'smtp.163.com'
+            # 输入收件人地址:
+            to_addr = mail
+            server = smtplib.SMTP(smtp_server)
+            server.set_debuglevel(1)
+            server.login(from_addr, password)
+            server.sendmail(from_addr, [to_addr], msg.as_string())
+            server.quit()
         except:
-            return res
-        '''       
+            return False
+        return True
  
 
 ##############################################################################################
