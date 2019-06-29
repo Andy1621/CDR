@@ -95,9 +95,28 @@
                 </div>
                 <div v-show="isDetail">
                     <div class="news-list">
-                        <h3>{{msgDetail.title}}</h3>
-                        <h4>{{msgDetail.date}}</h4>
-                        <p>{{msgDetail.text}}</p>
+                        <h2 style="text-align: center">{{msgDetail.title}}</h2>
+                        <Divider dashed/>
+                        <Row style="color: #8391a5; font-size: 18px">
+                            <Col span="10" style="text-align: left">
+                                <p>发布者：校团委</p>
+                            </Col>
+                            <Col span="10" offset="4" style="text-align: right">
+                                <p>发布时间：{{msgDetail.date}}</p>
+                            </Col>
+                        </Row>
+                        <p style="font-size: 16px; margin: 20px;">{{msgDetail.text}}</p>
+                        <Divider style="margin: 10px 0 20px 0;"/>
+                        <div v-if="msgDetail.download!=''">
+                            <p style="margin-left: 40px; font-size: 16px">附件下载：</p>
+                            <p style="margin-left: 60px">
+                                <Icon type="ios-cloud-download" style="margin-right: 10px"></Icon>
+                                {{msgDetail.filename}}
+                                <a :href="msgDetail.download" :download="msgDetail.filename">
+                                    <Button type="info" shape="circle" style="margin-left: 20px;" ghost>点击下载</Button>
+                                </a>
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -150,6 +169,8 @@
                     'date': '',
                     'url': '',
                     'text': '',
+                    'download': '',
+                    'filename': '',
                 }
             }
         },
@@ -217,8 +238,10 @@
                     this.msgDetail = this.show_news[index];
                 }
                 this.isDetail = true
-
-            }
+            },
+            // download(url){
+            //     window.open("http://sqdownb.onlinedown.net/down/HA-BaoLiMotor2002-UpDate.rar")
+            // }
         },
         created() {
             this.get_news();
@@ -257,7 +280,7 @@
         white-space: nowrap;
     }
     .news-list{
-        width: 85%;
+        width: 90%;
         margin-left: 5%;
     }
     .news-list li{
@@ -285,6 +308,9 @@
         border-bottom: #8391a5 dashed 0.5px;
         border-top: #8391a5 dashed 0.5px;
         cursor: pointer;
+    }
+    p{
+        margin: 10px;
     }
     a {
         color: black;
