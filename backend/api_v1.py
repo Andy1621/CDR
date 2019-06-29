@@ -55,7 +55,7 @@ class UpPhoto(Resource):
             file_name = img.filename
             file_path = path + file_name
             img.save(file_path)
-            if db.insert_attachment(project_code,'photo',file_path)
+            db.insert_attachment(project_code,'photo',file_path)
             res['state'] = "success"
             res['url'] = Config.DOMAIN_NAME + '/static/photo/' + file_name
         except:

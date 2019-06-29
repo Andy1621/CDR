@@ -127,10 +127,11 @@ class DbOperate:
             return res
 
 
+##############################################################################################
     '''
         插入附件信息
     '''
-    def insert_attachment(self, project_code, file_type,file_path):
+    def insert_attachment(self, project_code, file_type, file_path):
         res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
         try:
             find_project = self.getCol('project').find_one({'project_code': project_code})
