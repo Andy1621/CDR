@@ -8,20 +8,17 @@
 @desc:
 '''
 import os
-import shutil
-import time
-
 from flask import Flask, render_template, jsonify, request
 from flask_restful import Api, Resource
 from flask_cors import *
-from json import dumps
-from encrypt import encode
-import Config
 from DBClass import DbOperate
+import Config
+from utils import encode
 
 app = Flask(__name__)
 CORS(app, resources=r'/*')
 db = DbOperate()
+
 # 合法的后缀集
 ALLOWED_EXTENSIONS_PIC = ['png', 'jpg', 'JPG', 'PNG', 'gif', 'GIF']
 ALLOWED_EXTENSIONS_VIDEO = ['mp4', 'MP4', 'flv', 'FLV']
@@ -29,7 +26,7 @@ ALLOWED_EXTENSIONS_DOC = ['pdf', 'PDF']
 
 
 @app.route('/apply')
-def homework1():
+def apply():
     return render_template('apply.html')
 
 
@@ -122,7 +119,6 @@ class UpDoc(Resource):
         finally:
             return jsonify(res)
 
-
 # 删除附件
 class DeleteFile(Resource):
     def get(self):
@@ -146,96 +142,121 @@ class DeleteFile(Resource):
 
 
 '''
-    参数：
-        1.作品编码workCode
-        2.封面作品名称mainTitle
-        3.院系名称department
-        4.类别用于封面打钩mainType(取值'type1','type2')
-        5.姓名name
-        6.学号stuId
-        7.出生年月birthday
-        8.学历education(取值'A','B','C','D',后续生成pdf再转换)
-        9.专业major
-        10.入学时间enterTime
-        11.作品全称totalTitle
-        12.通讯地址address
-        13.联系电话phone
-        14.邮箱email
-        15.申报者情况applier[{
-                        'name': 'xxx',
-                        'stuId': 'xxx',
-                        'education': 'xxx',
-                        'phone': 'xxx',
-                        'email'： 'xxx'}]
-        16.表2作品名称title
-        17.表2作品类型type
-        18.作品总体情况说明description
-        19.创新点creation
-        20.关键词keyword
+保存项目报名
+参数：
+    1.作品编码workCode
+    2.封面作品名称mainTitle
+    3.院系名称department
+    4.类别用于封面打钩mainType(取值'type1','type2')
+    5.姓名name
+    6.学号stuId
+    7.出生年月birthday
+    8.学历education(取值'A','B','C','D',后续生成pdf再转换)
+    9.专业major
+    10.入学时间enterTime
+    11.作品全称totalTitle
+    12.通讯地址address
+    13.联系电话phone
+    14.邮箱email
+    15.申报者情况applier[{
+                    'name': 'xxx',
+                    'stuId': 'xxx',
+                    'education': 'xxx',
+                    'phone': 'xxx',
+                    'email'： 'xxx'}]
+    16.表2作品名称title
+    17.表2作品类型type
+    18.作品总体情况说明description
+    19.创新点creation
+    20.关键词keyword
 '''
-class Store(Resource):
+class StoreProject(Resource):
     def post(self):
         res = {"state": "fail"}
         try:
             data = request.get_json()
-            workCOde = data.get('workCode')
-            mainTitle = ''
+            params = {'workCode': data.get('workCode'), 'mainTitle': '', 'department': '',
+                      'mainType': '', 'name': '', 'stuId': '', 'birthday': '',
+                      'education': '', 'major': '', 'enterTime': '',
+                      'totalTitle': '', 'address': '', 'phone': '', 'email': '',
+                      'applier': list(), 'title': '', 'type': '', 'description': '',
+                      'creation': '', 'keyword': ''}
             if data.get('mainTitle'):
-                mainTitle = data.get('mainTitle')
-            department = ''
+                params['mainTitle'] = data.get('mainTitle')
             if data.get('department'):
-                department = data.get('department')
-            mainType = ''
+                params['department'] = data.get('department')
             if data.get('mainType'):
-                mainType = data.get('mainType')
-            name = ''
+                params['mainType'] = data.get('mainType')
             if data.get('name'):
-                name = data.get('name')
-            stuId = ''
+                params['name'] = data.get('name')
             if data.get('stuId'):
-                stuId = data.get('stuId')
-            birthday = ''
+                params['stuId'] = data.get('stuId')
             if data.get('birthday'):
-                birthday = data.get('birthday')
-            education = ''
+                params['birthday'] = data.get('birthday')
             if data.get('education'):
-                education = data.get('education')
-            major = ''
+                params['education'] = data.get('education')
             if data.get('major'):
-                major = data.get('major')
-            enterTime = ''
+                params['major'] = data.get('major')
             if data.get('enterTime'):
-                enterTime = data.get('enterTime')
-            totalTitle = ''
+                params['enterTime'] = data.get('enterTime')
             if data.get('totalTitle'):
-                totalTitle = data.get('totalTitle')
-            address = ''
+                params['totalTitle'] = data.get('totalTitle')
             if data.get('address'):
-                address = data.get('address')
-            phone = ''
+                params['address'] = data.get('address')
             if data.get('phone'):
-                phone = data.get('phone')
-            email = ''
+                params['phone'] = data.get('phone')
             if data.get('email'):
-                email = data.get('email')
-            applier = list()
+                params['email'] = data.get('email')
             if data.get('applier'):
-                applier = data.get('applier')
-            title = ''
+                params['applier'] = data.get('applier')
             if data.get('title'):
-                title = data.get('title')
-            type = ''
+                params['title'] = data.get('title')
             if data.get('type'):
-                type = data.get('type')
-            description = ''
+                params['type'] = data.get('type')
             if data.get('description'):
-                description = data.get('description')
-            creation = ''
+                params['description'] = data.get('description')
             if data.get('creation'):
-                creation = data.get('creation')
-            keyword = ''
+                params['creation'] = data.get('creation')
             if data.get('keyword'):
-                keyword = data.get('keyword')
+                params['keyword'] = data.get('keyword')
+            res = db.store_project(params)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+
+'''
+新增项目报名
+参数：
+    1.竞赛编号competition_id
+    2.学号stu_id 
+'''
+class AddProject(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            competition_id = data.get('competition_id')
+            email = data.get('email')
+            res = db.add_project(competition_id, email)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+'''
+查看报名表
+参数：
+    项目编号project_id
+'''
+class ViewApply(Resource):
+    def get(self):
+        res = {"state": "fail"}
+        try:
+            data = request.args
+            project_id = data.get('project_id')
+            res = db.view_apply(project_id)
         except:
             pass
         finally:
@@ -248,17 +269,19 @@ class Store(Resource):
 """
 class Login(Resource):
     def post(self):
-        data = request.get_json()
-        password = data.get('password')
-        password = encode(password)
-        mail = data.get('mail')
-        role = data.get('role')
         res = {"state": "fail"}
         try:
+            data = request.get_json()
+            password = data.get('password')
+            password = encode(password)
+            mail = data.get('mail')
+            role = data.get('role')
+            res = {"state": "fail"}
             res = db.compare_password(password, mail, role)
-            return dumps(res, ensure_ascii=False)
         except:
-            return dumps(res, ensure_ascii=False)
+            pass
+        finally:
+            return jsonify(res)
 
 
 """
@@ -266,29 +289,39 @@ class Login(Resource):
 """
 class RegisterStudent(Resource):  # 注册请求
     def post(self):
-        data = request.get_json()
-        password = data.get('password')
-        password = encode(password)
-        mail = data.get('mail')
-        username = data.get('username')
-        ID = data.get('ID')
-        department = data.get('department')
-        field = data.get('field')
-        admission_year = data.get('admission_year')
-        phone = data.get('phone')
-        res = db.create_user_student(mail, username, password, ID, department, field, admission_year, phone)
-        return dumps(res, ensure_ascii=False)
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            password = data.get('password')
+            password = encode(password)
+            mail = data.get('mail')
+            username = data.get('username')
+            ID = data.get('ID')
+            department = data.get('department')
+            field = data.get('field')
+            admission_year = data.get('admission_year')
+            phone = data.get('phone')
+            res = db.create_user_student(mail, username, password, ID, department, field, admission_year, phone)
+        except:
+            pass
+        finally:
+            return jsonify(res)
 
 """
 注册专家
 """
 class RegisterExpert(Resource):
     def post(self):
-        data = request.get_json()
-        mail = data.get('mail')
-        username = data.get('username')
-        res = db.create_user_expert(mail, username)
-        return dumps(res, ensure_ascii=False)
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            mail = data.get('mail')
+            username = data.get('username')
+            res = db.create_user_expert(mail, username)
+        except:
+            pass
+        finally:
+            return jsonify(res)
 
 ##############################################################################################################
 '''
@@ -297,11 +330,16 @@ class RegisterExpert(Resource):
 '''
 class FirstTrialChange(Resource):
     def post(self):
-        data = request.get_json()
-        proj_id = data.get('proj_id')
-        result = data.get('result')
-        res = db.first_trial_change(proj_id, result)
-        return dumps(res, ensure_ascii=False)
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            proj_id = data.get('proj_id')
+            result = data.get('result')
+            res = db.first_trial_change(proj_id, result)
+        except:
+            pass
+        finally:
+            return jsonify(res)
 
 '''
 获取提交表数据
@@ -309,10 +347,15 @@ class FirstTrialChange(Resource):
 '''
 class GetTableInfo(Resource):
     def post(self):
-        data = request.get_json()
-        proj_id = data.get('proj_id')
-        res = db.get_table_info(proj_id)
-        return dumps(res, ensure_ascii=False)
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            proj_id = data.get('proj_id')
+            res = db.get_table_info(proj_id)
+        except:
+            pass
+        finally:
+            return jsonify(res)
 
 ################################################################################################################
 
@@ -321,7 +364,9 @@ api = Api(app)
 api.add_resource(UpPhoto, "/api/v1/up_photo", endpoint="upPhoto")
 api.add_resource(UpVideo, "/api/v1/up_video", endpoint="upVideo")
 api.add_resource(UpDoc, "/api/v1/up_doc", endpoint="upDoc")
-api.add_resource(Store, "/api/v1/store", endpoint="store")
+api.add_resource(StoreProject, "/api/v1/store_project", endpoint="storeProject")
+api.add_resource(AddProject, "/api/v1/add_project", endpoint="addProject")
+api.add_resource(ViewApply, "/api/v1/view_apply", endpoint="viewApply")
 api.add_resource(DeleteFile, "/api/v1/delete_file", endpoint="deleteFile")
 api.add_resource(FirstTrialChange, "/api/vi/first_trial_change", endpoint="firstTrialChange")
 api.add_resource(GetTableInfo, "/api/vi/get_table_info", endpoint="getTableInfo")

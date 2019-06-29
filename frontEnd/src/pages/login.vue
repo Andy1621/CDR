@@ -92,50 +92,56 @@
         },
         methods:{
             login(){
-                this.$router.push({
+                /*this.$router.push({
                     path: '/index'
-                })
-                /*let data = {
+                })*/
+                let data = {
                     id: this.id,
                     password: this.password,
                     role: this.role,
                 };
-                this.$http.post("",data).then(function (res) {
+                this.$http.post("http://127.0.0.1:5000/api/v1/login",data).then(function (res) {
                     console.log(res);
-                    this.$cookie.set('id',*);
+                    /*this.$cookie.set('id',*);
                     this.$cookie.set('name',*);
-                    this.$cookie.set('role',*);
-                    this.$router.push({
+                    this.$cookie.set('role',*);*/
+                    /*this.$router.push({
                         path: '/index',
-                    });
+                    });*/
                 },function (res) {
                     console.log(res)
-                })*/
+                })
             },
             ok () {
                 if (this.passwordRegister!=this.passwordConform)
                 {
                     alert("两次输入的密码不相同！")
+                    return;
                 }
-                /*let data = {
-                    id: this.id,
-                    password: this.password,
-                    role: this.role,
+                let data = {
+                    ID: this.idRegister,
+                    password: this.passwordRegister,
+                    mail: this.email,
+                    username: this.name,
+                    department: this.school,
+                    field: this.major,
+                    admission_year: this.enterYear,
+                    phone: this.tel
                 };
-                this.$http.post("",data).then(function (res) {
+                this.$http.post("http://127.0.0.1:5000/api/v1/registerstudent",data).then(function (res) {
                     console.log(res)
-                    this.$cookie.set('id',*);
+                    /*this.$cookie.set('id',*);
                     this.$cookie.set('name',*);
                     this.$cookie.set('role',*);
                     this.$router.push({
                         path: '/index'
-                    })
+                    })*/
                 },function (res) {
                     console.log(res)
-                })*/
-                this.$router.push({
-                    path:'/index'
                 })
+                /*this.$router.push({
+                    path:'/index'
+                })*/
             },
             okPro(){
                 let url = '';

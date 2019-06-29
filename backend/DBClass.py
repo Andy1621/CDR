@@ -10,6 +10,7 @@
 
 from pymongo import MongoClient
 from elasticsearch import Elasticsearch
+from utils import replace_apply_html, html2pdf
 import Config
 
 
@@ -21,10 +22,10 @@ class DbOperate:
         self.host = Config.HOST
         self.port = Config.PORT_DB
         self.client = MongoClient(self.host, self.port)
-        self.es = Elasticsearch([{u'host': Config.HOST, u'port': Config.PORT_ES}], timeout=3600)
 
     '''
     取得Business数据库的指定表
+    66666:Good looking laptop. Good feeling. Good touching.
     '''
     def getCol(self, name):
         db = self.client[Config.DATABASE]
@@ -34,8 +35,62 @@ class DbOperate:
     '''
     保存申报信息
     '''
-    def storeInfomation(self):
-        pass
+    def store_project(self, params):
+        res = {'state': 'fail', 'reason': "信息字段出错"}
+        try:
+            project_code = params['workCode']
+            apply = self.getCol('project').find_one({'project_code': project_code})
+            if apply:
+                apply['form'] = params
+                self.getCol('project').update_one({'project_code': 'project_code'}, {'$set': apply})
+                res['state'] = 'success'
+            else:
+                res['reason'] = "申请编号不存在"
+        except:
+            pass
+        finally:
+            return res
+
+    '''
+    新增项目报名
+    '''
+    def add_project(self, competition_id, email):
+        res = {'state': 'fail', 'reason': "未知错误"}
+        try:
+            competition = self.getCol('competition').find_one({'_id': competition_id})
+            if competition:
+                result = self.getCol('project').insert({'email': email,
+                                                        'competition_id': competition_id,
+                                                        'status': 'editing'})
+                res['state'] = 'success'
+                res['project_id'] = str(result.inserted_id)
+            else:
+                res['reason'] = "竞赛不存在"
+        except:
+            pass
+        finally:
+            return res
+
+    '''
+    查看申请表
+    '''
+    def view_apply(self, project_id):
+        res = {'state': 'fail', 'reason': "未知错误"}
+        try:
+            form = self.getCol('project').find_one({'_id': project_id})
+            if form:
+                html = replace_apply_html(form)
+                filename = form['workCode'] + ".pdf"
+                html2pdf(html, filename)
+                pdf_url = Config.DOMAIN_NAME + "/static/export_pdf/" + filename
+                res['state'] = 'success'
+                res['pdf_url'] = pdf_url
+            else:
+                res['reason'] = "竞赛不存在"
+        except:
+            pass
+        finally:
+            return res
 
 
     '''
@@ -78,6 +133,7 @@ class DbOperate:
                            }
             user_list = self.getCol("user")
             user_list.insert_one(new_student)
+            res['state'] = 'success'
             return res
         except:
             return res
@@ -92,13 +148,15 @@ class DbOperate:
             if check['state'] == 'false':
                 res['reason'] = check['reason']
                 return res
-            new_student = {'username': username,
-                           'mail': mail,
-                           'password': "",
+            new_expert = {'username': username,
+                          'mail': mail,
+                          'password': "",
                            'user_type': 'expert',
+                          'invitation_code': ''
                            }
             user_list = self.getCol("user")
-            user_list.insert_one(new_student)
+            user_list.insert_one(new_expert)
+            res['state'] = 'success'
             return res
         except:
             return res
@@ -106,7 +164,7 @@ class DbOperate:
     '''
     用户登录
     '''
-    def compare_password(self, password, mail):
+    def compare_password(self, password, mail, user_type):
         res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
         try:
             find_user = self.getCol('user').find_one({'mail': mail})
@@ -116,6 +174,10 @@ class DbOperate:
                 if real_psw == "" and find_user['user_type'] == 'expert':
                     res['reason'] = '该专家尚未设置密码!'
                 elif real_psw == password:
+                    dictionary = {'student': 'student', 'professor': 'expert', 'school': 'admin'}
+                    if dictionary[user_type] != find_user['user_type']:
+                        res['reason'] = '用户类型不匹配'
+                        return res
                     res['state'] = 'success'
                 else:
                     res['reason'] = '密码错误'
@@ -125,7 +187,34 @@ class DbOperate:
             return res
         except:
             return res
+ 
+    '''
+    发送邮件
+    '''
+    def send_mail(self, mail):
+        msg = MIMEText('hello, send by Python...', 'plain', 'utf-8')
+        # 输入Email地址和口令:
+        from_addr = input('quezzjuly@163.com')
+        password = input('julyjuly')
+        # 输入SMTP服务器地址:
+        smtp_server = input('smtp.163.com')
+        # 输入收件人地址:
+        to_addr = input('julytony@163.com')
+        server = smtplib.SMTP(smtp_server, 25)  # SMTP协议默认端口是25
+        server.set_debuglevel(1)
+        server.login(from_addr, password)
+        server.sendmail(from_addr, [to_addr], msg.as_string())
+        server.quit()
+        '''
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
 
+            res['state'] = 'success'
+            return res
+        except:
+            return res
+        '''       
+ 
 
 ##############################################################################################
     '''
@@ -178,18 +267,6 @@ class DbOperate:
         finally:
             return res
 ###############################################################################################
-
-    '''
-    发送邮件
-    '''
-    def send_mail(self, mail):
-        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
-        try:
-
-            res['state'] = 'success'
-            return res
-        except:
-            return res
 
     '''
     初审改变作品状态
