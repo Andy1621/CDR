@@ -8,6 +8,8 @@
 @desc:
 '''
 import os
+import time
+
 from flask import Flask, render_template, jsonify, request
 from flask_restful import Api, Resource
 from flask_cors import *
@@ -39,11 +41,11 @@ class UpPhoto(Resource):
             img = request.files.get('img')
             basedir = os.path.abspath(os.path.dirname(__file__))
             path = basedir + "/static/photo/"
-            #取后缀，判断是否在范围中
+            # 取后缀，判断是否在范围中
             ext = os.path.splitext(img.filename)[1]
             if ext[1:] not in ALLOWED_EXTENSIONS_PIC:
                 raise FError("Error")
-            file_name = request.form.get('name')
+            file_name = str(round(time.time())) + ext
             file_path = path + file_name
             img.save(file_path)
             res['state'] = "success"
@@ -64,7 +66,7 @@ class UpVideo(Resource):
             ext = os.path.splitext(video.filename)[1]
             if ext[1:] not in ALLOWED_EXTENSIONS_VIDEO:
                 raise FError("Error")
-            file_name = request.form.get('name')
+            file_name = str(round(time.time())) + ext
             file_path = path + file_name
             print(file_path)
             video.save(file_path)
@@ -86,7 +88,7 @@ class UpDoc(Resource):
             ext = os.path.splitext(doc.filename)[1]
             if ext[1:] not in ALLOWED_EXTENSIONS_DOC:
                 raise FError("Error")
-            file_name = request.form.get('name')
+            file_name = str(round(time.time())) + ext
             file_path = path + file_name
             print(file_path)
             doc.save(file_path)
