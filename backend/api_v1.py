@@ -75,14 +75,18 @@ class UpVideo(Resource):
             video = request.files.get('file')
             basedir = os.path.abspath(os.path.dirname(__file__))
             path = basedir + "/static/video/"
+            project_code = request.form.get('project_code')
             ext = os.path.splitext(video.filename)[1]
             if ext[1:] not in ALLOWED_EXTENSIONS_VIDEO:
                 res['content'] = 'File''s type is not allowed'
                 raise FError("Error")
             file_name = video.filename
             file_path = path + file_name
-            print(file_path)
             video.save(file_path)
+            db_res = db.insert_attachment(project_code, 'video', file_path)
+            if db_res.get('state') == 'fail':
+                res['content'] = db_res.get('reason')
+                raise FError("Error")
             res['state'] = "success"
             res['url'] = Config.DOMAIN_NAME + '/static/video/' + file_name
         except:
@@ -99,14 +103,18 @@ class UpDoc(Resource):
             doc = request.files.get('file')
             basedir = os.path.abspath(os.path.dirname(__file__))
             path = basedir + "/static/doc/"
+            project_code = request.form.get('project_code')
             ext = os.path.splitext(doc.filename)[1]
             if ext[1:] not in ALLOWED_EXTENSIONS_DOC:
                 res['content'] = 'File''s type is not allowed'
                 raise FError("Error")
             file_name = doc.filename
             file_path = path + file_name
-            print(file_path)
             doc.save(file_path)
+            db_res = db.insert_attachment(project_code, 'video', file_path)
+            if db_res.get('state') == 'fail':
+                res['content'] = db_res.get('reason')
+                raise FError("Error")
             res['state'] = "success"
             res['url'] = Config.DOMAIN_NAME + '/static/doc/' + file_name
         except:
