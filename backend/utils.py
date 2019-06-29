@@ -10,6 +10,7 @@
 
 from bs4 import BeautifulSoup
 import hashlib
+import os
 
 SPECIAL_STR = "cxk"                     # MD5加密特殊字符串
 MD5_LEN = 10                            # 加密组合长度
@@ -57,7 +58,8 @@ def replace_apply_html(form, filename):
         'C': "硕士研究生",
         'D': "博士研究生"
     }
-    file_path = "./templates/apply.html"
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    file_path = basedir + "/templates/apply.html"
     with open(file_path, 'rb') as f1:
         data = f1.read()
         html = BeautifulSoup(data, 'lxml')
@@ -68,18 +70,20 @@ def replace_apply_html(form, filename):
                         temp_component = html.select('#' + c_key + str(i + 1))
                         temp_component[0].string = applier[c_key]
             elif key == 'type':
-                temp_component = html.select('#' + key)
-                temp_component[0].string = workType[form[key]]
+                if form[key] in workType.keys():
+                    temp_component = html.select('#' + key)
+                    temp_component[0].string = workType[form[key]]
             elif key == 'mainType':
                 temp_component = html.select('#' + form[key])
                 temp_component[0]['class'] = "glyphicon glyphicon-check"
             elif key == 'education':
-                temp_component = html.select('#' + key)
-                temp_component[0].string = educationType[form[key]]
+                if form[key] in educationType.keys():
+                    temp_component = html.select('#' + key)
+                    temp_component[0].string = educationType[form[key]]
             else:
                 temp_component = html.select('#' + key)
                 temp_component[0].string = form[key]
-        with open('./static/export_html/' + filename, 'wb') as f2:
+        with open(basedir + "/static/export_html/" + filename, 'wb') as f2:
             f2.write(html.prettify().encode())
 
 def encode(password):

@@ -10,6 +10,7 @@
 
 from pymongo import MongoClient
 from utils import replace_apply_html
+from bson.objectid import ObjectId
 import Config
 
 
@@ -37,11 +38,11 @@ class DbOperate:
     def store_project(self, params):
         res = {'state': 'fail', 'reason': "信息字段出错"}
         try:
-            project_code = params['workCode']
-            apply = self.getCol('project').find_one({'project_code': project_code})
-            if apply:
-                apply['form'] = params
-                self.getCol('project').update_one({'project_code': 'project_code'}, {'$set': apply})
+            project_id = params['workCode']
+            project = self.getCol('project').find_one({'_id': ObjectId(project_id)})
+            if project:
+                project['form'] = params
+                self.getCol('project').update_one({'_id': ObjectId(project_id)}, {'$set': project})
                 res['state'] = 'success'
             else:
                 res['reason'] = "申请编号不存在"
@@ -56,13 +57,20 @@ class DbOperate:
     def add_project(self, competition_id, email):
         res = {'state': 'fail', 'reason': "未知错误"}
         try:
-            competition = self.getCol('competition').find_one({'_id': competition_id})
+            competition = self.getCol('competition').find_one({'_id': ObjectId(competition_id)})
             if competition:
-                result = self.getCol('project').insert({'email': email,
+                result = self.getCol('project').insert_one({'email': email,
                                                         'competition_id': competition_id,
                                                         'status': 'editing'})
                 res['state'] = 'success'
-                res['project_id'] = str(result.inserted_id)
+                project_id = str(result.inserted_id)
+                res['project_id'] = project_id
+                form = {'workCode': project_id}
+                project = self.getCol('project').find_one({'_id': ObjectId(project_id)})
+                project['form'] = form
+                self.getCol('project').update_one({'_id': ObjectId(project_id)}, {'$set': project})
+                filename = project_id + ".html"
+                replace_apply_html(form, filename)
             else:
                 res['reason'] = "竞赛不存在"
         except:
@@ -76,15 +84,15 @@ class DbOperate:
     def view_apply(self, project_id):
         res = {'state': 'fail', 'reason': "未知错误"}
         try:
-            form = self.getCol('project').find_one({'_id': project_id})
+            form = self.getCol('project').find_one({'_id': ObjectId(project_id)})
             if form:
-                filename = form['workCode'] + ".html"
+                filename = project_id + ".html"
                 replace_apply_html(form, filename)
-                pdf_url = Config.DOMAIN_NAME + "/static/export_html/" + filename
+                html_url = Config.DOMAIN_NAME + "/static/export_html/" + filename
                 res['state'] = 'success'
-                res['html_url'] = pdf_url
+                res['html_url'] = html_url
             else:
-                res['reason'] = "竞赛不存在"
+                res['reason'] = "项目不存在"
         except:
             pass
         finally:

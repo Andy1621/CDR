@@ -47,14 +47,14 @@ class UpPhoto(Resource):
             # 取后缀，判断是否在范围中
             ext = os.path.splitext(img.filename)[1]
             if ext[1:] not in ALLOWED_EXTENSIONS_PIC:
-                res['content'] = 'File''s type is not allowed'
+                res['reason'] = 'File''s type is not allowed'
                 raise FError("Error")
             file_name = img.filename
             file_path = path + file_name
             img.save(file_path)
-            db_res = db.insert_attachment(project_code,'photo',file_path)
+            db_res = db.insert_attachment(project_code, 'photo', file_path)
             if db_res.get('state') == 'fail':
-                res['content'] = db_res.get('reason')
+                res['reason'] = db_res['reason']
                 raise FError("Error")
             res['state'] = "success"
             res['url'] = Config.DOMAIN_NAME + '/static/photo/' + file_name
@@ -75,14 +75,14 @@ class UpVideo(Resource):
             project_code = request.form.get('project_code')
             ext = os.path.splitext(video.filename)[1]
             if ext[1:] not in ALLOWED_EXTENSIONS_VIDEO:
-                res['content'] = 'File''s type is not allowed'
+                res['reason'] = 'File''s type is not allowed'
                 raise FError("Error")
             file_name = video.filename
             file_path = path + file_name
             video.save(file_path)
             db_res = db.insert_attachment(project_code, 'video', file_path)
             if db_res.get('state') == 'fail':
-                res['content'] = db_res.get('reason')
+                res['reason'] = db_res.get('reason')
                 raise FError("Error")
             res['state'] = "success"
             res['url'] = Config.DOMAIN_NAME + '/static/video/' + file_name
@@ -103,14 +103,14 @@ class UpDoc(Resource):
             project_code = request.form.get('project_code')
             ext = os.path.splitext(doc.filename)[1]
             if ext[1:] not in ALLOWED_EXTENSIONS_DOC:
-                res['content'] = 'File''s type is not allowed'
+                res['reason'] = 'File''s type is not allowed'
                 raise FError("Error")
             file_name = doc.filename
             file_path = path + file_name
             doc.save(file_path)
-            db_res = db.insert_attachment(project_code, 'video', file_path)
+            db_res = db.insert_attachment(project_code, 'doc', file_path)
             if db_res.get('state') == 'fail':
-                res['content'] = db_res.get('reason')
+                res['reason'] = db_res.get('reason')
                 raise FError("Error")
             res['state'] = "success"
             res['url'] = Config.DOMAIN_NAME + '/static/doc/' + file_name
