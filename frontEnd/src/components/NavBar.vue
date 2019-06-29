@@ -59,7 +59,12 @@
             <li><router-link :to="{path:'/accountInfo'}" class=""><i class="lnr lnr-text-format"></i> <span>对账信息</span></router-link></li>
             <li><router-link :to="{path:'/ruleImport'}" class=""><i class="lnr lnr-linearicons"></i> <span>规则导入</span></router-link></li>-->
             <li><router-link :to="{path:'/apply'}" class=""><i class="lnr lnr-linearicons"></i> <span>项目申请</span></router-link></li>
-            <li><router-link :to="{path:'/myProject'}" class=""><i class="lnr lnr-linearicons"></i> <span>我的项目</span></router-link></li>
+            <li><router-link :to="{path:'/myProject'}" class=""><i class="lnr lnr-diamond"></i> <span>我的项目</span></router-link></li>
+
+            <li><router-link :to="{path:'/competitionList'}" class=""><i class="lnr lnr-text-align-justify"></i> <span>竞赛列表</span></router-link></li>
+            <li><router-link :to="{path:'/addCompetition'}" class=""><i class="lnr lnr-plus-circle"></i> <span>添加竞赛</span></router-link></li>
+            <li><router-link :to="{path:'/announce'}" class=""><i class="lnr lnr-alarm"></i> <span>发布公告</span></router-link></li>
+            <li><router-link :to="{path:'/professorManagement'}" class=""><i class="lnr lnr-mustache"></i> <span>管理专家</span></router-link></li>
           </ul>
         </nav>
       </div>
