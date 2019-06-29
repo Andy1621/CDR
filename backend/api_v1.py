@@ -10,12 +10,15 @@
 import os
 import shutil
 import time
+
 import Config
 
 from flask import Flask, render_template, jsonify, request
 from flask_restful import Api, Resource
 from flask_cors import *
 from json import dumps
+
+
 from encrypt import encode
 from DBClass import DbOperate
 
@@ -46,6 +49,7 @@ class UpPhoto(Resource):
             img = request.files.get('img')
             basedir = os.path.abspath(os.path.dirname(__file__))
             path = basedir + "/static/photo/"
+            project_code = request.form.get('project_code')
             # 取后缀，判断是否在范围中
             ext = os.path.splitext(img.filename)[1]
             if ext[1:] not in ALLOWED_EXTENSIONS_PIC:
@@ -54,6 +58,7 @@ class UpPhoto(Resource):
             file_name = img.filename
             file_path = path + file_name
             img.save(file_path)
+            db.insert_attachment(project_code,'photo',file_path)
             res['state'] = "success"
             res['url'] = Config.DOMAIN_NAME + '/static/photo/' + file_name
         except:

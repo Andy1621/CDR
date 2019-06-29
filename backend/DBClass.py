@@ -78,7 +78,6 @@ class DbOperate:
                            }
             user_list = self.getCol("user")
             user_list.insert_one(new_student)
-            res['state'] = 'success'
             return res
         except:
             return res
@@ -93,15 +92,13 @@ class DbOperate:
             if check['state'] == 'false':
                 res['reason'] = check['reason']
                 return res
-            new_expert = {'username': username,
-                          'mail': mail,
-                          'password': "",
+            new_student = {'username': username,
+                           'mail': mail,
+                           'password': "",
                            'user_type': 'expert',
-                          'invitation_code': ''
                            }
             user_list = self.getCol("user")
-            user_list.insert_one(new_expert)
-            res['state'] = 'success'
+            user_list.insert_one(new_student)
             return res
         except:
             return res
@@ -109,7 +106,7 @@ class DbOperate:
     '''
     用户登录
     '''
-    def compare_password(self, password, mail, user_type):
+    def compare_password(self, password, mail):
         res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
         try:
             find_user = self.getCol('user').find_one({'mail': mail})
@@ -119,10 +116,6 @@ class DbOperate:
                 if real_psw == "" and find_user['user_type'] == 'expert':
                     res['reason'] = '该专家尚未设置密码!'
                 elif real_psw == password:
-                    dictionary = {'student': 'student', 'professor': 'expert', 'school': 'admin'}
-                    if dictionary[user_type] != find_user['user_type']:
-                        res['reason'] = '用户类型不匹配'
-                        return res
                     res['state'] = 'success'
                 else:
                     res['reason'] = '密码错误'
@@ -132,6 +125,29 @@ class DbOperate:
             return res
         except:
             return res
+
+
+##############################################################################################
+    '''
+        插入附件信息
+    '''
+    def insert_attachment(self, project_code, file_type, file_path):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
+            find_project = self.getCol('project').find_one({'project_code': project_code})
+            # 搜索到唯一项目
+            if find_project:
+                self.getCol('project').update_one({'project_code': project_code},
+                                                  {"$set": {"project_files": [file_type, file_path]}})
+                res['state'] = 'Success'
+                res['reason'] = 'None'
+            # 项目不存在
+            else:
+                res['reason'] = '项目不存在'
+            return res
+        except:
+            return res
+        
 
     '''
     发送邮件
