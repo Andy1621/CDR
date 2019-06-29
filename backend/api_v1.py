@@ -8,15 +8,12 @@
 @desc:
 '''
 import os
-import shutil
-import time
 from flask import Flask, render_template, jsonify, request
 from flask_restful import Api, Resource
 from flask_cors import *
 from DBClass import DbOperate
 import Config
-from json import dumps
-from encrypt import encode
+from utils import encode
 
 app = Flask(__name__)
 CORS(app, resources=r'/*')
@@ -31,11 +28,6 @@ ALLOWED_EXTENSIONS_DOC = ['pdf', 'PDF']
 @app.route('/apply')
 def apply():
     return render_template('apply.html')
-
-@app.route('/apply.pdf')
-def apply_pdf():
-    html = render_template('apply.html')
-    return render_pdf(HTML(string=html))
 
 
 # 自定义异常——出现错误时抛出
@@ -266,17 +258,19 @@ class ViewApply(Resource):
 """
 class Login(Resource):
     def post(self):
-        data = request.get_json()
-        password = data.get('password')
-        password = encode(password)
-        mail = data.get('mail')
-        role = data.get('role')
         res = {"state": "fail"}
         try:
+            data = request.get_json()
+            password = data.get('password')
+            password = encode(password)
+            mail = data.get('mail')
+            role = data.get('role')
+            res = {"state": "fail"}
             res = db.compare_password(password, mail, role)
-            return dumps(res, ensure_ascii=False)
         except:
-            return dumps(res, ensure_ascii=False)
+            pass
+        finally:
+            return jsonify(res)
 
 
 """
@@ -284,29 +278,39 @@ class Login(Resource):
 """
 class RegisterStudent(Resource):  # 注册请求
     def post(self):
-        data = request.get_json()
-        password = data.get('password')
-        password = encode(password)
-        mail = data.get('mail')
-        username = data.get('username')
-        ID = data.get('ID')
-        department = data.get('department')
-        field = data.get('field')
-        admission_year = data.get('admission_year')
-        phone = data.get('phone')
-        res = db.create_user_student(mail, username, password, ID, department, field, admission_year, phone)
-        return dumps(res, ensure_ascii=False)
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            password = data.get('password')
+            password = encode(password)
+            mail = data.get('mail')
+            username = data.get('username')
+            ID = data.get('ID')
+            department = data.get('department')
+            field = data.get('field')
+            admission_year = data.get('admission_year')
+            phone = data.get('phone')
+            res = db.create_user_student(mail, username, password, ID, department, field, admission_year, phone)
+        except:
+            pass
+        finally:
+            return jsonify(res)
 
 """
 注册专家
 """
 class RegisterExpert(Resource):
     def post(self):
-        data = request.get_json()
-        mail = data.get('mail')
-        username = data.get('username')
-        res = db.create_user_expert(mail, username)
-        return dumps(res, ensure_ascii=False)
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            mail = data.get('mail')
+            username = data.get('username')
+            res = db.create_user_expert(mail, username)
+        except:
+            pass
+        finally:
+            return jsonify(res)
 
 ##############################################################################################################
 '''
@@ -315,11 +319,16 @@ class RegisterExpert(Resource):
 '''
 class FirstTrialChange(Resource):
     def post(self):
-        data = request.get_json()
-        proj_id = data.get('proj_id')
-        result = data.get('result')
-        res = db.first_trial_change(proj_id, result)
-        return dumps(res, ensure_ascii=False)
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            proj_id = data.get('proj_id')
+            result = data.get('result')
+            res = db.first_trial_change(proj_id, result)
+        except:
+            pass
+        finally:
+            return jsonify(res)
 
 '''
 获取提交表数据
@@ -327,10 +336,15 @@ class FirstTrialChange(Resource):
 '''
 class GetTableInfo(Resource):
     def post(self):
-        data = request.get_json()
-        proj_id = data.get('proj_id')
-        res = db.get_table_info(proj_id)
-        return dumps(res, ensure_ascii=False)
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            proj_id = data.get('proj_id')
+            res = db.get_table_info(proj_id)
+        except:
+            pass
+        finally:
+            return jsonify(res)
 
 ################################################################################################################
 
