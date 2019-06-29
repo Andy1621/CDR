@@ -110,7 +110,7 @@ class DeleteFile(Resource):
     5.姓名name
     6.学号stuId
     7.出生年月birthday
-    8.学历education(取值'A','B','C','D',后续生成pdf再转换)
+    8.学历education(取值'A','B','C','D', 代码里转换)
     9.专业major
     10.入学时间enterTime
     11.作品全称totalTitle
@@ -124,7 +124,7 @@ class DeleteFile(Resource):
                     'phone': 'xxx',
                     'email'： 'xxx'}]
     16.表2作品名称title
-    17.表2作品类型type
+    17.表2作品类型type(取值'A','B','C','D','E','F', 代码里转换)
     18.作品总体情况说明description
     19.创新点creation
     20.关键词keyword

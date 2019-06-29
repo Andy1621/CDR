@@ -9,9 +9,12 @@
 '''
 
 from pymongo import MongoClient
-from elasticsearch import Elasticsearch
-from utils import replace_apply_html, html2pdf
+from utils import replace_apply_html
 import Config
+from email.mime.text import MIMEText
+from email.header import Header
+import smtplib
+
 
 
 class DbOperate:
@@ -79,12 +82,11 @@ class DbOperate:
         try:
             form = self.getCol('project').find_one({'_id': project_id})
             if form:
-                html = replace_apply_html(form)
-                filename = form['workCode'] + ".pdf"
-                html2pdf(html, filename)
-                pdf_url = Config.DOMAIN_NAME + "/static/export_pdf/" + filename
+                filename = form['workCode'] + ".html"
+                replace_apply_html(form, filename)
+                pdf_url = Config.DOMAIN_NAME + "/static/export_html/" + filename
                 res['state'] = 'success'
-                res['pdf_url'] = pdf_url
+                res['html_url'] = pdf_url
             else:
                 res['reason'] = "竞赛不存在"
         except:
@@ -165,16 +167,17 @@ class DbOperate:
     用户登录
     '''
     def compare_password(self, password, mail, user_type):
-        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        res = {'username':'', 'state': 'fail', 'reason': '网络错误或其他问题!'}
         try:
             find_user = self.getCol('user').find_one({'mail': mail})
             # 搜索到唯一用户
             if find_user:
+                res['username'] = find_user['username']
                 real_psw = find_user['password']
                 if real_psw == "" and find_user['user_type'] == 'expert':
                     res['reason'] = '该专家尚未设置密码!'
                 elif real_psw == password:
-                    dictionary = {'student': 'student', 'professor': 'expert', 'school': 'admin'}
+                    dictionary = {'student': 'user', 'professor': 'expert', 'school': 'admin'}
                     if dictionary[user_type] != find_user['user_type']:
                         res['reason'] = '用户类型不匹配'
                         return res
@@ -189,31 +192,29 @@ class DbOperate:
             return res
  
     '''
-    发送邮件
+    校团委发送邮件
     '''
-    def send_mail(self, mail):
-        msg = MIMEText('hello, send by Python...', 'plain', 'utf-8')
-        # 输入Email地址和口令:
-        from_addr = input('quezzjuly@163.com')
-        password = input('julyjuly')
-        # 输入SMTP服务器地址:
-        smtp_server = input('smtp.163.com')
-        # 输入收件人地址:
-        to_addr = input('julytony@163.com')
-        server = smtplib.SMTP(smtp_server, 25)  # SMTP协议默认端口是25
-        server.set_debuglevel(1)
-        server.login(from_addr, password)
-        server.sendmail(from_addr, [to_addr], msg.as_string())
-        server.quit()
-        '''
-        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+    def send_mail(self, mail, header, message):
         try:
-
-            res['state'] = 'success'
-            return res
+            msg = MIMEText(message, 'plain', 'utf-8')
+            msg['Subject'] = Header(header, 'utf-8')
+            msg['From'] = '校团委 <team_997ywwg@163.com>'
+            msg['To'] = '<' + mail + '>'
+            # 输入Email地址和口令:
+            from_addr = 'team_997ywwg@163.com'
+            password = 'nxdmdyzxcxk233'
+            # 输入SMTP服务器地址:
+            smtp_server = 'smtp.163.com'
+            # 输入收件人地址:
+            to_addr = mail
+            server = smtplib.SMTP(smtp_server)
+            server.set_debuglevel(1)
+            server.login(from_addr, password)
+            server.sendmail(from_addr, [to_addr], msg.as_string())
+            server.quit()
         except:
-            return res
-        '''       
+            return False
+        return True
  
 
 ##############################################################################################
