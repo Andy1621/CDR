@@ -12,11 +12,13 @@ from flask import Flask, render_template, jsonify, request
 from flask_restful import Api, Resource
 from flask_cors import *
 from json import dumps
-import Config
+from backend.encrypt import encode
+from backend import Config
+from backend.DBClass import DbOperate
 
 app = Flask(__name__)
 CORS(app, resources=r'/*')
-
+db = DbOperate()
 # 合法的后缀集
 ALLOWED_EXTENSIONS_PIC = ['png', 'jpg', 'JPG', 'PNG', 'gif', 'GIF']
 ALLOWED_EXTENSIONS_VIDEO = ['mp4', 'MP4', 'flv', 'FLV']
@@ -126,7 +128,53 @@ class Store(Resource):
         res = {"state": "fail"}
         try:
             data = request.get_json()
-        
+        except:
+            pass
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class Login(Resource):
+    def post(self):
+        data = request.get_json()
+        password = data.get('password')
+        password = encode(password)
+        username = data.get('username')
+        res = {"state": "fail"}
+        try:
+            res = db.compare_password(password, username)
+            return dumps(res, ensure_ascii=False)
+        except:
+            return dumps(res, ensure_ascii=False)
+
+
+
+class Register(Resource):  # 注册请求
+    def post(self):
+        data = request.get_json()
+        password = data.get('password')
+        password = encode(password)
+        email = data.get('email')
+        username = data.get('username')
+        email_code = data.get('email_code')
+        res = db.create_user(password, email, username, email_code)
+        return dumps(res, ensure_ascii=False)
 
 # 添加api资源
 api = Api(app)
