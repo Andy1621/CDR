@@ -7,7 +7,7 @@
       <div class="container-fluid">
         <div id="navbar-menu">
           <ul class="nav navbar-nav navbar-right">
-            <li class="dropdown" style="display: none;">
+            <!--<li class="dropdown" style="display: none;">
               <a href="#" class="dropdown-toggle icon-menu" data-toggle="dropdown">
                 <i class="lnr lnr-alarm"></i>
                 <span class="badge bg-danger">5</span>
@@ -19,11 +19,11 @@
                 <li><a href="#" class="notification-item"><span class="dot bg-warning"></span>有一条异常订单，请尽快处理</a></li>
                 <li><a href="#" class="notification-item"><span class="dot bg-success"></span>有一条异常订单，请尽快处理</a></li>
               </ul>
-            </li>
+            </li>-->
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown"><img class="img-circle" alt="Avatar"> <span>{{name}}</span> <i class="icon-submenu lnr lnr-chevron-down"></i></a>
               <ul class="dropdown-menu">
-                <li style="display: none" @click="info"><a><i class="lnr lnr-cog"></i> <span>个人资料</span></a></li>
+                <!--<li style="display: none" @click="info"><a><i class="lnr lnr-cog"></i> <span>个人资料</span></a></li>-->
                 <li @click="logout"><a><i class="lnr lnr-exit"></i> <span>退出登录</span></a></li>
               </ul>
             </li>
@@ -37,7 +37,7 @@
         <nav>
           <ul class="nav">
             <li><router-link :to="{path:'/index'}" class="active"><i class="lnr lnr-home"></i> <span>首页</span></router-link></li>
-            <li>
+            <!--<li>
               <a href="#subPages" data-toggle="collapse" class="collapsed"><i class="lnr lnr-file-empty"></i> <span>订单管理</span> <i class="icon-submenu lnr lnr-chevron-left"></i></a>
               <div id="subPages" class="collapse ">
                 <ul class="nav">
@@ -55,10 +55,9 @@
                           <li><router-link :to="{path:'/editWorker'}"  class="">新建/编辑员工</router-link></li>
                       </ul>
                   </div>
-                  <!--                <router-link :to="{path:'/'}" class=""><i class="lnr lnr-user"></i> <span>员工管理</span></router-link>-->
               </li>
             <li><router-link :to="{path:'/accountInfo'}" class=""><i class="lnr lnr-text-format"></i> <span>对账信息</span></router-link></li>
-            <li><router-link :to="{path:'/ruleImport'}" class=""><i class="lnr lnr-linearicons"></i> <span>规则导入</span></router-link></li>
+            <li><router-link :to="{path:'/ruleImport'}" class=""><i class="lnr lnr-linearicons"></i> <span>规则导入</span></router-link></li>-->
             <li><router-link :to="{path:'/apply'}" class=""><i class="lnr lnr-linearicons"></i> <span>项目申请</span></router-link></li>
             <li><router-link :to="{path:'/myProject'}" class=""><i class="lnr lnr-linearicons"></i> <span>我的项目</span></router-link></li>
           </ul>
