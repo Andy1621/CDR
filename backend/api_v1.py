@@ -10,14 +10,14 @@
 import os
 import shutil
 import time
+import Config
 
 from flask import Flask, render_template, jsonify, request
 from flask_restful import Api, Resource
 from flask_cors import *
 from json import dumps
-from backend.encrypt import encode
-from backend import Config
-from backend.DBClass import DbOperate
+from encrypt import encode
+from DBClass import DbOperate
 
 app = Flask(__name__)
 CORS(app, resources=r'/*')

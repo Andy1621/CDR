@@ -10,7 +10,7 @@
 
 from pymongo import MongoClient
 from elasticsearch import Elasticsearch
-from . import Config
+import Config
 
 
 class DbOperate:
