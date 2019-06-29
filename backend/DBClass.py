@@ -313,8 +313,9 @@ class DbOperate:
     def get_table_info(self, proj_id):
         res = {'state': 'fail', 'reason': '网络出错或BUG出现！'}
         try:
-            form = self.getCol('project').find_one({'project_code': proj_id}, {'registration_form': 1})
-            if form:
+            proj = self.getCol('project').find_one({'project_code': proj_id}, {'registration_form': 1})
+            form = proj['registration_form']
+            if proj:
                 form.pop('workCode')
                 # 将类别选项改为汉字值
                 if form['mainType'] == 'type1':
