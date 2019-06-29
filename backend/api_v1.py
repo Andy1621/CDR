@@ -238,28 +238,42 @@ class Login(Resource):
         data = request.get_json()
         password = data.get('password')
         password = encode(password)
-        username = data.get('username')
+        mail = data.get('mail')
         res = {"state": "fail"}
         try:
-            res = db.compare_password(password, username)
+            res = db.compare_password(password, mail)
             return dumps(res, ensure_ascii=False)
         except:
             return dumps(res, ensure_ascii=False)
 
 
-
 """
-注册
+注册学生
 """
-class Register(Resource):  # 注册请求
+class RegisterStudent(Resource):  # 注册请求
     def post(self):
         data = request.get_json()
         password = data.get('password')
         password = encode(password)
-        email = data.get('email')
+        mail = data.get('mail')
         username = data.get('username')
-        email_code = data.get('email_code')
-        res = db.create_user(password, email, username, email_code)
+        ID = data.get('ID')
+        department = data.get('department')
+        field = data.get('field')
+        admission_year = data.get('admission_year')
+        phone = data.get('phone')
+        res = db.create_user_student(mail, username, password, ID, department, field, admission_year, phone)
+        return dumps(res, ensure_ascii=False)
+
+"""
+注册专家
+"""
+class RegisterExpert(Resource):
+    def post(self):
+        data = request.get_json()
+        mail = data.get('mail')
+        username = data.get('username')
+        res = db.create_user_expert(mail, username)
         return dumps(res, ensure_ascii=False)
 
 ##############################################################################################################3
