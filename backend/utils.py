@@ -11,6 +11,7 @@
 from bs4 import BeautifulSoup
 from weasyprint import HTML
 
+
 def export2pdf(filename):
     HTML('templates/apply.html').write_pdf('static/export_pdf/'+filename)
 

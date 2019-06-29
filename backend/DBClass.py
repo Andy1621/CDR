@@ -10,7 +10,7 @@
 
 from pymongo import MongoClient
 from elasticsearch import Elasticsearch
-from . import Config
+import Config
 
 
 class DbOperate:
@@ -135,19 +135,24 @@ class DbOperate:
         res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
         try:
             find_project = self.getCol('project').find_one({'project_code': project_code})
+            project_files = [{
+                'file_type': file_type,
+                'file_path': file_path
+            }]
             # 搜索到唯一项目
             if find_project:
                 self.getCol('project').update_one({'project_code': project_code},
-                                                  {"$set": {"project_files": [file_type, file_path]}})
+                                                  {"$set": {"project_files": project_files}})
                 res['state'] = 'Success'
                 res['reason'] = 'None'
             # 项目不存在
             else:
                 res['reason'] = '项目不存在'
-            return res
         except:
+            pass
+        finally:
             return res
-        
+
 
     '''
     发送邮件

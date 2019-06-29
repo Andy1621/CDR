@@ -43,7 +43,7 @@ class UpPhoto(Resource):
     def post(self):
         res = {"state": "fail"}
         try:
-            img = request.files.get('img')
+            img = request.files.get('file')
             basedir = os.path.abspath(os.path.dirname(__file__))
             path = basedir + "/static/photo/"
             project_code = request.form.get('project_code')
@@ -55,7 +55,10 @@ class UpPhoto(Resource):
             file_name = img.filename
             file_path = path + file_name
             img.save(file_path)
-            db.insert_attachment(project_code,'photo',file_path)
+            db_res = db.insert_attachment(project_code,'photo',file_path)
+            if db_res.get('state') == 'fail':
+                res['content'] = db_res.get('reason')
+                raise FError("Error")
             res['state'] = "success"
             res['url'] = Config.DOMAIN_NAME + '/static/photo/' + file_name
         except:
