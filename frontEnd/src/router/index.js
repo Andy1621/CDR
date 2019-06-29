@@ -4,7 +4,7 @@ import index from '@/pages/index'
 import login from '@/pages/login'
 import apply from '@/pages/apply'
 import myProject from '@/pages/myProject'
-
+import firstTrial from '@/pages/firstTrial'
 Vue.use(Router)
 
 export default new Router({
@@ -28,6 +28,11 @@ export default new Router({
         path: '/myProject',
         name: 'myProject',
         component: myProject,
-    }
+    },
+      {
+        path: '/firstTrial',
+        name: 'firstTrial',
+        component: firstTrial,
+      },
   ]
 })

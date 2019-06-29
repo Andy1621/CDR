@@ -20,8 +20,8 @@
                     </FormItem>
                     <FormItem label="作品类别" prop="type">
                         <Select v-model="basicInfo.type" :disabled="readonly">
-                            <Option value="invention">科技发明制作</Option>
-                            <Option value="article">调查报告和学术论文</Option>
+                            <Option value="type1">科技发明制作</Option>
+                            <Option value="type2">调查报告和学术论文</Option>
                         </Select>
                     </FormItem>
                 </Form>
