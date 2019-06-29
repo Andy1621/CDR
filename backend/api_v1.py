@@ -40,7 +40,7 @@ class UpPhoto(Resource):
     def post(self):
         res = {"state": "fail"}
         try:
-            img = request.files.get('img')
+            img = request.files.get('file')
             basedir = os.path.abspath(os.path.dirname(__file__))
             path = basedir + "/static/photo/"
             project_code = request.form.get('project_code')
@@ -52,7 +52,10 @@ class UpPhoto(Resource):
             file_name = img.filename
             file_path = path + file_name
             img.save(file_path)
-            db.insert_attachment(project_code,'photo',file_path)
+            db_res = db.insert_attachment(project_code,'photo',file_path)
+            if db_res.get('state') == 'fail':
+                res['content'] = db_res.get('reason')
+                raise FError("Error")
             res['state'] = "success"
             res['url'] = Config.DOMAIN_NAME + '/static/photo/' + file_name
         except:
@@ -69,14 +72,18 @@ class UpVideo(Resource):
             video = request.files.get('file')
             basedir = os.path.abspath(os.path.dirname(__file__))
             path = basedir + "/static/video/"
+            project_code = request.form.get('project_code')
             ext = os.path.splitext(video.filename)[1]
             if ext[1:] not in ALLOWED_EXTENSIONS_VIDEO:
                 res['content'] = 'File''s type is not allowed'
                 raise FError("Error")
             file_name = video.filename
             file_path = path + file_name
-            print(file_path)
             video.save(file_path)
+            db_res = db.insert_attachment(project_code, 'video', file_path)
+            if db_res.get('state') == 'fail':
+                res['content'] = db_res.get('reason')
+                raise FError("Error")
             res['state'] = "success"
             res['url'] = Config.DOMAIN_NAME + '/static/video/' + file_name
         except:
@@ -93,20 +100,25 @@ class UpDoc(Resource):
             doc = request.files.get('file')
             basedir = os.path.abspath(os.path.dirname(__file__))
             path = basedir + "/static/doc/"
+            project_code = request.form.get('project_code')
             ext = os.path.splitext(doc.filename)[1]
             if ext[1:] not in ALLOWED_EXTENSIONS_DOC:
                 res['content'] = 'File''s type is not allowed'
                 raise FError("Error")
             file_name = doc.filename
             file_path = path + file_name
-            print(file_path)
             doc.save(file_path)
+            db_res = db.insert_attachment(project_code, 'video', file_path)
+            if db_res.get('state') == 'fail':
+                res['content'] = db_res.get('reason')
+                raise FError("Error")
             res['state'] = "success"
             res['url'] = Config.DOMAIN_NAME + '/static/doc/' + file_name
         except:
             pass
         finally:
             return jsonify(res)
+
 
 # 删除附件
 class DeleteFile(Resource):
@@ -116,6 +128,7 @@ class DeleteFile(Resource):
             data = request.form
             file_type = data.get('type')  # video/ doc/ photo
             file_name = data.get('file_name')
+            project_code = data.get('project_code')
             basedir = os.path.abspath(os.path.dirname(__file__))
             path = basedir + "/static/" + file_type + "/"
             file_path = path + file_name
@@ -123,6 +136,10 @@ class DeleteFile(Resource):
                 res['content'] = 'The file does not exists'
                 raise FError("Error")
             os.remove(file_path)
+            db_res = db.delete_attachment(project_code, file_type, file_path)
+            if db_res.get('state') == 'fail':
+                res['reason'] = db_res.get('reason')
+                raise FError("Error")
             res['state'] = 'success'
         except:
             pass

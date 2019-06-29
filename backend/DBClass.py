@@ -90,7 +90,7 @@ class DbOperate:
         finally:
             return res
 
-
+##############################################################################################
     '''
     检查邮箱是否已注册
     '''
@@ -216,25 +216,70 @@ class DbOperate:
 
 ##############################################################################################
     '''
-        插入附件信息
+    插入附件信息
     '''
     def insert_attachment(self, project_code, file_type, file_path):
         res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
         try:
-            find_project = self.getCol('project').find_one({'project_code': project_code})
+            find_project = self.getCol('project').find_one({'project_code': project_code}, {'project_files' : 1})
             # 搜索到唯一项目
             if find_project:
-                self.getCol('project').update_one({'project_code': project_code},
-                                                  {"$set": {"project_files": [file_type, file_path]}})
-                res['state'] = 'Success'
-                res['reason'] = 'None'
+                project_files = find_project.get('project_files')
+                project_file = {
+                    'file_type': file_type,
+                    'file_path': file_path
+                }
+                flag = True
+                for pf in project_files:
+                    if file_path == pf.get('file_path'):
+                        res['reason'] = '附件已存在'
+                        flag = False
+                        break
+                if flag:
+                    project_files.append(project_file)
+                    self.getCol('project').update_one({'project_code': project_code},
+                                                  {"$set": {"project_files": project_files}})
+                    res['state'] = 'Success'
+                    res['reason'] = 'None'
             # 项目不存在
             else:
                 res['reason'] = '项目不存在'
-            return res
         except:
+            pass
+        finally:
             return res
-        
+
+    '''
+    删除附件
+    '''
+    def delete_attachment(self, project_code, file_type, file_path):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
+            find_project = self.getCol('project').find_one({'project_code': project_code}, {'project_files' : 1})
+            # 搜索到唯一项目
+            if find_project:
+                project_files = find_project.get('project_files')
+                flag = True
+                for pf in project_files:
+                    if file_path == pf.get('file_path'):
+                        project_files.remove(pf)
+                        flag = False
+                        break
+                if not flag:
+                    self.getCol('project').update_one({'project_code': project_code},
+                                                  {"$set": {"project_files": project_files}})
+                    res['state'] = 'Success'
+                    res['reason'] = 'None'
+                else:
+                    res['state'] = '附件不存在'
+            # 项目不存在
+            else:
+                res['reason'] = '项目不存在'
+        except:
+            pass
+        finally:
+            return res
+###############################################################################################
 
     '''
     初审改变作品状态

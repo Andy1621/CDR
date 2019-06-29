@@ -9,11 +9,11 @@
                         <TabPane label="专家" name="professor"></TabPane>
                         <TabPane label="校团委" name="school"></TabPane>
                     </Tabs>
-                    <Input v-model="id" prefix="md-person" placeholder="请输入账号" clearable size="large"/>
-                    <Input v-model="password" type="password" @keyup.enter.native="login" prefix="md-lock" placeholder="请输入密码" clearable size="large"/>
+                    <Input v-model="email" prefix="md-person" placeholder="请输入账号" clearable size="large"></Input>
+                    <Input v-model="password" type="password" @keyup.enter.native="login" prefix="md-lock" placeholder="请输入密码" clearable size="large"></Input>
                     <Button type="primary" class="btn" size="large" shape="circle" @click="login">登录</Button>
-                    <div class="box-body-foot" v-if="role=='student'">没有账号？<span style="color: #2db7f5;cursor:pointer" @click="register=!register">点击注册</span></div>
-                    <div class="box-body-foot" v-if="role=='professor'">邀请码失效？<span style="color: #2db7f5;cursor:pointer" @click="professorRegister=!professorRegister">点击注册</span></div>
+                    <div class="box-body-foot" v-if="role==='student'">没有账号？<span style="color: #2db7f5;cursor:pointer" @click="register=!register">点击注册</span></div>
+                    <div class="box-body-foot" v-if="role==='professor'">邀请码失效？<span style="color: #2db7f5;cursor:pointer" @click="professorRegister=!professorRegister">点击注册</span></div>
                     <Modal
                         v-model="register"
                         title="注册"
@@ -21,17 +21,16 @@
                         width="460"
                         :mask-closable="false"
                         @on-ok="ok">
-                        <LInput v-model="idRegister" labelContent="用户名：" :disabled="isProfessor?true:false"></LInput>
+                        <LInput v-model="emailRegister" labelContent="邮箱：" :disabled="isProfessor?true:false"></LInput>
                         <LInput v-model="passwordRegister" labelContent="密码：" inputType="password"></LInput>
                         <LInput v-model="passwordConform" labelContent="确认密码：" inputType="password"></LInput>
                         <br>
-                        <LInput v-if="!isProfessor" v-model="stuID" labelContent="学号："></LInput>
-                        <LInput v-if="!isProfessor" v-model="name" labelContent="姓名："></LInput>
-                        <LInput v-if="!isProfessor" v-model="school" labelContent="院系："></LInput>
-                        <LInput v-if="!isProfessor" v-model="major" labelContent="专业："></LInput>
-                        <LInput v-if="!isProfessor" v-model="enterYear" labelContent="入学年份："></LInput>
-                        <LInput v-if="!isProfessor" v-model="tel" labelContent="联系电话："></LInput>
-                        <LInput v-if="!isProfessor" v-model="email" labelContent="电子邮箱："></LInput>
+                        <LInput v-if="!isProfessor" v-model="ID" labelContent="学号："></LInput>
+                        <LInput v-if="!isProfessor" v-model="username" labelContent="姓名："></LInput>
+                        <LInput v-if="!isProfessor" v-model="department" labelContent="院系："></LInput>
+                        <LInput v-if="!isProfessor" v-model="field" labelContent="专业："></LInput>
+                        <LInput v-if="!isProfessor" v-model="admission_year" labelContent="入学年份："></LInput>
+                        <LInput v-if="!isProfessor" v-model="phone" labelContent="联系电话："></LInput>
                     </Modal>
                     <Modal
                         v-model="professorRegister"
@@ -61,19 +60,18 @@
                 register: false,
                 professorRegister: false,
                 professorEmail: '',
-                id:'',
-                idRegister:'',
+                email:'',
+                emailRegister:'',
                 isProfessor: false,
                 password:'',
                 passwordRegister:'',
                 passwordConform:'',
-                stuID:'',
-                name:'',
-                school:'',
-                major:'',
-                enterYear:'',
-                tel:'',
-                email:'',
+                ID:'',
+                username:'',
+                department:'',
+                field:'',
+                admission_year:'',
+                phone:'',
             }
         },
         created(){
@@ -86,7 +84,7 @@
                     console.log(res);
                 });*/
                 this.register = true;
-                this.idRegister = 'test';
+                this.emailRegister = 'test';
                 this.isProfessor = true;
             }
         },
@@ -96,7 +94,7 @@
                     path: '/index'
                 })*/
                 let data = {
-                    id: this.id,
+                    mail: this.email,
                     password: this.password,
                     role: this.role,
                 };
@@ -112,23 +110,22 @@
                     console.log(res)
                 })
             },
-            ok () {
-                if (this.passwordRegister!=this.passwordConform)
-                {
-                    alert("两次输入的密码不相同！")
+            ok: function () {
+                if (this.passwordRegister !== this.passwordConform) {
+                    alert("两次输入的密码不相同！");
                     return;
                 }
                 let data = {
-                    ID: this.idRegister,
+                    mail: this.emailRegister,
                     password: this.passwordRegister,
-                    mail: this.email,
-                    username: this.name,
-                    department: this.school,
-                    field: this.major,
-                    admission_year: this.enterYear,
-                    phone: this.tel
+                    ID: this.ID,
+                    username: this.username,
+                    department: this.department,
+                    field: this.field,
+                    admission_year: this.admission_year,
+                    phone: this.phone
                 };
-                this.$http.post("http://127.0.0.1:5000/api/v1/registerstudent",data).then(function (res) {
+                this.$http.post("http://127.0.0.1:5000/api/v1/registerstudent", data).then(function (res) {
                     console.log(res)
                     /*this.$cookie.set('id',*);
                     this.$cookie.set('name',*);
@@ -136,7 +133,7 @@
                     this.$router.push({
                         path: '/index'
                     })*/
-                },function (res) {
+                }, function (res) {
                     console.log(res)
                 })
                 /*this.$router.push({
