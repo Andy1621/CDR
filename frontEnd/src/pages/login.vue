@@ -127,6 +127,8 @@
     .box-login{
         width: 20%;
         height: 53%;
+        min-height: 400px;
+        min-width: 320px;
         position: absolute;
         left: 40%;
         top: 23%;
