@@ -12,7 +12,8 @@
                     <Input v-model="id" prefix="md-person" placeholder="请输入账号" clearable size="large"/>
                     <Input v-model="password" type="password" @keyup.enter.native="login" prefix="md-lock" placeholder="请输入密码" clearable size="large"/>
                     <Button type="primary" class="btn" size="large" shape="circle" @click="login">登录</Button>
-                    <div class="box-body-foot">没有账号？<span style="color: #2db7f5;cursor:pointer" @click="register=!register">点击注册</span></div>
+                    <div class="box-body-foot" v-if="role=='student'">没有账号？<span style="color: #2db7f5;cursor:pointer" @click="register=!register">点击注册</span></div>
+                    <div class="box-body-foot" v-if="role=='professor'">邀请码失效？<span style="color: #2db7f5;cursor:pointer" @click="professorRegister=!professorRegister">点击注册</span></div>
                     <Modal
                         v-model="register"
                         title="注册"
@@ -32,6 +33,15 @@
                         <LInput v-if="!isProfessor" v-model="tel" labelContent="联系电话："></LInput>
                         <LInput v-if="!isProfessor" v-model="email" labelContent="电子邮箱："></LInput>
                     </Modal>
+                    <Modal
+                        v-model="professorRegister"
+                        title="请输入您的邮箱"
+                        ok-text="确认"
+                        width="460"
+                        :mask-closable="false"
+                        @on-ok="okPro">
+                        <LInput v-model="professorEmail" labelContent="邮箱："></LInput>
+                    </Modal>
                 </div>
             </div>
         </div>
@@ -47,8 +57,10 @@
         name: "login",
         data(){
             return{
-                role: '',
+                role: 'student',
                 register: false,
+                professorRegister: false,
+                professorEmail: '',
                 id:'',
                 idRegister:'',
                 isProfessor: false,
@@ -124,7 +136,15 @@
                 this.$router.push({
                     path:'/index'
                 })
-            }
+            },
+            okPro(){
+                let url = '';
+                /*this.$http.post(url, {email: this.professorEmail}, {emulateJSON: true}).then(function (res) {
+                    console.log(res)
+                },function (res) {
+                    console.log(res)
+                })*/
+            },
         }
     }
 </script>
