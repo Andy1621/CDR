@@ -163,17 +163,17 @@ class DbOperate:
     用户登录
     '''
     def compare_password(self, password, mail, user_type):
-        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        res = {'username':'', 'state': 'fail', 'reason': '网络错误或其他问题!'}
         try:
             find_user = self.getCol('user').find_one({'mail': mail})
             # 搜索到唯一用户
             if find_user:
+                res['username'] = find_user['username']
                 real_psw = find_user['password']
                 if real_psw == "" and find_user['user_type'] == 'expert':
                     res['reason'] = '该专家尚未设置密码!'
                 elif real_psw == password:
-                    dictionary = {'student': 'user', 'professor': 'expert', 'school': 'admin'}
-                    print(dictionary[user_type], find_user['user_type'])
+                    dictionary = {'student': 'student', 'professor': 'expert', 'school': 'admin'}
                     if dictionary[user_type] != find_user['user_type']:
                         res['reason'] = '用户类型不匹配'
                         return res
@@ -313,9 +313,8 @@ class DbOperate:
     def get_table_info(self, proj_id):
         res = {'state': 'fail', 'reason': '网络出错或BUG出现！'}
         try:
-            proj = self.getCol('project').find_one({'project_code': proj_id}, {'registration_form': 1})
-            form = proj['registration_form']
-            if proj:
+            form = self.getCol('project').find_one({'project_code': proj_id}, {'registration_form': 1})
+            if form:
                 form.pop('workCode')
                 # 将类别选项改为汉字值
                 if form['mainType'] == 'type1':
