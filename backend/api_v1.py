@@ -119,6 +119,7 @@ class UpDoc(Resource):
         finally:
             return jsonify(res)
 
+
 # 删除附件
 class DeleteFile(Resource):
     def get(self):
@@ -127,6 +128,7 @@ class DeleteFile(Resource):
             data = request.form
             file_type = data.get('type')  # video/ doc/ photo
             file_name = data.get('file_name')
+            project_code = data.get('project_code')
             basedir = os.path.abspath(os.path.dirname(__file__))
             path = basedir + "/static/" + file_type + "/"
             file_path = path + file_name
@@ -134,6 +136,10 @@ class DeleteFile(Resource):
                 res['content'] = 'The file does not exists'
                 raise FError("Error")
             os.remove(file_path)
+            db_res = db.delete_attachment(project_code, file_type, file_path)
+            if db_res.get('state') == 'fail':
+                res['reason'] = db_res.get('reason')
+                raise FError("Error")
             res['state'] = 'success'
         except:
             pass

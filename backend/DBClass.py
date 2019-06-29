@@ -223,17 +223,26 @@ class DbOperate:
     def insert_attachment(self, project_code, file_type, file_path):
         res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
         try:
-            find_project = self.getCol('project').find_one({'project_code': project_code})
-            project_files = [{
-                'file_type': file_type,
-                'file_path': file_path
-            }]
+            find_project = self.getCol('project').find_one({'project_code': project_code}, {'project_files' : 1})
             # 搜索到唯一项目
             if find_project:
-                self.getCol('project').update_one({'project_code': project_code},
+                project_files = find_project.get('project_files')
+                project_file = {
+                    'file_type': file_type,
+                    'file_path': file_path
+                }
+                flag = True
+                for pf in project_files:
+                    if file_path == pf.get('file_path'):
+                        res['reason'] = '附件已存在'
+                        flag = False
+                        break
+                if flag:
+                    project_files.append(project_file)
+                    self.getCol('project').update_one({'project_code': project_code},
                                                   {"$set": {"project_files": project_files}})
-                res['state'] = 'Success'
-                res['reason'] = 'None'
+                    res['state'] = 'Success'
+                    res['reason'] = 'None'
             # 项目不存在
             else:
                 res['reason'] = '项目不存在'
@@ -248,17 +257,23 @@ class DbOperate:
     def delete_attachment(self, project_code, file_type, file_path):
         res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
         try:
-            find_project = self.getCol('project').find_one({'project_code': project_code})
-            project_files = [{
-                'file_type': file_type,
-                'file_path': file_path
-            }]
+            find_project = self.getCol('project').find_one({'project_code': project_code}, {'project_files' : 1})
             # 搜索到唯一项目
             if find_project:
-                self.getCol('project').update_one({'project_code': project_code},
+                project_files = find_project.get('project_files')
+                flag = True
+                for pf in project_files:
+                    if file_path == pf.get('file_path'):
+                        project_files.remove(pf)
+                        flag = False
+                        break
+                if not flag:
+                    self.getCol('project').update_one({'project_code': project_code},
                                                   {"$set": {"project_files": project_files}})
-                res['state'] = 'Success'
-                res['reason'] = 'None'
+                    res['state'] = 'Success'
+                    res['reason'] = 'None'
+                else:
+                    res['state'] = '附件不存在'
             # 项目不存在
             else:
                 res['reason'] = '项目不存在'
