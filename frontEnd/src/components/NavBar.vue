@@ -36,7 +36,7 @@
       <div class="sidebar-scroll" style="position: relative">
         <nav>
           <ul class="nav">
-            <li><router-link :to="{path:'/index'}" class="active"><i class="lnr lnr-home"></i> <span>首页</span></router-link></li>
+            <li><router-link :to="{path:'/index'}" class="" exact><i class="lnr lnr-home"></i> <span>首页</span></router-link></li>
             <!--<li>
               <a href="#subPages" data-toggle="collapse" class="collapsed"><i class="lnr lnr-file-empty"></i> <span>订单管理</span> <i class="icon-submenu lnr lnr-chevron-left"></i></a>
               <div id="subPages" class="collapse ">
@@ -58,13 +58,13 @@
               </li>
             <li><router-link :to="{path:'/accountInfo'}" class=""><i class="lnr lnr-text-format"></i> <span>对账信息</span></router-link></li>
             <li><router-link :to="{path:'/ruleImport'}" class=""><i class="lnr lnr-linearicons"></i> <span>规则导入</span></router-link></li>-->
-            <li v-if="role==='student'"><router-link :to="{path:'/apply'}" class=""><i class="lnr lnr-linearicons"></i> <span>项目申请</span></router-link></li>
-            <li v-if="role==='student'"><router-link :to="{path:'/myProject'}" class=""><i class="lnr lnr-diamond"></i> <span>我的项目</span></router-link></li>
+            <li v-if="role==='student'"><router-link :to="{path:'/apply'}" class="" exact><i class="lnr lnr-linearicons"></i> <span>项目申请</span></router-link></li>
+            <li v-if="role==='student'"><router-link :to="{path:'/myProject'}" class="" exact><i class="lnr lnr-diamond"></i> <span>我的项目</span></router-link></li>
 
-            <li v-if="role==='school'"><router-link :to="{path:'/competitionList'}" class=""><i class="lnr lnr-text-align-justify"></i> <span>竞赛列表</span></router-link></li>
-            <li v-if="role==='school'"><router-link :to="{path:'/addCompetition'}" class=""><i class="lnr lnr-plus-circle"></i> <span>添加竞赛</span></router-link></li>
-            <li v-if="role==='school'"><router-link :to="{path:'/announce'}" class=""><i class="lnr lnr-alarm"></i> <span>发布公告</span></router-link></li>
-            <li v-if="role==='school'"><router-link :to="{path:'/professorManagement'}" class=""><i class="lnr lnr-mustache"></i> <span>管理专家</span></router-link></li>
+            <li v-if="role==='school'"><router-link :to="{path:'/competitionList'}" class="" exact><i class="lnr lnr-text-align-justify"></i> <span>竞赛列表</span></router-link></li>
+            <li v-if="role==='school'"><router-link :to="{path:'/addCompetition'}" class="" exact><i class="lnr lnr-plus-circle"></i> <span>添加竞赛</span></router-link></li>
+            <li v-if="role==='school'"><router-link :to="{path:'/announce'}" class="" exact><i class="lnr lnr-alarm"></i> <span>发布公告</span></router-link></li>
+            <li v-if="role==='school'"><router-link :to="{path:'/professorManagement'}" class="" exact><i class="lnr lnr-mustache"></i> <span>管理专家</span></router-link></li>
           </ul>
         </nav>
       </div>
@@ -80,7 +80,8 @@ export default {
   data () {
     return {
       role: this.$cookie.get('role'),
-      name: this.$cookie.get('username')
+      name: this.$cookie.get('username'),
+      
     }
   },
   methods: {
@@ -95,6 +96,10 @@ export default {
     },
     refresh () {
       this.$emit('refresh')
+    },
+    switchSlide(e) {
+      console.log('EE')
+      console.log(e)
     }
   }
 }
