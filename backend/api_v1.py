@@ -240,31 +240,69 @@ class Login(Resource):
         data = request.get_json()
         password = data.get('password')
         password = encode(password)
-        username = data.get('username')
+        mail = data.get('mail')
         res = {"state": "fail"}
         try:
-            res = db.compare_password(password, username)
+            res = db.compare_password(password, mail)
             return dumps(res, ensure_ascii=False)
         except:
             return dumps(res, ensure_ascii=False)
 
 
-
 """
-注册
+注册学生
 """
-class Register(Resource):  # 注册请求
+class RegisterStudent(Resource):  # 注册请求
     def post(self):
         data = request.get_json()
         password = data.get('password')
         password = encode(password)
-        email = data.get('email')
+        mail = data.get('mail')
         username = data.get('username')
-        email_code = data.get('email_code')
-        res = db.create_user(password, email, username, email_code)
+        ID = data.get('ID')
+        department = data.get('department')
+        field = data.get('field')
+        admission_year = data.get('admission_year')
+        phone = data.get('phone')
+        res = db.create_user_student(mail, username, password, ID, department, field, admission_year, phone)
         return dumps(res, ensure_ascii=False)
 
-##############################################################################################################3
+"""
+注册专家
+"""
+class RegisterExpert(Resource):
+    def post(self):
+        data = request.get_json()
+        mail = data.get('mail')
+        username = data.get('username')
+        res = db.create_user_expert(mail, username)
+        return dumps(res, ensure_ascii=False)
+
+##############################################################################################################
+'''
+初审改变作品状态
+    proj_id：项目id（字符串）   result：初审结果（字符串 'True' 'False'）
+'''
+class FirstTrialChange(Resource):
+    def post(self):
+        data = request.get_json()
+        proj_id = data.get('proj_id')
+        result = data.get('result')
+        res = db.first_trial_change(proj_id, result)
+        return dumps(res, ensure_ascii=False)
+
+'''
+获取提交表数据
+    proj_id：项目id（字符串）
+'''
+class GetTableInfo(Resource):
+    def post(self):
+        data = request.get_json()
+        proj_id = data.get('proj_id')
+        res = db.get_table_info(proj_id)
+        return dumps(res, ensure_ascii=False)
+
+################################################################################################################
 
 # 添加api资源
 api = Api(app)
@@ -273,6 +311,8 @@ api.add_resource(UpVideo, "/api/v1/up_video", endpoint="upVideo")
 api.add_resource(UpDoc, "/api/v1/up_doc", endpoint="upDoc")
 api.add_resource(Store, "/api/v1/store", endpoint="store")
 api.add_resource(DeleteFile, "/api/v1/delete_file", endpoint="deleteFile")
+api.add_resource(FirstTrialChange, "/api/vi/first_trial_change", endpoint="firstTrialChange")
+api.add_resource(GetTableInfo, "/api/vi/get_table_info", endpoint="getTableInfo")
 
 
 if __name__ == "__main__":
