@@ -312,7 +312,9 @@ api.add_resource(Store, "/api/v1/store", endpoint="store")
 api.add_resource(DeleteFile, "/api/v1/delete_file", endpoint="deleteFile")
 api.add_resource(FirstTrialChange, "/api/vi/first_trial_change", endpoint="firstTrialChange")
 api.add_resource(GetTableInfo, "/api/vi/get_table_info", endpoint="getTableInfo")
-
+api.add_resource(Login, '/api/v1/login', endpoint='login')
+api.add_resource(RegisterExpert, '/api/v1/registerexpert', endpoint='registerexpert')
+api.add_resource(RegisterStudent, '/api/v1/registerstudent', endpoint='registerstudent')
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", debug=True)
