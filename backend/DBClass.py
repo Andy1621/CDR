@@ -125,3 +125,24 @@ class DbOperate:
             return res
         except:
             return res
+
+
+    '''
+        插入附件信息
+    '''
+    def insert_attachment(self, project_code, file_type,file_path):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
+            find_project = self.getCol('project').find_one({'project_code': project_code})
+            # 搜索到唯一项目
+            if find_project:
+                self.getCol('project').update_one({'project_code': project_code},
+                                                  {"$set": {"project_files": [file_type, file_path]}})
+                res['state'] = 'Success'
+                res['reason'] = 'None'
+            # 项目不存在
+            else:
+                res['reason'] = '项目不存在'
+            return res
+        except:
+            return res
