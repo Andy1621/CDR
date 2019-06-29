@@ -173,7 +173,7 @@ class DbOperate:
                 if real_psw == "" and find_user['user_type'] == 'expert':
                     res['reason'] = '该专家尚未设置密码!'
                 elif real_psw == password:
-                    dictionary = {'student': 'student', 'professor': 'expert', 'school': 'admin'}
+                    dictionary = {'student': 'user', 'professor': 'expert', 'school': 'admin'}
                     if dictionary[user_type] != find_user['user_type']:
                         res['reason'] = '用户类型不匹配'
                         return res
