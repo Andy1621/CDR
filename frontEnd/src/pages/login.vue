@@ -12,25 +12,35 @@
                     <Input v-model="id" prefix="md-person" placeholder="请输入账号" clearable size="large"/>
                     <Input v-model="password" type="password" @keyup.enter.native="login" prefix="md-lock" placeholder="请输入密码" clearable size="large"/>
                     <Button type="primary" class="btn" size="large" shape="circle" @click="login">登录</Button>
-                    <div class="box-body-foot">没有账号？<span style="color: #2db7f5;cursor:pointer" @click="register=!register">点击注册</span></div>
+                    <div class="box-body-foot" v-if="role=='student'">没有账号？<span style="color: #2db7f5;cursor:pointer" @click="register=!register">点击注册</span></div>
+                    <div class="box-body-foot" v-if="role=='professor'">邀请码失效？<span style="color: #2db7f5;cursor:pointer" @click="professorRegister=!professorRegister">点击注册</span></div>
                     <Modal
                         v-model="register"
                         title="注册"
                         ok-text="注册"
                         width="460"
+                        :mask-closable="false"
                         @on-ok="ok">
-                        <Row align="middle" type="flex">
-                            <Col span="4">用户名：</Col>
-                            <Col><Input class="register-input"></Input></Col>
-                        </Row>
-                        <Row align="middle" type="flex">
-                            <Col span="4">密码：</Col>
-                            <Col><Input class="register-input"></Input></Col>
-                        </Row>
-                        <Row align="middle" type="flex">
-                            <Col span="4" style=""> 确认密码：</Col>
-                            <Col><Input class="register-input"></Input></Col>
-                        </Row>
+                        <LInput v-model="idRegister" labelContent="用户名：" :disabled="isProfessor?true:false"></LInput>
+                        <LInput v-model="passwordRegister" labelContent="密码：" inputType="password"></LInput>
+                        <LInput v-model="passwordConform" labelContent="确认密码：" inputType="password"></LInput>
+                        <br>
+                        <LInput v-if="!isProfessor" v-model="stuID" labelContent="学号："></LInput>
+                        <LInput v-if="!isProfessor" v-model="name" labelContent="姓名："></LInput>
+                        <LInput v-if="!isProfessor" v-model="school" labelContent="院系："></LInput>
+                        <LInput v-if="!isProfessor" v-model="major" labelContent="专业："></LInput>
+                        <LInput v-if="!isProfessor" v-model="enterYear" labelContent="入学年份："></LInput>
+                        <LInput v-if="!isProfessor" v-model="tel" labelContent="联系电话："></LInput>
+                        <LInput v-if="!isProfessor" v-model="email" labelContent="电子邮箱："></LInput>
+                    </Modal>
+                    <Modal
+                        v-model="professorRegister"
+                        title="请输入您的邮箱"
+                        ok-text="确认"
+                        width="460"
+                        :mask-closable="false"
+                        @on-ok="okPro">
+                        <LInput v-model="professorEmail" labelContent="邮箱："></LInput>
                     </Modal>
                 </div>
             </div>
@@ -39,41 +49,127 @@
 </template>
 
 <script>
+    import LInput from '../components/InputWithLabel.vue'
     export default {
+        components:{
+            LInput
+        },
         name: "login",
         data(){
             return{
-                role: '',
+                role: 'student',
                 register: false,
+                professorRegister: false,
+                professorEmail: '',
                 id:'',
+                idRegister:'',
+                isProfessor: false,
                 password:'',
+                passwordRegister:'',
+                passwordConform:'',
+                stuID:'',
+                name:'',
+                school:'',
+                major:'',
+                enterYear:'',
+                tel:'',
+                email:'',
+            }
+        },
+        created(){
+            if(this.$route.query.token)
+            {
+                /*let url = "";
+                this.$http.get(url, {params:{token: this.$route.query.token}}).then(function (res) {
+                    console.log(res);
+                },function (res) {
+                    console.log(res);
+                });*/
+                this.register = true;
+                this.idRegister = 'test';
+                this.isProfessor = true;
             }
         },
         methods:{
             login(){
-
+                /*this.$router.push({
+                    path: '/index'
+                })*/
+                let data = {
+                    id: this.id,
+                    password: this.password,
+                    role: this.role,
+                };
+                this.$http.post("http://127.0.0.1:5000/api/v1/login",data).then(function (res) {
+                    console.log(res);
+                    /*this.$cookie.set('id',*);
+                    this.$cookie.set('name',*);
+                    this.$cookie.set('role',*);*/
+                    /*this.$router.push({
+                        path: '/index',
+                    });*/
+                },function (res) {
+                    console.log(res)
+                })
             },
             ok () {
-                this.$Message.info('Clicked ok');
-            }
+                if (this.passwordRegister!=this.passwordConform)
+                {
+                    alert("两次输入的密码不相同！")
+                    return;
+                }
+                let data = {
+                    ID: this.idRegister,
+                    password: this.passwordRegister,
+                    mail: this.email,
+                    username: this.name,
+                    department: this.school,
+                    field: this.major,
+                    admission_year: this.enterYear,
+                    phone: this.tel
+                };
+                this.$http.post("http://127.0.0.1:5000/api/v1/registerstudent",data).then(function (res) {
+                    console.log(res)
+                    /*this.$cookie.set('id',*);
+                    this.$cookie.set('name',*);
+                    this.$cookie.set('role',*);
+                    this.$router.push({
+                        path: '/index'
+                    })*/
+                },function (res) {
+                    console.log(res)
+                })
+                /*this.$router.push({
+                    path:'/index'
+                })*/
+            },
+            okPro(){
+                let url = '';
+                /*this.$http.post(url, {email: this.professorEmail}, {emulateJSON: true}).then(function (res) {
+                    console.log(res)
+                },function (res) {
+                    console.log(res)
+                })*/
+            },
         }
     }
 </script>
 
 <style scoped>
     .box-login{
-        width: 310px;
-        height: 420px;
+        width: 20%;
+        height: 53%;
+        min-height: 400px;
+        min-width: 320px;
         position: absolute;
-        left: 590px;
-        top: 200px;
+        left: 40%;
+        top: 23%;
         text-align: center;
         font-weight: lighter;
     }
     .box-body{
-        width: 340px;
-        height: 380px;
-        margin: 10px;
+        width: 100%;
+        height: 100%;
         padding: 10px;
         border-radius: 8px;
         background-color: #FFFFFF;

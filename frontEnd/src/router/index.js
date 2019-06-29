@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import index from '@/pages/index'
 import login from '@/pages/login'
 import apply from '@/pages/apply'
+import myProject from '@/pages/myProject'
 
 Vue.use(Router)
 
@@ -11,7 +12,7 @@ export default new Router({
     {
         path: '/',
         name: 'login',
-        component: index
+        component: login
     },
     {
         path: '/index',
@@ -22,6 +23,11 @@ export default new Router({
         path: '/apply',
         name: 'apply',
         component: apply,
+    },
+    {
+        path: '/myProject',
+        name: 'myProject',
+        component: myProject,
     }
   ]
 })

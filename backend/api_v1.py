@@ -8,11 +8,15 @@
 @desc:
 '''
 import os
+import shutil
+import time
 from flask import Flask, render_template, jsonify, request
 from flask_restful import Api, Resource
 from flask_cors import *
 from DBClass import DbOperate
 import Config
+from json import dumps
+from encrypt import encode
 
 app = Flask(__name__)
 CORS(app, resources=r'/*')
@@ -34,10 +38,12 @@ def apply_pdf():
     return render_pdf(HTML(string=html))
 
 
+# 自定义异常——出现错误时抛出
 class FError(Exception):
     pass
 
 
+# 上传照片
 class UpPhoto(Resource):
     def post(self):
         res = {"state": "fail"}
@@ -45,13 +51,16 @@ class UpPhoto(Resource):
             img = request.files.get('img')
             basedir = os.path.abspath(os.path.dirname(__file__))
             path = basedir + "/static/photo/"
-            #取后缀，判断是否在范围中
+            project_code = request.form.get('project_code')
+            # 取后缀，判断是否在范围中
             ext = os.path.splitext(img.filename)[1]
             if ext[1:] not in ALLOWED_EXTENSIONS_PIC:
+                res['content'] = 'File''s type is not allowed'
                 raise FError("Error")
-            file_name = request.form.get('name')
+            file_name = img.filename
             file_path = path + file_name
             img.save(file_path)
+            db.insert_attachment(project_code,'photo',file_path)
             res['state'] = "success"
             res['url'] = Config.DOMAIN_NAME + '/static/photo/' + file_name
         except:
@@ -60,17 +69,19 @@ class UpPhoto(Resource):
             return jsonify(res)
 
 
+# 上传视频
 class UpVideo(Resource):
     def post(self):
         res = {"state": "fail"}
         try:
-            video = request.files.get('video')
+            video = request.files.get('file')
             basedir = os.path.abspath(os.path.dirname(__file__))
             path = basedir + "/static/video/"
             ext = os.path.splitext(video.filename)[1]
             if ext[1:] not in ALLOWED_EXTENSIONS_VIDEO:
+                res['content'] = 'File''s type is not allowed'
                 raise FError("Error")
-            file_name = request.form.get('name')
+            file_name = video.filename
             file_path = path + file_name
             print(file_path)
             video.save(file_path)
@@ -82,22 +93,45 @@ class UpVideo(Resource):
             return jsonify(res)
 
 
+# 上传文档
 class UpDoc(Resource):
     def post(self):
         res = {"state": "fail"}
         try:
-            doc = request.files.get('doc')
+            doc = request.files.get('file')
             basedir = os.path.abspath(os.path.dirname(__file__))
             path = basedir + "/static/doc/"
             ext = os.path.splitext(doc.filename)[1]
             if ext[1:] not in ALLOWED_EXTENSIONS_DOC:
+                res['content'] = 'File''s type is not allowed'
                 raise FError("Error")
-            file_name = request.form.get('name')
+            file_name = doc.filename
             file_path = path + file_name
             print(file_path)
             doc.save(file_path)
             res['state'] = "success"
             res['url'] = Config.DOMAIN_NAME + '/static/doc/' + file_name
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+# 删除附件
+class DeleteFile(Resource):
+    def get(self):
+        res = {"state": "fail"}
+        try:
+            data = request.form
+            file_type = data.get('type')  # video/ doc/ photo
+            file_name = data.get('file_name')
+            basedir = os.path.abspath(os.path.dirname(__file__))
+            path = basedir + "/static/" + file_type + "/"
+            file_path = path + file_name
+            if not os.path.exists(file_path):
+                res['content'] = 'The file does not exists'
+                raise FError("Error")
+            os.remove(file_path)
+            res['state'] = 'success'
         except:
             pass
         finally:
@@ -226,6 +260,80 @@ class ViewApply(Resource):
             return jsonify(res)
 
 
+#######################################################################################################################
+"""
+登录
+"""
+class Login(Resource):
+    def post(self):
+        data = request.get_json()
+        password = data.get('password')
+        password = encode(password)
+        mail = data.get('mail')
+        role = data.get('role')
+        res = {"state": "fail"}
+        try:
+            res = db.compare_password(password, mail, role)
+            return dumps(res, ensure_ascii=False)
+        except:
+            return dumps(res, ensure_ascii=False)
+
+
+"""
+注册学生
+"""
+class RegisterStudent(Resource):  # 注册请求
+    def post(self):
+        data = request.get_json()
+        password = data.get('password')
+        password = encode(password)
+        mail = data.get('mail')
+        username = data.get('username')
+        ID = data.get('ID')
+        department = data.get('department')
+        field = data.get('field')
+        admission_year = data.get('admission_year')
+        phone = data.get('phone')
+        res = db.create_user_student(mail, username, password, ID, department, field, admission_year, phone)
+        return dumps(res, ensure_ascii=False)
+
+"""
+注册专家
+"""
+class RegisterExpert(Resource):
+    def post(self):
+        data = request.get_json()
+        mail = data.get('mail')
+        username = data.get('username')
+        res = db.create_user_expert(mail, username)
+        return dumps(res, ensure_ascii=False)
+
+##############################################################################################################
+'''
+初审改变作品状态
+    proj_id：项目id（字符串）   result：初审结果（字符串 'True' 'False'）
+'''
+class FirstTrialChange(Resource):
+    def post(self):
+        data = request.get_json()
+        proj_id = data.get('proj_id')
+        result = data.get('result')
+        res = db.first_trial_change(proj_id, result)
+        return dumps(res, ensure_ascii=False)
+
+'''
+获取提交表数据
+    proj_id：项目id（字符串）
+'''
+class GetTableInfo(Resource):
+    def post(self):
+        data = request.get_json()
+        proj_id = data.get('proj_id')
+        res = db.get_table_info(proj_id)
+        return dumps(res, ensure_ascii=False)
+
+################################################################################################################
+
 # 添加api资源
 api = Api(app)
 api.add_resource(UpPhoto, "/api/v1/up_photo", endpoint="upPhoto")
@@ -234,6 +342,12 @@ api.add_resource(UpDoc, "/api/v1/up_doc", endpoint="upDoc")
 api.add_resource(StoreProject, "/api/v1/store_project", endpoint="storeProject")
 api.add_resource(AddProject, "/api/v1/add_project", endpoint="addProject")
 api.add_resource(ViewApply, "/api/v1/view_apply", endpoint="viewApply")
+api.add_resource(DeleteFile, "/api/v1/delete_file", endpoint="deleteFile")
+api.add_resource(FirstTrialChange, "/api/vi/first_trial_change", endpoint="firstTrialChange")
+api.add_resource(GetTableInfo, "/api/vi/get_table_info", endpoint="getTableInfo")
+api.add_resource(Login, '/api/v1/login', endpoint='login')
+api.add_resource(RegisterExpert, '/api/v1/registerexpert', endpoint='registerexpert')
+api.add_resource(RegisterStudent, '/api/v1/registerstudent', endpoint='registerstudent')
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", debug=True)
