@@ -33,10 +33,12 @@ def homework1():
     return render_template('apply.html')
 
 
+# 自定义异常——出现错误时抛出
 class FError(Exception):
     pass
 
 
+# 上传照片
 class UpPhoto(Resource):
     def post(self):
         res = {"state": "fail"}
@@ -60,6 +62,7 @@ class UpPhoto(Resource):
             return jsonify(res)
 
 
+# 上传视频
 class UpVideo(Resource):
     def post(self):
         res = {"state": "fail"}
@@ -83,6 +86,7 @@ class UpVideo(Resource):
             return jsonify(res)
 
 
+# 上传文档
 class UpDoc(Resource):
     def post(self):
         res = {"state": "fail"}
@@ -106,6 +110,7 @@ class UpDoc(Resource):
             return jsonify(res)
 
 
+# 删除附件
 class DeleteFile(Resource):
     def get(self):
         res = {"state": "fail"}
