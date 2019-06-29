@@ -9,8 +9,7 @@
 '''
 
 from pymongo import MongoClient
-from elasticsearch import Elasticsearch
-from utils import replace_apply_html, html2pdf
+from utils import replace_apply_html
 import Config
 
 
@@ -79,12 +78,11 @@ class DbOperate:
         try:
             form = self.getCol('project').find_one({'_id': project_id})
             if form:
-                html = replace_apply_html(form)
-                filename = form['workCode'] + ".pdf"
-                html2pdf(html, filename)
-                pdf_url = Config.DOMAIN_NAME + "/static/export_pdf/" + filename
+                filename = form['workCode'] + ".html"
+                replace_apply_html(form, filename)
+                pdf_url = Config.DOMAIN_NAME + "/static/export_html/" + filename
                 res['state'] = 'success'
-                res['pdf_url'] = pdf_url
+                res['html_url'] = pdf_url
             else:
                 res['reason'] = "竞赛不存在"
         except:
