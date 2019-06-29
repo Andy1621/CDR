@@ -2,7 +2,7 @@
     <div>
         <NavBar></NavBar>
         <div class="body">
-            <div v-if="!isMoreNews">
+            <div v-if="!isMoreNews&&!isDetail">
             <h3>雨我无瓜科技竞赛</h3>
             <Divider style="margin: 3px"/>
             <Carousel autoplay :autoplay-speed="3000" :height="250" v-model="value2" loop>
@@ -22,8 +22,8 @@
                             更多消息
                         </a>
                         <ul>
-                            <li v-for="(item,index) in latest_news.slice(0,5)" :key="index">
-                                <a :href="item.url" target="_blank">
+                            <li v-for="(item,index) in latest_news.slice(0,5)" :key="index" @click="show_detail('latest',index)">
+<!--                                <a :href="item.url" target="_blank">-->
                                     <Row>
                                         <Col span="18">
                                             <div class="span-title">{{item.title}}</div>
@@ -32,7 +32,7 @@
                                             <span style="float: right; color: #8391a5;">{{item.date}}</span>
                                         </Col>
                                     </Row>
-                                </a>
+<!--                                </a>-->
                             </li>
                         </ul>
                     </Card>
@@ -48,8 +48,8 @@
                             更多消息
                         </a>
                         <ul>
-                            <li v-for="(item,index) in else_news.slice(0,5)" :key="index">
-                                <a :href="item.url" target="_blank">
+                            <li v-for="(item,index) in else_news.slice(0,5)" :key="index" @click="show_detail('else',index)">
+<!--                                <a :href="item.url" target="_blank">-->
                                     <Row>
                                         <Col span="18">
                                             <div class="span-title">{{item.title}}</div>
@@ -58,38 +58,48 @@
                                             <span style="float: right; color: #8391a5;">{{item.date}}</span>
                                         </Col>
                                     </Row>
-                                </a>
+<!--                                </a>-->
                             </li>
                         </ul>
                     </Card>
                 </Col>
             </Row>
             </div>
-            <div v-else>
+            <div v-if="isMoreNews||isDetail">
                 <Breadcrumb style="font-size: 16px">
-                    <BreadcrumbItem @click.native="isMoreNews = !isMoreNews">首页</BreadcrumbItem>
-                    <BreadcrumbItem>{{newsType}}</BreadcrumbItem>
+                    <BreadcrumbItem class="breadcrumb-item" @click.native="back_to_index">首页</BreadcrumbItem>
+                    <BreadcrumbItem class="breadcrumb-item" @click.native="back_to_list" v-if="isMoreNews">{{newsType}}</BreadcrumbItem>
+                    <BreadcrumbItem class="breadcrumb-item" v-if="isDetail">信息详情</BreadcrumbItem>
                 </Breadcrumb>
                 <Divider/>
-                <div class="news-list">
-                    <ul style="list-style-type:none">
-                        <li v-for="(item,index) in show_news.slice((pageNum-1)*pageSize, pageNum*pageSize)" :key="index">
-                            <div class="paper-detail">
-                                <a :href="item.url" target="_blank">
-                                    <Row>
-                                        <Col span="18">
-                                            <div class="span-title">{{item.title}}</div>
-                                        </Col>
-                                        <Col span="6">
-                                            <span style="float: right; color: #8391a5;">{{item.date}}</span>
-                                        </Col>
-                                    </Row>
-                                </a>
-                            </div>
-                        </li>
-                    </ul>
+                <div v-if="!isDetail">
+                    <div class="news-list">
+                        <ul style="list-style-type:none">
+                            <li v-for="(item,index) in show_news.slice((pageNum-1)*pageSize, pageNum*pageSize)" :key="index" @click="show_detail('default',index)">
+                                <div class="paper-detail">
+<!--                                    <a :href="item.url" target="_blank">-->
+                                        <Row>
+                                            <Col span="18">
+                                                <div class="span-title">{{item.title}}</div>
+                                            </Col>
+                                            <Col span="6">
+                                                <span style="float: right; color: #8391a5;">{{item.date}}</span>
+                                            </Col>
+                                        </Row>
+<!--                                    </a>-->
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <Page :current="pageNum" :total="show_news.length" :page-size="pageSize" @on-change="change_page" simple style="text-align: center; margin-bottom: 20px"/>
                 </div>
-                <Page :current="pageNum" :total="show_news.length" :page-size="pageSize" @on-change="change_page" simple style="text-align: center; margin-bottom: 20px"/>
+                <div v-show="isDetail">
+                    <div class="news-list">
+                        <h3>{{msgDetail.title}}</h3>
+                        <h4>{{msgDetail.date}}</h4>
+                        <p>{{msgDetail.text}}</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -106,6 +116,7 @@
             return {
                 value2: 0,
                 isMoreNews: false,
+                isDetail: false,
                 newsType: '',
                 pageNum: 1,
                 pageSize: 20,
@@ -134,6 +145,12 @@
                         'url': '../../static/picture/test5.jpg'
                     }
                 ],
+                msgDetail:{
+                    'title': '',
+                    'date': '',
+                    'url': '',
+                    'text': '',
+                }
             }
         },
         methods:{
@@ -179,6 +196,28 @@
                 console.log(this.pageNum);
                 document.body.scrollTop = 0;
                 document.documentElement.scrollTop = 0;
+            },
+            back_to_index(){
+                this.isMoreNews = false;
+                this.isDetail = false;
+                this.msgDetail = {};
+            },
+            back_to_list(){
+                this.isDetail = false;
+            },
+            show_detail(type,index){
+                console.log(type + index)
+                if(type == 'latest'){
+                    this.msgDetail = this.latest_news[index];
+                }
+                else if(type == 'else'){
+                    this.msgDetail = this.else_news[index];
+                }
+                else{
+                    this.msgDetail = this.show_news[index];
+                }
+                this.isDetail = true
+
             }
         },
         created() {
@@ -231,6 +270,9 @@
         border-bottom: #8391a5 dashed 0.5px;
         border-top: #8391a5 dashed 0.5px;
     }
+    .breadcrumb-item{
+        cursor: pointer;
+    }
     h1, h2 {
         font-weight: normal;
     }
@@ -242,6 +284,7 @@
         padding: 6px 0 6px 0;
         border-bottom: #8391a5 dashed 0.5px;
         border-top: #8391a5 dashed 0.5px;
+        cursor: pointer;
     }
     a {
         color: black;
