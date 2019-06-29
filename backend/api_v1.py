@@ -239,9 +239,10 @@ class Login(Resource):
         password = data.get('password')
         password = encode(password)
         mail = data.get('mail')
+        role = data.get('role')
         res = {"state": "fail"}
         try:
-            res = db.compare_password(password, mail)
+            res = db.compare_password(password, mail, role)
             return dumps(res, ensure_ascii=False)
         except:
             return dumps(res, ensure_ascii=False)
