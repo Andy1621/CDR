@@ -203,7 +203,7 @@
                     <Button :disabled="uploadVideoList.length>=1" v-show="!readonly" icon="ios-videocam" style="width: 100px">上传</Button>
                 </Upload>
             </div>
-            <Button type="" v-show="current == 3" @click="check_table">预览表格</Button>
+            <Button v-show="current == 3" @click="check_table">预览表格</Button>
             <Button type="primary" :disabled="current == 0" @click="pre_step">上一步</Button>
             <Button type="primary" :disabled="current == 3" @click="next_step">下一步</Button>
             <Button type="primary" v-show="!readonly" @click="save_data" style="margin-left: 20px">保存到草稿箱</Button>

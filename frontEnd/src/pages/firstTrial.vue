@@ -43,12 +43,6 @@
             <Col span="12">
               <FormItem label="现学历" prop="edu_background">
                 <Input v-model="authorInfo.edu_background" readonly></Input>
-                <!--<Select v-model="authorInfo.edu_background" readonly>-->
-                  <!--<Option value="A">A.专科</Option>-->
-                  <!--<Option value="B">B.大学本科</Option>-->
-                  <!--<Option value="C">C.硕士研究生</Option>-->
-                  <!--<Option value="D">D.博士研究生</Option>-->
-                <!--</Select>-->
               </FormItem>
             </Col>
             <Col span="12">
@@ -126,14 +120,6 @@
           </FormItem>
           <FormItem label="作品分类" prop="type">
             <Input v-model="projectInfo.type"readonly style="color: black"></Input>
-            <!--<Select v-model="projectInfo.type" :disabled="readonly">-->
-              <!--<Option value="A">A.机械与控制（包括机械、仪器仪表、自动化控制、工程、交通、建筑等）</Option>-->
-              <!--<Option value="B">B.信息技术（包括计算机、电信、通讯、电子等）</Option>-->
-              <!--<Option value="C">C.数理（包括数学、物理、地球与空间科学等）</Option>-->
-              <!--<Option value="D">D.生命科学（包括生物､农学､药学､医学､健康､卫生､食品等）</Option>-->
-              <!--<Option value="E">E.能源化工（包括能源、材料、石油、化学、化工、生态、环保等）</Option>-->
-              <!--<Option value="F">F.哲学社会科学（包括哲学、经济、社会、法律、教育、管理）</Option>-->
-            <!--</Select>-->
           </FormItem>
           <FormItem label="作品情况" prop="introduction">
             <Input v-model="projectInfo.introduction" readonly type="textarea" :maxlength="800" :rows="4" :autosize="{minRows: 4,maxRows: 4}" placeholder="请输入作品整体情况说明（不超过800字）"></Input>
@@ -150,8 +136,8 @@
       <Button type="primary" shape="circle" :disabled="current == 0" @click="pre_step" icon="ios-arrow-back" style="margin-right: 30%"></Button>
       <Button type="primary" shape="circle" :disabled="current == 2" @click="next_step" icon="ios-arrow-forward"></Button>
       <div style="margin-top: 10px">
-        <Button type="primary" v-show="current == 2" style="margin-right:6%" >通过</Button>
-        <Button type="error" v-show="current == 2">不通过</Button>
+        <Button type="primary" v-show="current == 2" style="margin-right:6%" @click="pass('True')" >通过</Button>
+        <Button type="error" v-show="current == 2" @click="pass('False')">不通过</Button>
       </div>
     </div>
   </div>
@@ -159,11 +145,9 @@
 
 <script>
     import NavBar from '../components/NavBar.vue'
-    import Index from "./index";
     export default {
       name: "firstTrial",
       components:{
-        Index,
         NavBar
       },
       data(){
@@ -263,6 +247,7 @@
         }
       },
       created() {
+        console.log(this.basicInfo.id);
         this.getFormMess();
       },
       methods:{
@@ -313,16 +298,16 @@
           this.$Message.info('Save Data')
         },
         getFormMess(){
-          domin_url = '';
+          let domin_url = 'http://127.0.0.1:5000';
           let params = {'proj_id':this.basicInfo.id};
           this.$http.post(domin_url + "/api/vi/get_table_info",params,{
             headers:{
               'Content-Type':"application/json",
             }
           }).then(function (res) {
-            var detail = JSON.parse(res.body);
+             var detail = (res.body.msg);
             console.log(detail);
-            if(detail.state=="fail"){
+            if(res.body.state=="fail"){
               this.$Message.info("获取数据失败")
             }
             else{
@@ -345,12 +330,52 @@
               this.projectInfo.introduction = detail.description;
               this.projectInfo.innovation = detail.creation;
               this.projectInfo.keyword = detail.keyword;
+              switch (detail.type) {
+                case 'A':
+                  this.projectInfo.type = '机械与控制（包括机械、仪器仪表、自动化控制、工程、交通、建筑等）';
+                      break;
+                case 'B':
+                  this.projectInfo.type = '信息技术（包括计算机、电信、通讯、电子等）';
+                  break;
+                case 'C':
+                  this.projectInfo.type = '数理（包括数学、物理、地球与空间科学等）';
+                  break;
+                case 'D':
+                  this.projectInfo.type = '生命科学（包括生物､农学､药学､医学､健康､卫生､食品等）';
+                  break;
+                case 'E':
+                  this.projectInfo.type = '能源化工（包括能源、材料、石油、化学、化工、生态、环保等）';
+                  break;
+                case 'F':
+                  this.projectInfo.type = '哲学社会科学（包括哲学、经济、社会、法律、教育、管理）';
+                  break
+              }
             }
           }, function (res) {
             alert(res);
           });
         },
-      },
+        pass(re){
+          let domin_url = 'http://127.0.0.1:5000';
+          let params = {'proj_id':this.basicInfo.id,'result':re};
+          this.$http.post(domin_url + "/api/vi/first_trial_change",params,{
+            headers:{
+              'Content-Type':"application/json",
+            }
+          }).then(function (res) {
+            var detail = (res.body.state);
+            console.log(detail);
+            if(detail =="fail"){
+              this.$Message.info("评审失败")
+            }
+            else{
+              this.$Message.info("评审成功")
+            }
+          }, function (res) {
+            alert(res);
+          });
+        },
+        },
       mounted () {
         //设置Message默认属性
         this.$Message.config({

@@ -75,24 +75,26 @@
             }
         },
         created(){
+            var temp = this.$cookie.get('mail');
             if(this.$route.query.token)
             {
-                /*let url = "";
+                let url = "";
                 this.$http.get(url, {params:{token: this.$route.query.token}}).then(function (res) {
                     console.log(res);
                 },function (res) {
                     console.log(res);
-                });*/
+                });
                 this.register = true;
                 this.emailRegister = 'test';
                 this.isProfessor = true;
             }
+            else if(temp != '')
+            {
+                this.email = temp;
+            }
         },
         methods:{
             login(){
-                /*this.$router.push({
-                    path: '/index'
-                })*/
                 let data = {
                     mail: this.email,
                     password: this.password,
@@ -100,12 +102,15 @@
                 };
                 this.$http.post("http://127.0.0.1:5000/api/v1/login",data).then(function (res) {
                     console.log(res);
-                    /*this.$cookie.set('id',*);
-                    this.$cookie.set('name',*);
-                    this.$cookie.set('role',*);*/
-                    /*this.$router.push({
-                        path: '/index',
-                    });*/
+                    if (res.body.state==='success')
+                    {
+                        this.$cookie.set('mail',this.email);
+                        this.$cookie.set('role',this.role);
+                        this.$cookie.set('username', res.body.username);
+                        this.$router.push({
+                            path: '/index',
+                        });
+                    }
                 },function (res) {
                     console.log(res)
                 })
@@ -127,18 +132,15 @@
                 };
                 this.$http.post("http://127.0.0.1:5000/api/v1/registerstudent", data).then(function (res) {
                     console.log(res)
-                    /*this.$cookie.set('id',*);
-                    this.$cookie.set('name',*);
-                    this.$cookie.set('role',*);
+                    this.$cookie.set('mail',this.email);
+                    this.$cookie.set('username',this.username);
+                    this.$cookie.set('role',this.role);
                     this.$router.push({
-                        path: '/index'
-                    })*/
+                        path: '/index',
+                    });
                 }, function (res) {
                     console.log(res)
                 })
-                /*this.$router.push({
-                    path:'/index'
-                })*/
             },
             okPro(){
                 let url = '';
