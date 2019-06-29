@@ -82,3 +82,48 @@ class DbOperate:
         except:
             return res
 
+    '''
+    注册专家用户
+    '''
+    def create_user_expert(self, mail, username):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
+            check = self.check_mail(mail)
+            if check['state'] == 'false':
+                res['reason'] = check['reason']
+                return res
+            new_student = {'username': username,
+                           'mail': mail,
+                           'password': "",
+                           'user_type': 'expert',
+                           }
+            user_list = self.getCol("user")
+            user_list.insert_one(new_student)
+            return res
+        except:
+            return res
+
+    '''
+    用户登录
+    '''
+    def compare_password(self, password, mail):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
+            find_user = self.getCol('user').find_one({'mail': mail})
+            # 搜索到唯一用户
+            if find_user:
+                real_psw = find_user['password']
+                if real_psw == "" and find_user['user_type'] == 'expert':
+                    res['reason'] = '该专家尚未设置密码!'
+                elif real_psw == password:
+                    res['state'] = 'success'
+                else:
+                    res['reason'] = '密码错误'
+            # 用户不存在
+            else:
+                res['reason'] = '用户不存在'
+            return res
+        except:
+            return res
+
+    
