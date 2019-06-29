@@ -109,7 +109,7 @@ class DbOperate:
     '''
     用户登录
     '''
-    def compare_password(self, password, mail):
+    def compare_password(self, password, mail, user_type):
         res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
         try:
             find_user = self.getCol('user').find_one({'mail': mail})
@@ -119,6 +119,10 @@ class DbOperate:
                 if real_psw == "" and find_user['user_type'] == 'expert':
                     res['reason'] = '该专家尚未设置密码!'
                 elif real_psw == password:
+                    dictionary = {'student': 'student', 'professor': 'expert', 'school': 'admin'}
+                    if dictionary[user_type] != find_user['user_type']:
+                        res['reason'] = '用户类型不匹配'
+                        return res
                     res['state'] = 'success'
                 else:
                     res['reason'] = '密码错误'
@@ -130,28 +134,16 @@ class DbOperate:
             return res
 
     '''
-    用户登录
+    发送邮件
     '''
-    def compare_password(self, password, mail):
+    def send_mail(self, mail):
         res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
         try:
-            find_user = self.getCol('user').find_one({'mail': mail})
-            # 搜索到唯一用户
-            if find_user:
-                real_psw = find_user['password']
-                if real_psw == "" and find_user['user_type'] == 'expert':
-                    res['reason'] = '该专家尚未设置密码!'
-                elif real_psw == password:
-                    res['state'] = 'success'
-                else:
-                    res['reason'] = '密码错误'
-            # 用户不存在
-            else:
-                res['reason'] = '用户不存在'
+
+            res['state'] = 'success'
             return res
         except:
             return res
-
 
     '''
     初审改变作品状态
