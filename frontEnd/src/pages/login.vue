@@ -122,7 +122,7 @@
                     ID: this.idRegister,
                     password: this.passwordRegister,
                     mail: this.email,
-                    username: this.username,
+                    username: this.name,
                     department: this.school,
                     field: this.major,
                     admission_year: this.enterYear,
