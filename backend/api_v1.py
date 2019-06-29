@@ -11,12 +11,15 @@ import os
 import shutil
 import time
 
+import Config
+
 from flask import Flask, render_template, jsonify, request
 from flask_restful import Api, Resource
 from flask_cors import *
 from json import dumps
+
+
 from encrypt import encode
-import Config
 from DBClass import DbOperate
 
 app = Flask(__name__)
