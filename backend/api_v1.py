@@ -35,85 +35,38 @@ class FError(Exception):
     pass
 
 
-# 上传照片
-class UpPhoto(Resource):
+# 上传附件
+class UpFile(Resource):
     def post(self):
         res = {"state": "fail"}
         try:
-            img = request.files.get('file')
+            file = request.files.get('file')
+            file_type = request.form.get('file_type')
             basedir = os.path.abspath(os.path.dirname(__file__))
-            path = basedir + "/static/photo/"
+            path = basedir + '/static/' + file_type + '/'
             project_code = request.form.get('project_code')
             # 取后缀，判断是否在范围中
-            ext = os.path.splitext(img.filename)[1]
-            if ext[1:] not in ALLOWED_EXTENSIONS_PIC:
-                res['content'] = 'File''s type is not allowed'
-                raise FError("Error")
-            file_name = img.filename
-            file_path = path + file_name
-            img.save(file_path)
-            db_res = db.insert_attachment(project_code,'photo',file_path)
+            ext = os.path.splitext(file.filename)[1]
+            if file_type == 'photo':
+                if ext[1:] not in ALLOWED_EXTENSIONS_PIC:
+                    res['reason'] = 'File''s type is not allowed'
+                    raise FError("Error")
+            elif file_type == 'video':
+                if ext[1:] not in ALLOWED_EXTENSIONS_VIDEO:
+                    res['reason'] = 'File''s type is not allowed'
+                    raise FError("Error")
+            elif file_type == 'doc':
+                if ext[1:] not in ALLOWED_EXTENSIONS_DOC:
+                    res['reason'] = 'File''s type is not allowed'
+                    raise FError("Error")
+            file_path = path + file.filename
+            file.save(file_path)
+            db_res = db.insert_attachment(project_code, file_type, file_path)
             if db_res.get('state') == 'fail':
-                res['content'] = db_res.get('reason')
+                res['reason'] = db_res.get('reason')
                 raise FError("Error")
             res['state'] = "success"
-            res['url'] = Config.DOMAIN_NAME + '/static/photo/' + file_name
-        except:
-            pass
-        finally:
-            return jsonify(res)
-
-
-# 上传视频
-class UpVideo(Resource):
-    def post(self):
-        res = {"state": "fail"}
-        try:
-            video = request.files.get('file')
-            basedir = os.path.abspath(os.path.dirname(__file__))
-            path = basedir + "/static/video/"
-            project_code = request.form.get('project_code')
-            ext = os.path.splitext(video.filename)[1]
-            if ext[1:] not in ALLOWED_EXTENSIONS_VIDEO:
-                res['content'] = 'File''s type is not allowed'
-                raise FError("Error")
-            file_name = video.filename
-            file_path = path + file_name
-            video.save(file_path)
-            db_res = db.insert_attachment(project_code, 'video', file_path)
-            if db_res.get('state') == 'fail':
-                res['content'] = db_res.get('reason')
-                raise FError("Error")
-            res['state'] = "success"
-            res['url'] = Config.DOMAIN_NAME + '/static/video/' + file_name
-        except:
-            pass
-        finally:
-            return jsonify(res)
-
-
-# 上传文档
-class UpDoc(Resource):
-    def post(self):
-        res = {"state": "fail"}
-        try:
-            doc = request.files.get('file')
-            basedir = os.path.abspath(os.path.dirname(__file__))
-            path = basedir + "/static/doc/"
-            project_code = request.form.get('project_code')
-            ext = os.path.splitext(doc.filename)[1]
-            if ext[1:] not in ALLOWED_EXTENSIONS_DOC:
-                res['content'] = 'File''s type is not allowed'
-                raise FError("Error")
-            file_name = doc.filename
-            file_path = path + file_name
-            doc.save(file_path)
-            db_res = db.insert_attachment(project_code, 'video', file_path)
-            if db_res.get('state') == 'fail':
-                res['content'] = db_res.get('reason')
-                raise FError("Error")
-            res['state'] = "success"
-            res['url'] = Config.DOMAIN_NAME + '/static/doc/' + file_name
+            res['url'] = Config.DOMAIN_NAME + '/static/' + file_type + '/' + file.filename
         except:
             pass
         finally:
@@ -367,9 +320,7 @@ class GetTableInfo(Resource):
 
 # 添加api资源
 api = Api(app)
-api.add_resource(UpPhoto, "/api/v1/up_photo", endpoint="upPhoto")
-api.add_resource(UpVideo, "/api/v1/up_video", endpoint="upVideo")
-api.add_resource(UpDoc, "/api/v1/up_doc", endpoint="upDoc")
+api.add_resource(UpFile, "/api/v1/up_file", endpoint="upFile")
 api.add_resource(StoreProject, "/api/v1/store_project", endpoint="storeProject")
 api.add_resource(AddProject, "/api/v1/add_project", endpoint="addProject")
 api.add_resource(ViewApply, "/api/v1/view_apply", endpoint="viewApply")
