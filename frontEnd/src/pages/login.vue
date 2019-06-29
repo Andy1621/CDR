@@ -75,17 +75,22 @@
             }
         },
         created(){
+            var temp = this.$cookie.get('mail');
             if(this.$route.query.token)
             {
-                /*let url = "";
+                let url = "";
                 this.$http.get(url, {params:{token: this.$route.query.token}}).then(function (res) {
                     console.log(res);
                 },function (res) {
                     console.log(res);
-                });*/
+                });
                 this.register = true;
                 this.emailRegister = 'test';
                 this.isProfessor = true;
+            }
+            else if(temp != '')
+            {
+                this.email = temp;
             }
         },
         methods:{
@@ -100,8 +105,8 @@
                     if (res.body.state==='success')
                     {
                         this.$cookie.set('mail',this.email);
-                        this.$cookie.set('password',this.password);
                         this.$cookie.set('role',this.role);
+                        this.$cookie.set('username', res.body.username);
                         this.$router.push({
                             path: '/index',
                         });
@@ -128,7 +133,7 @@
                 this.$http.post("http://127.0.0.1:5000/api/v1/registerstudent", data).then(function (res) {
                     console.log(res)
                     this.$cookie.set('mail',this.email);
-                    this.$cookie.set('password',this.password);
+                    this.$cookie.set('username',this.username);
                     this.$cookie.set('role',this.role);
                     this.$router.push({
                         path: '/index',
