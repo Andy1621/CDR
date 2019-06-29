@@ -282,6 +282,21 @@ class RegisterExpert(Resource):
         finally:
             return jsonify(res)
 
+"""
+校团委查看竞赛的所有作品信息
+"""
+class stageProList(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            contestid = data.get('contestid')
+            res = db.get_contest_projects(contestid)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
 ##############################################################################################################
 '''
 初审改变作品状态
@@ -330,6 +345,7 @@ api.add_resource(GetTableInfo, "/api/vi/get_table_info", endpoint="getTableInfo"
 api.add_resource(Login, '/api/v1/login', endpoint='login')
 api.add_resource(RegisterExpert, '/api/v1/registerexpert', endpoint='registerexpert')
 api.add_resource(RegisterStudent, '/api/v1/registerstudent', endpoint='registerstudent')
+api.add_resource(stageProList, '/api/v1/stageprolist', endpoint='stageprolist')
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", debug=True)
