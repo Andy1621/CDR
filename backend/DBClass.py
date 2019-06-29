@@ -92,7 +92,7 @@ class DbOperate:
         finally:
             return res
 
-
+##############################################################################################
     '''
     检查邮箱是否已注册
     '''
@@ -118,7 +118,7 @@ class DbOperate:
         res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
         try:
             check = self.check_mail(mail)
-            if check['state'] == 'false':
+            if check['state'] == 'fail':
                 res['reason'] = check['reason']
                 return res
             new_student = {'username': username,
@@ -145,7 +145,7 @@ class DbOperate:
         res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
         try:
             check = self.check_mail(mail)
-            if check['state'] == 'false':
+            if check['state'] == 'fail':
                 res['reason'] = check['reason']
                 return res
             new_expert = {'username': username,
