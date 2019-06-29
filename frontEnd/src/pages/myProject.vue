@@ -3,6 +3,7 @@
         <NavBar></NavBar>
         <div class="body">
             <h2>我的项目</h2>
+            <Button style="margin: 10px" icon="md-add-circle" @click="apply_new">申请项目</Button>
             <Table stripe border :columns="columns" :data="rows" ref="table" ></Table>
         </div>
     </div>
@@ -115,6 +116,14 @@
         methods:{
             remove (index) {
                 this.rows.splice(index, 1);
+            },
+            apply_new(){
+                this.$router.push({
+                    path: '/apply',
+                    query: {
+                        userID: '12138',
+                    }
+                })
             }
         },
     }
