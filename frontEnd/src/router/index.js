@@ -9,6 +9,8 @@ import addCompetition from '@/pages/addCompetition'
 import announce from '@/pages/announce'
 import competitionList from '@/pages/competitionList'
 import professorManagement from '@/pages/professorManagement'
+import projectReview from '@/pages/projectReview'
+import projectDetail from '@/pages/projectDetail'
 Vue.use(Router);
 
 export default new Router({
@@ -58,6 +60,16 @@ export default new Router({
             path: '/professorManagement',
             name: 'professorManagement',
             component: professorManagement,
+        },
+        {
+            path: '/projectReview',
+            name: 'projectReview',
+            component: projectReview,
+        },
+        {
+            path: '/projectDetail',
+            name: 'projectDetail',
+            component: projectDetail,
         },
   ]
 })
