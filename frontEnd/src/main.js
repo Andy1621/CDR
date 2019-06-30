@@ -20,7 +20,7 @@ Vue.use(VueResource)
 
 Vue.config.productionTip = false;
 
-Vue.prototype.$baseURL = '';
+Vue.prototype.$baseURL = 'http://127.0.0.1:5000';
 Vue.prototype.$cookie =cookie;
 
 /* eslint-disable no-new */

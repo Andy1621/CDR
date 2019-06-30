@@ -11,6 +11,7 @@
             </Steps>
             <Divider/>
             <div class="form" v-show="current == 0">
+                <p style="margin: 0 0 20px 20px;color: #8391a5;font-size: 15px">作品编号：{{basicInfo.workCode}}（系统自动生成）</p>
                 <Form ref="basicInfo" :model="basicInfo" :rules="ruleBasicInfo" :label-width="80">
                     <FormItem label="作品名称" prop="project">
                         <Input v-model="basicInfo.project" :disabled="readonly" placeholder="请输入作品名称"></Input>
@@ -98,13 +99,13 @@
                             </FormItem>
                         </Col>
                         <Col span="8">
-                            <FormItem label="学号" :key="index" :prop="'cooperators.'+ index +'.stu_id'" :rules="{required: true, message:'学号不能为空', trigger: 'blur'}">
-                                <Input v-model="item.stu_id" :disabled="readonly" placeholder=""></Input>
+                            <FormItem label="学号" :key="index" :prop="'cooperators.'+ index +'.stuId'" :rules="{required: true, message:'学号不能为空', trigger: 'blur'}">
+                                <Input v-model="item.stuId" :disabled="readonly" placeholder=""></Input>
                             </FormItem>
                         </Col>
                         <Col span="8">
-                            <FormItem label="现学历" :key="index" :prop="'cooperators.'+ index +'.edu'" :rules="{required: true, message:'请选择现学历', trigger: 'change'}">
-                                <Select v-model="item.edu" :disabled="readonly">
+                            <FormItem label="现学历" :key="index" :prop="'cooperators.'+ index +'.education'" :rules="{required: true, message:'请选择现学历', trigger: 'change'}">
+                                <Select v-model="item.education" :disabled="readonly">
                                     <Option value="A">A.专科</Option>
                                     <Option value="B">B.大学本科</Option>
                                     <Option value="C">C.硕士研究生</Option>
@@ -152,8 +153,27 @@
                 </Form>
             </div>
             <div class="form" v-show="current == 3">
+                <h4 style="margin-bottom: 20px">相关文档上传（仅限PDF）</h4>
+                <Upload
+                    ref="uploadDoc"
+                    multiple
+                    :show-upload-list="true"
+                    :default-file-list="defaultDocList"
+                    :on-success="handleSuccessDoc"
+                    :on-remove="handleRemoveDoc"
+                    :format="['pdf']"
+                    :max-size="20480"
+                    :on-format-error="handleFormatErrorDoc"
+                    :on-exceeded-size="handleMaxSizeDoc"
+                    :before-upload="handleBeforeUploadDoc"
+                    action = "http://127.0.0.1:5000/api/v1/up_file"
+                    :data = type_doc
+                    style="display: inline-block">
+                    <Button v-show="!readonly" icon="ios-document" style="width: 100px">文档上传</Button>
+                </Upload>
+                <Divider/>
                 <h4 style="margin-bottom: 20px">作品图片上传</h4>
-                <div class="demo-upload-list" v-for="item in uploadList">
+                <div class="demo-upload-list" v-for="item in uploadPhotoList">
                     <template v-if="item.status === 'finished'">
                         <img :src="item.url">
                         <div class="demo-upload-list-cover">
@@ -167,9 +187,9 @@
                 </div>
                 <Upload
                     v-show="!readonly"
-                    ref="upload"
+                    ref="uploadPhoto"
                     :show-upload-list="false"
-                    :default-file-list="defaultList"
+                    :default-file-list="defaultPhotoList"
                     :on-success="handleSuccess"
                     :format="['jpg','jpeg','png']"
                     :max-size="2048"
@@ -178,7 +198,8 @@
                     :before-upload="handleBeforeUpload"
                     multiple
                     type="drag"
-                    action="http://127.0.0.1:5000/api/v1/up_photo"
+                    action="http://127.0.0.1:5000/api/v1/up_file"
+                    :data = type_photo
                     style="display: inline-block;width:96px;">
                     <div style="width: 96px;height:96px;line-height: 100px;">
                         <Icon type="ios-camera" size="30"></Icon>
@@ -188,19 +209,22 @@
                     <img :src="imgUrl" v-if="visible" style="width: 100%">
                 </Modal>
                 <Divider/>
-                <h4 style="margin-bottom: 20px">作品视频上传</h4>
+                <h4 style="margin-bottom: 20px">作品视频上传（仅限 mp4 flv）</h4>
                 <Upload
                     ref="uploadVideo"
                     :show-upload-list="true"
+                    :default-file-list="defaultVideoList"
                     :on-success="handleSuccessVideo"
+                    :on-remove="handleRemoveVideo"
                     :format="['mp4','flv']"
                     :max-size="102400"
                     :on-format-error="handleFormatErrorVideo"
                     :on-exceeded-size="handleMaxSizeVideo"
                     :before-upload="handleBeforeUploadVideo"
-                    action="http://127.0.0.1:5000/api/v1/up_video"
+                    action="http://127.0.0.1:5000/api/v1/up_file"
+                    :data = type_video
                     style="display: inline-block">
-                    <Button :disabled="uploadVideoList.length>=1" v-show="!readonly" icon="ios-videocam" style="width: 100px">上传</Button>
+                    <Button :disabled="uploadVideoList.length>=1" v-show="!readonly" icon="ios-videocam" style="width: 100px">视频上传</Button>
                 </Upload>
             </div>
             <Button v-show="current == 3" @click="check_table">预览表格</Button>
@@ -223,8 +247,22 @@
             return{
                 current: 3,
                 readonly: false,
+                project_id: '',
+                type_doc: {
+                    'file_type' : 'doc',
+                    'project_code' : '',
+                },
+                type_video: {
+                    'file_type' : 'video',
+                    'project_code' : '',
+                },
+                type_photo: {
+                    'file_type' : 'photo',
+                    'project_code' : '',
+                },
                 //basic info
                 basicInfo:{
+                    workCode: '',
                     project: '',
                     college: '',
                     type: '',
@@ -316,7 +354,8 @@
                     ]
                 },
                 // upload
-                defaultList: [
+                defaultDocList: [],
+                defaultPhotoList: [
                     // {
                     //     'name': 'file1',
                     //     'url': 'http://127.0.0.1:5000/static/photo/1561694068_32.3-2.png'
@@ -330,15 +369,18 @@
                         'url': 'https://o5wwk8baw.qnssl.com/7eb99afb9d5f317c912f08b5212fd69a/avatar'
                     }
                 ],
+                defaultVideoList: [],
                 imgUrl: '',
                 visible: false,
-                uploadList: [],
+                filtList: [],
+                uploadPhotoList: [],
                 uploadVideoList: [],
+                uploadDocList: [],
             }
         },
         methods:{
             add_cooperator(){
-                console.log(this.authorInfo.cooperators);
+                // console.log(this.authorInfo.cooperators);
                 this.authorInfo.cooperators.push({
                     name: '',
                     stu_id: '',
@@ -405,17 +447,31 @@
                 this.visible = true;
             },
             handleRemove (file) {
-                const fileList = this.$refs.upload.fileList;
-                this.$refs.upload.fileList.splice(fileList.indexOf(file), 1);
-            },
+                const fileList = this.$refs.uploadPhoto.fileList;
+                this.$http.get(this.$baseURL + '/api/v1/delete_file',{params:{'type':'photo','file_name':file.name,'project_code':this.project_id}})
+                    .then(function (res) {
+                        console.log(res.body)
+                        if(res.body.state == 'fail'){
+                            this.$Message.error('删除失败 '+ res.body.content)
+                            this.$refs.uploadDoc.fileList.push(file)
+                        }
+                        else{
+                            console.log('Success')
+                            this.$refs.uploadPhoto.fileList.splice(fileList.indexOf(file), 1);
+                        }
+                    })
+                },
             handleSuccess (res, file) {
-                // file.url = URL.createObjectURL(file.raw);
                 console.log(res)
-                if(res.state == 'fail')
-                    this.$Message.error('上传失败');
-                console.log(file)
-                file.url = 'https://o5wwk8baw.qnssl.com/7eb99afb9d5f317c912f08b5212fd69a/avatar';
-                file.name = 'defaultfile';
+                if(res.state == 'fail'){
+                    this.$Message.error('上传失败 ' + res.reason);
+                    const fileList = this.$refs.uploadPhoto.fileList;
+                    this.$refs.uploadPhoto.fileList.splice(fileList.indexOf(file), 1);
+                }
+                else{
+                    // this.$Message.success('成功上传')
+                    file.url = res.file_path;
+                }
             },
             handleFormatError (file) {
                 this.$Notice.warning({
@@ -430,7 +486,7 @@
                 });
             },
             handleBeforeUpload () {
-                const check = this.uploadList.length < 5;
+                const check = this.uploadPhotoList.length < 5;
                 if (!check) {
                     this.$Notice.warning({
                         title: '最多只能上传5张图片'
@@ -440,13 +496,27 @@
             },
             //upload video
             handleSuccessVideo (res, file) {
-                // file.url = URL.createObjectURL(file.raw);
                 console.log(res);
                 if(res.state == 'fail')
-                    this.$Message.error('上传失败');
+                    this.$Message.error('上传失败 ' + res.reason);
+                else{
+                    // this.$Message.success('成功上传')
+                    file.url = res.file_path;
+                }
+            },
+            handleRemoveVideo(file){
                 console.log(file)
-                file.url = 'file/url';
-                // file.name = 'filename.flv';
+                this.$http.get(this.$baseURL + '/api/v1/delete_file',{params:{'type':'video','file_name':file.name,'project_code':this.project_id}})
+                    .then(function (res) {
+                        console.log(res.body)
+                        if(res.body.state == 'fail'){
+                            this.$Message.error('删除失败 '+ res.body.content)
+                            this.$refs.uploadVideo.fileList.push(file)
+                        }
+                        else{
+                            console.log('Success')
+                        }
+                    })
             },
             handleFormatErrorVideo (file) {
                 this.$Notice.warning({
@@ -469,17 +539,148 @@
                 }
                 return check;
             },
+            //upload file
+            handleSuccessDoc (res, file) {
+                console.log(res);
+                if(res.state == 'fail')
+                    this.$Message.error('上传失败 ' + res.reason);
+                else{
+                    // this.$Message.success('成功上传')
+                    file.url = res.file_path;
+                }
+            },
+            handleRemoveDoc (file, fileList){
+                console.log("this is file")
+                console.log(file.name + this.project_id)
+                this.$http.get(this.$baseURL + '/api/v1/delete_file',{params:{'type':'doc','file_name':file.name,'project_code':this.project_id}})
+                    .then(function (res) {
+                        console.log(res.body)
+                        if(res.body.state == 'fail'){
+                            this.$Message.error('删除失败 '+ res.body.content)
+                            this.$refs.uploadDoc.fileList.push(file)
+                        }
+                        else{
+                            console.log('Success')
+                        }
+                    })
+            },
+            handleFormatErrorDoc (file) {
+                this.$Notice.warning({
+                    title: '文件格式错误',
+                    desc: '文件 ' + file.name + ' 格式错误请选择 pdf 格式'
+                });
+            },
+            handleMaxSizeDoc (file) {
+                this.$Notice.warning({
+                    title: '文件过大',
+                    desc: '文件  ' + file.name + ' 过大，不能超过20M'
+                });
+            },
+            handleBeforeUploadDoc () {
+                const check = this.uploadDocList.length < 100;
+                if (!check) {
+                    this.$Notice.warning({
+                        title: '最多只能上传100个文件'
+                    });
+                }
+                return check;
+            },
             //upload end
+            get_project_detail(project_id){
+                this.$http.get(this.$baseURL + '/api/v1/get_project_detail',{params:{'project_code': project_id}})
+                    .then(function (res) {
+                        var detail = res.body;
+                        console.log(res.body);
+                        if(detail.state == '' && detail.reason == '项目不存在'){
+                            console.log()
+                        }
+                        else{
+                            var form = detail.project.registration_form;
+                            console.log(form)
+                            this.fileList = detail.project.project_files;
+                            for(let item of this.fileList){
+                                console.log(item);
+                                switch(item.file_type){
+                                    case 'doc':
+                                        this.defaultDocList.push({
+                                            'name' : item.file_name,
+                                            'url' : item.file_path,
+                                        });
+                                        break;
+                                    case 'photo':
+                                        console.log("FFFF")
+                                        this.defaultPhotoList.push({
+                                            'name' : item.file_name,
+                                            'url' : item.file_path,
+                                        });
+                                        break;
+                                    case 'video':
+                                        this.defaultVideoList.push({
+                                            'name' : item.file_name,
+                                            'url' : item.file_path,
+                                        });
+                                        break;
+                                }
+                            }
+                            // console.log(this.defaultDocList)
+                            // console.log(this.defaultPhotoList)
+                            // console.log(this.defaultVideoList)
+
+                            this.project_id = form.workCode;
+                            // console.log(form.workCode)
+                            this.type_doc = {
+                                'file_type' : 'doc',
+                                'project_code' : form.workCode,
+                            };
+                            this.type_video = {
+                                'file_type' : 'video',
+                                'project_code' : form.workCode,
+                            };
+                            this.type_photo = {
+                                'file_type' : 'photo',
+                                'project_code' : form.workCode,
+                            };
+                            this.basicInfo.workCode = form.workCode;
+                            this.basicInfo.project = form.mainTitle;
+                            this.basicInfo.college = form.department;
+                            this.basicInfo.type = form.mainType;
+
+                            this.authorInfo.name = form.name;
+                            this.authorInfo.stu_id = form.stuId;
+                            this.authorInfo.birth = form.birthday;
+                            this.authorInfo.edu_background = form.education;
+                            this.authorInfo.major = form.major;
+                            this.authorInfo.school_date = form.enterTime;
+                            this.authorInfo.project = form.totalTitle;
+                            this.authorInfo.address = form.address;
+                            this.authorInfo.phone = form.phone;
+                            this.authorInfo.email = form.email;
+                            this.authorInfo.cooperators = form.applier;
+
+                            this.projectInfo.project = form.title;
+                            this.projectInfo.type = form.type;
+                            this.projectInfo.introduction = form.description;
+                            this.projectInfo.innovation = form.creation;
+                            this.projectInfo.keyword = form.keyword;
+                        }
+                    },function (res) {
+                        console.log('Failed')
+                    })
+            }
         },
         mounted () {
-            this.uploadList = this.$refs.upload.fileList;
+            this.uploadDocList = this.$refs.uploadDoc.fileList;
+            this.uploadPhotoList = this.$refs.uploadPhoto.fileList;
             this.uploadVideoList = this.$refs.uploadVideo.fileList;
             //设置Message默认属性
             this.$Message.config({
                 top: 100,
                 duration: 1,
             });
-        }
+        },
+        created () {
+            this.get_project_detail('0001')
+        },
     }
 </script>
 

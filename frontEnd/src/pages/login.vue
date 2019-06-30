@@ -111,6 +111,10 @@
                             path: '/index',
                         });
                     }
+                    else
+                    {
+                        alert(res.body.reason)
+                    }
                 },function (res) {
                     console.log(res)
                 })

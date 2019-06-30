@@ -88,7 +88,7 @@ class DeleteFile(Resource):
             path = basedir + "/static/" + file_type + "/"
             file_path = path + project_code + '_' + file_name
             if not os.path.exists(file_path):
-                res['content'] = 'The file does not exists'
+                res['reason'] = 'The file does not exists'
                 raise FError("Error")
             os.remove(file_path)
             db_res = db.delete_attachment(project_code, file_path)
@@ -123,6 +123,21 @@ class DownloadFiles(Resource):
         finally:
             return jsonify(res)
 
+
+# 获取专家评审项目信息
+class GetExpertReviewList(Resource):
+    def post(self):
+        res = {"state":"fail"}
+        try:
+            data = request.get_json()
+            expert_email = data.get('email')
+            db_res = db.expert_review_list(expert_email)
+            res['project_lists'] = db_res['project_lists']
+            res['state'] = 'Success'
+        except:
+            pass
+        finally:
+            return jsonify(res)
 ################################################################################################
 
 '''
@@ -302,6 +317,53 @@ class SubmitProject(Resource):
             return jsonify(res)
 
 
+'''
+保存评审意见
+参数：
+    项目编号project_code
+    专家邮箱expert_email
+    专家评分score
+    评审意见suggestion
+'''
+class StoreReview(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            project_code = data.get('project_code')
+            expert_email = data.get('expert_email')
+            score = ''
+            if data.get('score'):
+                score = data.get('score')
+            suggestion = ''
+            if data.get('suggestion'):
+                suggestion = data.get('suggestion')
+            res = db.store_review(project_code, expert_email, score, suggestion)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+'''
+提交评审意见
+参数：
+    项目编号project_code
+    专家邮箱expert_email
+'''
+class SubmitReview(Resource):
+    def get(self):
+        res = {"state": "fail"}
+        try:
+            data = request.args
+            project_code = data.get('project_code')
+            expert_email = data.get('expert_email')
+            res = db.submit_review(project_code, expert_email)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+
 #######################################################################################################################
 """
 登录
@@ -365,7 +427,7 @@ class RegisterExpert(Resource):
 """
 校团委查看竞赛的所有作品信息
 """
-class stageProList(Resource):
+class StageProList(Resource):
     def post(self):
         res = {"state": "fail"}
         try:
@@ -430,6 +492,40 @@ class GetExpertInviteList(Resource):
         finally:
             return jsonify(res)
 
+'''
+检查邮箱和邀请码
+'''
+class check_code(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            mail = data.get('mail')
+            invitation_code = data.get('invitation_code')
+            project_code = data.get('project_code')
+            is_accept = data.get('is_accept')
+            res = db.check_code(mail, invitation_code, project_code, is_accept)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+'''
+专家设置密码
+'''
+class expert_set_password(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            mail = data.get('mail')
+            password = data.get('password')
+            res = db.cexpert_set_password(mail, password)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
 ################################################################################################################
 
 # 添加api资源
@@ -447,9 +543,14 @@ api.add_resource(GetTableInfo, "/api/vi/get_table_info", endpoint="getTableInfo"
 api.add_resource(Login, '/api/v1/login', endpoint='login')
 api.add_resource(RegisterExpert, '/api/v1/registerexpert', endpoint='registerexpert')
 api.add_resource(RegisterStudent, '/api/v1/registerstudent', endpoint='registerstudent')
-api.add_resource(stageProList, '/api/v1/stageprolist', endpoint='stageprolist')
+api.add_resource(StageProList, '/api/v1/stageprolist', endpoint='stageprolist')
 api.add_resource(GetExpertInviteList, '/api/v1/getExpertInviteList', endpoint='getExpertInviteList')
 api.add_resource(DownloadFiles, '/api/v1/download_files', endpoint='downloadFiles')
+api.add_resource(GetExpertReviewList, '/api/v1/get_expert_review_list', endpoint='expertReviewList')
+api.add_resource(SubmitReview, '/api/v1/submit_review', endpoint='submitReview')
+api.add_resource(StoreReview, '/api/v1/store_review', endpoint='storeReview')
+api.add_resource(check_code, '/api/v1/check_code', endpoint='check_code')
+api.add_resource(expert_set_password, '/api/v1/expert_set_password', endpoint='expert_set_password')
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", debug=True)

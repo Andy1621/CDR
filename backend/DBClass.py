@@ -131,7 +131,9 @@ class DbOperate:
                     temp = file['file_path'].split('/')
                     temp_files.append({
                         'file_name': temp[-1].split('_')[-1],
-                        'file_path': Config.DOMAIN_NAME + '/' + '/'.join(temp[-3:])})
+                        'file_path': Config.DOMAIN_NAME + '/' + '/'.join(temp[-3:]),
+                        'file_type': file['file_type']
+                        })
                 project['project_files'] = temp_files
                 res['project'] = project
             else:
@@ -160,7 +162,6 @@ class DbOperate:
             pass
         finally:
             return res
-
 
     '''
     删除项目报名
@@ -193,7 +194,6 @@ class DbOperate:
         finally:
             return res
 
-
     '''
     提交项目报名
     '''
@@ -212,7 +212,47 @@ class DbOperate:
         finally:
             return res
 
-        
+    '''
+    保存评审意见
+    '''
+    def store_review(self, project_code, expert_email, score, suggestion):
+        res = {'state': 'fail', 'reason': "未知错误"}
+        try:
+            review = self.getCol('expert_project').find_one({'project_code': project_code,
+                                                             'expert_email': expert_email})
+            if review and review['status'] == 0:
+                review['score'] = score
+                review['suggestion'] = suggestion
+                self.getCol('expert_project').update_one({'project_code': project_code,
+                                                          'expert_email': expert_email}, {'$set': review})
+                res['state'] = 'success'
+            else:
+                res['reason'] = "项目不存在或专家没有权利评审该项目"
+        except:
+            pass
+        finally:
+            return res
+
+
+    '''
+    提交评审意见
+    '''
+    def submit_review(self, project_code, expert_email):
+        res = {'state': 'fail', 'reason': "未知错误"}
+        try:
+            review = self.getCol('expert_project').find_one({'project_code': project_code, 'expert_email': expert_email})
+            if review and review['status'] == 0:
+                review['status'] = 2
+                self.getCol('expert_project').update_one({'project_code': project_code,
+                                                   'expert_email': expert_email}, {'$set': review})
+                res['state'] = 'success'
+            else:
+                res['reason'] = "项目不存在或专家没有权利评审该项目"
+        except:
+            pass
+        finally:
+            return res
+
 ##############################################################################################
     '''
     检查邮箱是否已注册
@@ -260,6 +300,13 @@ class DbOperate:
             return res
 
     '''
+    hash
+    '''
+    def hash_code(self, name):
+        code = str(name.__hash__())
+        return code
+
+    '''
     注册专家用户
     '''
     def create_user_expert(self, mail, username):
@@ -269,11 +316,12 @@ class DbOperate:
             if check['state'] == 'fail':
                 res['reason'] = check['reason']
                 return res
+            invitation_code = self.hash_code(mail)
             new_expert = {'username': username,
                           'mail': mail,
                           'password': "",
-                           'user_type': 'expert',
-                          'invitation_code': ''
+                          'user_type': 'expert',
+                          'invitation_code': invitation_code
                            }
             user_list = self.getCol("user")
             user_list.insert_one(new_expert)
@@ -309,7 +357,27 @@ class DbOperate:
             return res
         except:
             return res
- 
+
+    '''
+    专家设置密码
+    '''
+    def expert_set_password(self, mail, password):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
+            user = self.getCol('user')
+            expert = user.find_one({'user_type': 'expert', 'mail': mail})
+            if expert is None:
+                res['reason'] = "未找到专家"
+                return res
+            if expert['password'] != "":
+                res['reason'] = "已设置密码"
+                return res
+            user.update_one({'user_type': 'expert', 'mail': mail}, {"$set": {'password': password}})
+            res['state'] = 'success'
+        except:
+            return res
+        return res
+
     '''
     校团委发送邮件
     '''
@@ -334,7 +402,82 @@ class DbOperate:
         except:
             return False
         return True
- 
+
+    '''
+    向专家发送邀请邮件
+    '''
+    def invite_mail(self, mail, expert_name, project_name, project_code):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
+            user = self.getCol('user')
+            expert = user.find_one({'user_type': 'expert', 'mail': mail})
+            if expert is None:
+                res['reason'] = "未找到专家"
+                return res
+            invitation_code = expert['invitation_code']
+            project = self.getCol('project')
+            pro = project.find_one({'project_code': project_code})
+            if pro is None:
+                res['reason'] = "未找到项目"
+                return res
+            comp_code = pro["competition_id"]
+            competition = self.getCol('competition')
+            comp = competition.find_one({'competition_id': comp_code})
+            if comp is None:
+                res['reason'] = "未找到竞赛"
+                return res
+            comp_name = comp["competition_name"]
+            header = comp_name + "项目评审邀请"
+            accept_addr = "http://localhost:8080/#/?token=" + invitation_code + "&email=" + mail
+            refuse_addr = "???"
+            message = "如果您接受此邀请，请点击链接: " + accept_addr + " 进入竞赛系统。\n" + "如果您希望拒绝此邀请，请点击链接: " + refuse_addr + " 。\n"
+            if self.send_mail(mail, header, message) is False:
+                res['reason'] = "邮件发送失败"
+                return res
+            res['state'] = 'success'
+        except:
+            return res
+        return res
+
+    '''
+    检查邮箱和邀请码
+    '''
+    def check_code(self, mail, invitation_code, project_code, is_accept):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
+            user = self.getCol('user')
+            expert = user.find_one({'user_type': 'expert', 'mail': mail})
+            if expert is None:
+                res['reason'] = "未找到专家"
+                return res
+            if expert['invitation_code'] != invitation_code:
+                res['reason'] = "验证码错误"
+                return res
+            expert_project = self.getCol('expert_project')
+            e_p = expert_project.find_one({'expert_mail': mail, 'project_code': project_code})
+            if e_p is None:
+                res['reason'] = "未找到关系"
+                return res
+            status = e_p['status']
+            if expert["password"] == "":
+                res['registered'] = False
+            else:
+                res['registered'] = True
+            res['old_status'] = expert["password"]
+            if expert["password"] == -1:
+                if is_accept:
+                    new_status = 0
+                else:
+                    new_status = 1
+                expert_project.update_many({'expert_mail': mail, 'project_code': project_code}, {"$set": {'status': new_status}})
+                # res['operation_ok'] = True
+            else:
+                1  # res['registered'] = False
+            res['state'] = 'success'
+        except:
+            return res
+        return res
+
     '''
     对于某个项目，返回邀请过和未邀请得专家列表
     '''
@@ -453,6 +596,47 @@ class DbOperate:
             # 项目不存在
             else:
                 res['reason'] = '项目不存在'
+        except:
+            pass
+        finally:
+            return res
+
+    '''
+    获取专家评审项目信息
+    '''
+    def expert_review_list(self, email):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
+            print('b')
+            find_project = self.getCol(
+                'expert_project').find({'expert_mail': email,'status': '0'})
+            print(email)
+            # 搜索到专家对应的列表
+            if find_project:
+                print('a')
+                project_lists = []
+                project_list = {}
+                for fp in find_project:
+                    proj_id = fp['project_code']
+                    proj = self.getCol('project').find_one({'project_code': proj_id},{'project_name':1, 'competition_id':1})
+                    proj_name = proj['project_name']
+                    comp = self.getCol('competition').find_one({'_id': ObjectId(proj['competition_id'])}, {'project_name': 1, 'expert_comments_ddl': 1})
+                    comp_name = comp['project_name']
+                    exp_com_ddl = comp['expert_comments_ddl']
+                    project_list = {
+                        'project_id': proj_id,
+                        'project_name': proj_name,
+                        'competition_name': comp_name,
+                        'expert_comments_ddl': exp_com_ddl
+                    }
+                    project_lists.append(project_list)
+                res['state'] = 'Success'
+                res['reason'] = 'None'
+                res['project_lists'] = project_lists
+            # 专家不存在
+            else:
+                res['state'] = 'Success'
+                res['reason'] = '专家没有评审的项目'
         except:
             pass
         finally:
