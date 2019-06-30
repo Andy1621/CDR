@@ -161,7 +161,6 @@ class DbOperate:
         finally:
             return res
 
-
     '''
     删除项目报名
     '''
@@ -193,7 +192,6 @@ class DbOperate:
         finally:
             return res
 
-
     '''
     提交项目报名
     '''
@@ -212,7 +210,47 @@ class DbOperate:
         finally:
             return res
 
-        
+    '''
+    保存评审意见
+    '''
+    def store_review(self, project_code, expert_email, score, suggestion):
+        res = {'state': 'fail', 'reason': "未知错误"}
+        try:
+            review = self.getCol('expert_project').find_one({'project_code': project_code,
+                                                             'expert_email': expert_email})
+            if review and review['status'] == 0:
+                review['score'] = score
+                review['suggestion'] = suggestion
+                self.getCol('expert_project').update_one({'project_code': project_code,
+                                                          'expert_email': expert_email}, {'$set': review})
+                res['state'] = 'success'
+            else:
+                res['reason'] = "项目不存在或专家没有权利评审该项目"
+        except:
+            pass
+        finally:
+            return res
+
+
+    '''
+    提交评审意见
+    '''
+    def submit_review(self, project_code, expert_email):
+        res = {'state': 'fail', 'reason': "未知错误"}
+        try:
+            review = self.getCol('expert_project').find_one({'project_code': project_code, 'expert_email': expert_email})
+            if review and review['status'] == 0:
+                review['status'] = 2
+                self.getCol('expert_project').update_one({'project_code': project_code,
+                                                   'expert_email': expert_email}, {'$set': review})
+                res['state'] = 'success'
+            else:
+                res['reason'] = "项目不存在或专家没有权利评审该项目"
+        except:
+            pass
+        finally:
+            return res
+
 ##############################################################################################
     '''
     检查邮箱是否已注册

@@ -302,6 +302,53 @@ class SubmitProject(Resource):
             return jsonify(res)
 
 
+'''
+保存评审意见
+参数：
+    项目编号project_code
+    专家邮箱expert_email
+    专家评分score
+    评审意见suggestion
+'''
+class StoreReview(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            project_code = data.get('project_code')
+            expert_email = data.get('expert_email')
+            score = ''
+            if data.get('score'):
+                score = data.get('score')
+            suggestion = ''
+            if data.get('suggestion'):
+                suggestion = data.get('suggestion')
+            res = db.store_review(project_code, expert_email, score, suggestion)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+'''
+提交评审意见
+参数：
+    项目编号project_code
+    专家邮箱expert_email
+'''
+class SubmitReview(Resource):
+    def get(self):
+        res = {"state": "fail"}
+        try:
+            data = request.args
+            project_code = data.get('project_code')
+            expert_email = data.get('expert_email')
+            res = db.submit_review(project_code, expert_email)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+
 #######################################################################################################################
 """
 登录
@@ -449,6 +496,8 @@ api.add_resource(RegisterStudent, '/api/v1/registerstudent', endpoint='registers
 api.add_resource(stageProList, '/api/v1/stageprolist', endpoint='stageprolist')
 api.add_resource(GetExpertInviteList, '/api/v1/getExpertInviteList', endpoint='getExpertInviteList')
 api.add_resource(DownloadFiles, '/api/v1/download_files', endpoint='downloadFiles')
+api.add_resource(SubmitReview, '/api/v1/submit_review', endpoint='submitReview')
+api.add_resource(StoreReview, '/api/v1/store_review', endpoint='storeReview')
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", debug=True)
