@@ -461,7 +461,9 @@ class DbOperate:
             accept_addr = "http://localhost:8080/#/?token=" + invitation_code + \
                           "&email=" + mail + \
                           "&project_code=" + project_code + "&is_accept=" + "true"
-            refuse_addr = "???"
+            refuse_addr = "http://localhost:8080/#/?token=" + invitation_code + \
+                          "&email=" + mail + \
+                          "&project_code=" + project_code + "&is_accept=" + "false"
             message = "如果您接受此邀请，请点击链接: " + accept_addr + " 进入竞赛系统。\n" + "如果您希望拒绝此邀请，请点击链接: " + refuse_addr + " 。\n"
             if self.send_mail(mail, header, message) is False:
                 res['reason'] = "邮件发送失败"
