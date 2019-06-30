@@ -88,7 +88,7 @@ class DbOperate:
                 t_project = {
                     'project_name': '',
                     'author_email': email,
-                    'author_email': name,
+                    'author_name': name,
                     'project_code': code,
                     'competition_id': competition_id,
                     'project_status': -1,
@@ -130,7 +130,7 @@ class DbOperate:
                 for file in project_files:
                     temp = file['file_path'].split('/')
                     temp_files.append({
-                        'file_name': temp[-1],
+                        'file_name': temp[-1].split('_')[-1],
                         'file_path': Config.DOMAIN_NAME + '/' + '/'.join(temp[-3:])})
                 project['project_files'] = temp_files
                 res['project'] = project
