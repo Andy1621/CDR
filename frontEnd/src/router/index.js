@@ -11,7 +11,7 @@ import competitionList from '@/pages/competitionList'
 import professorManagement from '@/pages/professorManagement'
 import projectReview from '@/pages/projectReview'
 import projectDetail from '@/pages/projectDetail'
-import stageProList from '@/pages/stageProList'import projectDetail from '@/pages/projectDetail'
+import stageProList from '@/pages/stageProList'
 import expTrialStat from '@/pages/expTrialStat'
 Vue.use(Router);
 
