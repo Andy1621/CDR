@@ -59,14 +59,15 @@ class UpFile(Resource):
                 if ext[1:] not in ALLOWED_EXTENSIONS_DOC:
                     res['reason'] = 'File''s type is not allowed'
                     raise FError("Error")
-            file_path = path + file.filename
+            file_name = project_code + '_' + file.filename
+            file_path = path + file_name
             file.save(file_path)
             db_res = db.insert_attachment(project_code, file_type, file_path)
             if db_res.get('state') == 'fail':
                 res['reason'] = db_res.get('reason')
                 raise FError("Error")
             res['state'] = "success"
-            res['url'] = Config.DOMAIN_NAME + '/static/' + file_type + '/' + file.filename
+            res['url'] = Config.DOMAIN_NAME + '/static/' + file_type + '/' + file_name
             res['file_name'] = file.filename
         except:
             pass
@@ -85,7 +86,7 @@ class DeleteFile(Resource):
             project_code = data.get('project_code')
             basedir = os.path.abspath(os.path.dirname(__file__))
             path = basedir + "/static/" + file_type + "/"
-            file_path = path + file_name
+            file_path = path + project_code + '_' + file_name
             if not os.path.exists(file_path):
                 res['content'] = 'The file does not exists'
                 raise FError("Error")
@@ -369,8 +370,8 @@ class stageProList(Resource):
         res = {"state": "fail"}
         try:
             data = request.get_json()
-            contestid = data.get('contestid')
-            res = db.get_contest_projects(contestid)
+            competition_id = data.get('competition_id')
+            res = db.get_contest_projects(competition_id)
         except:
             pass
         finally:
@@ -447,6 +448,7 @@ api.add_resource(RegisterExpert, '/api/v1/registerexpert', endpoint='registerexp
 api.add_resource(RegisterStudent, '/api/v1/registerstudent', endpoint='registerstudent')
 api.add_resource(stageProList, '/api/v1/stageprolist', endpoint='stageprolist')
 api.add_resource(GetExpertInviteList, '/api/v1/getExpertInviteList', endpoint='getExpertInviteList')
+api.add_resource(DownloadFiles, '/api/v1/download_files', endpoint='downloadFiles')
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", debug=True)
