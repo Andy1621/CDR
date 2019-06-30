@@ -75,18 +75,28 @@
             }
         },
         created(){
-            var temp = this.$cookie.get('mail');
-            if(this.$route.query.token)
+            let temp = this.$cookie.get('mail');
+            let route = this.$route.query;
+            if(route.token)
             {
-                let url = "";
-                this.$http.get(url, {params:{token: this.$route.query.token}}).then(function (res) {
+                let url = "http://127.0.0.1:5000/api/v1/check_code";
+                this.$http.post(url, {
+                    mail: route.email,
+                    invitation_code: route.token,
+                    project_code: route.project_code,
+                    is_accept: route.is_accept == 'true'? true : false
+                }).then(function (res) {
                     console.log(res);
+                    if (res.body)
+                    {
+
+                    }
                 },function (res) {
                     console.log(res);
                 });
-                this.register = true;
+                /*this.register = true;
                 this.emailRegister = 'test';
-                this.isProfessor = true;
+                this.isProfessor = true;*/
             }
             else if(temp != '')
             {
