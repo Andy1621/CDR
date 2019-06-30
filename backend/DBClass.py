@@ -38,6 +38,7 @@ class DbOperate:
         col = db[name]
         return col
 
+################################################################################################
     '''
     保存申报信息
     '''
@@ -64,7 +65,7 @@ class DbOperate:
     '''
     新增项目报名
     '''
-    def add_project(self, competition_id, email):
+    def add_project(self, competition_id, email, name):
         res = {'state': 'fail', 'reason': "未知错误"}
         try:
             competition = self.getCol('competition').find_one({'_id': ObjectId(competition_id)})
@@ -87,9 +88,10 @@ class DbOperate:
                 t_project = {
                     'project_name': '',
                     'author_email': email,
+                    'author_name': name,
                     'project_code': code,
                     'competition_id': competition_id,
-                    'project_status': 'editing',
+                    'project_status': -1,
                     'registration_form': {'workCode': code, 'mainTitle': '',
                                           'department': '', 'mainType': '',
                                           'name': '', 'stuId': '', 'birthday': '',
@@ -128,7 +130,7 @@ class DbOperate:
                 for file in project_files:
                     temp = file['file_path'].split('/')
                     temp_files.append({
-                        'file_name': temp[-1],
+                        'file_name': temp[-1].split('_')[-1],
                         'file_path': Config.DOMAIN_NAME + '/' + '/'.join(temp[-3:])})
                 project['project_files'] = temp_files
                 res['project'] = project
@@ -158,7 +160,6 @@ class DbOperate:
             pass
         finally:
             return res
-
 
     '''
     删除项目报名
@@ -190,6 +191,66 @@ class DbOperate:
             pass
         finally:
             return res
+
+    '''
+    提交项目报名
+    '''
+    def submit_project(self, project_code):
+        res = {'state': 'fail', 'reason': "未知错误"}
+        try:
+            project = self.getCol('project').find_one({'project_code': project_code})
+            if project:
+                project['project_status'] = 0
+                self.getCol('project').update_one({'project_code': project_code}, {'$set': project})
+                res['state'] = 'success'
+            else:
+                res['reason'] = "项目不存在"
+        except:
+            pass
+        finally:
+            return res
+
+    '''
+    保存评审意见
+    '''
+    def store_review(self, project_code, expert_email, score, suggestion):
+        res = {'state': 'fail', 'reason': "未知错误"}
+        try:
+            review = self.getCol('expert_project').find_one({'project_code': project_code,
+                                                             'expert_email': expert_email})
+            if review and review['status'] == 0:
+                review['score'] = score
+                review['suggestion'] = suggestion
+                self.getCol('expert_project').update_one({'project_code': project_code,
+                                                          'expert_email': expert_email}, {'$set': review})
+                res['state'] = 'success'
+            else:
+                res['reason'] = "项目不存在或专家没有权利评审该项目"
+        except:
+            pass
+        finally:
+            return res
+
+
+    '''
+    提交评审意见
+    '''
+    def submit_review(self, project_code, expert_email):
+        res = {'state': 'fail', 'reason': "未知错误"}
+        try:
+            review = self.getCol('expert_project').find_one({'project_code': project_code, 'expert_email': expert_email})
+            if review and review['status'] == 0:
+                review['status'] = 2
+                self.getCol('expert_project').update_one({'project_code': project_code,
+                                                   'expert_email': expert_email}, {'$set': review})
+                res['state'] = 'success'
+            else:
+                res['reason'] = "项目不存在或专家没有权利评审该项目"
+        except:
+            pass
+        finally:
+            return res
+
 ##############################################################################################
     '''
     检查邮箱是否已注册
@@ -518,6 +579,48 @@ class DbOperate:
         finally:
             return res
 
+    '''
+    获取专家评审项目信息
+    '''
+
+    def expert_review_list(self, email):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
+            print('b')
+            find_project = self.getCol(
+                'expert_project').find({'expert_mail': email,'status': '已接受'})
+            print(email)
+            # 搜索到专家对应的列表
+            if find_project:
+                print('a')
+                project_lists = []
+                project_list = {}
+                for fp in find_project:
+                    proj_id = fp['project_code']
+                    proj = self.getCol('project').find_one({'project_code': proj_id},{'project_name':1, 'competition_id':1})
+                    proj_name = proj['project_name']
+                    comp = self.getCol('competition').find_one({'_id': ObjectId(proj['competition_id'])}, {'project_name': 1, 'expert_comments_ddl': 1})
+                    comp_name = comp['project_name']
+                    exp_com_ddl = comp['expert_comments_ddl']
+                    project_list = {
+                        'project_id': proj_id,
+                        'project_name': proj_name,
+                        'competition_name': comp_name,
+                        'expert_comments_ddl': exp_com_ddl
+                    }
+                    project_lists.append(project_list)
+                res['state'] = 'Success'
+                res['reason'] = 'None'
+                res['project_lists'] = project_lists
+            # 专家不存在
+            else:
+                res['state'] = 'Success'
+                res['reason'] = '专家没有评审的项目'
+        except:
+            pass
+        finally:
+            return res
+
 
     '''
     查询竞赛所有作品信息
@@ -544,6 +647,7 @@ class DbOperate:
             if project['project_status'] >= 1:
                 A_List[index]['project_status'] = 1
             A_List[index]['project_status'] = self.num2status(A_List[index]['project_status'])
+            print(A_List[index])
         return A_List
 
     '''
@@ -576,10 +680,6 @@ class DbOperate:
             D_List[index]['project_status'] = self.num2status(D_List[index]['project_status'])
         return D_List
 
-    '''
-    过滤ABCD_List返回的字段，只返回
-    '''
-
     def get_contest_projects(self, competition_id):
         res = {
             'state': 'fail',
@@ -593,9 +693,12 @@ class DbOperate:
         project_collection = self.getCol('project')
         com_collection = self.getCol('competition')
         try:
-            projects = project_collection.find({'competition_id': competition_id})
-            com_status = com_collection.find_one({'_id': competition_id})['com_status']
+            projects = []
+            for item in project_collection.find({'competition_id': competition_id}, {'_id':0}):
+                projects.append(item)
+            com_status = com_collection.find_one({'_id': ObjectId(competition_id)})['com_status']
             res['com_status'] = com_status
+            print(com_status)
             if len(projects)>0:
                 res['state'] = 'success'
                 res['reason'] = '成功获取竞赛作品列表'
@@ -618,7 +721,8 @@ class DbOperate:
                     res['C_List'] = self.rule_DC(list(filter(lambda x:x['project_status'] >= 1 , projects)))
                     res['D_List'] = self.rule_D(list(filter(lambda x: x['project_status'] >= 3, projects)))
             elif len(projects) == 0:
-                res ['reason'] = '竞赛作品列表为空'
+                res['reason'] = '竞赛作品列表为空'
+
         except:
             pass
         finally:

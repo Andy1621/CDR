@@ -1,7 +1,7 @@
 <template>
     <Row align="middle" type="flex">
         <Col span="4"> {{labelContent}}</Col>
-        <Col><Input class="register-input" @input="handleInput" :value="textContent" :disabled="disabled" :type="inputType"></Input></Col>
+        <Col><Input class="register-input" @input="handleInput" :value="textContent" :disabled="disabled" :type="inputType" :readonly="readonly"></Input></Col>
     </Row>
 </template>
 
@@ -16,7 +16,8 @@
             'textContent',
             'labelContent',
             'disabled',
-            'inputType'
+            'inputType',
+            'readonly'
         ],
         methods:{
             handleInput(){
