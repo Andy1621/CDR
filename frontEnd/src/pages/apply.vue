@@ -173,7 +173,7 @@
                 </Upload>
                 <Divider/>
                 <h4 style="margin-bottom: 20px">作品图片上传</h4>
-                <div class="demo-upload-list" v-for="item in uploadPhotoList">
+                <div v-if="false" class="demo-upload-list" v-for="item in uploadPhotoList">
                     <template v-if="item.status === 'finished'">
                         <img :src="item.url">
                         <div class="demo-upload-list-cover">
@@ -188,24 +188,27 @@
                 <Upload
                     v-show="!readonly"
                     ref="uploadPhoto"
-                    :show-upload-list="false"
+                    :show-upload-list="true"
                     :default-file-list="defaultPhotoList"
                     :on-success="handleSuccess"
+                    :on-remove="handleRemove"
+                    :on-preview="photoView"
                     :format="['jpg','jpeg','png']"
                     :max-size="2048"
                     :on-format-error="handleFormatError"
                     :on-exceeded-size="handleMaxSize"
                     :before-upload="handleBeforeUpload"
                     multiple
-                    type="drag"
+                    type="select"
                     action="http://127.0.0.1:5000/api/v1/up_file"
                     :data = type_photo
-                    style="display: inline-block;width:96px;">
-                    <div style="width: 96px;height:96px;line-height: 100px;">
-                        <Icon type="ios-camera" size="30"></Icon>
-                    </div>
+                    style="display: inline-block">
+<!--                    <div style="width: 96px;height:96px;line-height: 100px;">-->
+<!--                        <Icon type="ios-camera" size="30"></Icon>-->
+<!--                    </div>-->
+                    <Button :disabled="uploadVideoList.length>=5" v-show="!readonly" icon="ios-image" style="width: 100px">图片上传</Button>
                 </Upload>
-                <Modal title="预览图片" v-model="visible">
+                <Modal title="预览图片" draggable v-model="visible">
                     <img :src="imgUrl" v-if="visible" style="width: 100%">
                 </Modal>
                 <Divider/>
@@ -365,7 +368,7 @@
                     //     'url': 'http://127.0.0.1:5000/static/photo/Test123.png'
                     // },
                     {
-                        'name': 'file3',
+                        'name': 'file3.jpg',
                         'url': 'https://o5wwk8baw.qnssl.com/7eb99afb9d5f317c912f08b5212fd69a/avatar'
                     }
                 ],
@@ -446,14 +449,19 @@
                 this.imgUrl = name;
                 this.visible = true;
             },
+            photoView(file){
+                console.log(file)
+                this.imgUrl = file.url;
+                this.visible = true;
+            },
             handleRemove (file) {
                 const fileList = this.$refs.uploadPhoto.fileList;
                 this.$http.get(this.$baseURL + '/api/v1/delete_file',{params:{'type':'photo','file_name':file.name,'project_code':this.project_id}})
                     .then(function (res) {
                         console.log(res.body)
                         if(res.body.state == 'fail'){
-                            this.$Message.error('删除失败 '+ res.body.content)
-                            this.$refs.uploadDoc.fileList.push(file)
+                            this.$Message.error('删除失败 '+ res.body.reason)
+                            this.$refs.uploadPhoto.fileList.push(file)
                         }
                         else{
                             console.log('Success')
@@ -469,8 +477,10 @@
                     this.$refs.uploadPhoto.fileList.splice(fileList.indexOf(file), 1);
                 }
                 else{
-                    // this.$Message.success('成功上传')
+                    this.$Message.success('成功上传')
                     file.url = res.file_path;
+                    // this.refresh_list()
+                    console.log(this.uploadPhotoList)
                 }
             },
             handleFormatError (file) {
@@ -510,7 +520,7 @@
                     .then(function (res) {
                         console.log(res.body)
                         if(res.body.state == 'fail'){
-                            this.$Message.error('删除失败 '+ res.body.content)
+                            this.$Message.error('删除失败 '+ res.body.reason)
                             this.$refs.uploadVideo.fileList.push(file)
                         }
                         else{
@@ -556,7 +566,7 @@
                     .then(function (res) {
                         console.log(res.body)
                         if(res.body.state == 'fail'){
-                            this.$Message.error('删除失败 '+ res.body.content)
+                            this.$Message.error('删除失败 '+ res.body.reason)
                             this.$refs.uploadDoc.fileList.push(file)
                         }
                         else{
@@ -591,15 +601,16 @@
                     .then(function (res) {
                         var detail = res.body;
                         console.log(res.body);
-                        if(detail.state == '' && detail.reason == '项目不存在'){
+                        if(detail.state == 'fail' && detail.reason == '项目不存在'){
                             console.log()
                         }
                         else{
                             var form = detail.project.registration_form;
                             console.log(form)
+                            // console.log(this.defaultPhotoList)
+                            console.log(this.defaultDocList)
                             this.fileList = detail.project.project_files;
                             for(let item of this.fileList){
-                                console.log(item);
                                 switch(item.file_type){
                                     case 'doc':
                                         this.defaultDocList.push({
@@ -608,11 +619,15 @@
                                         });
                                         break;
                                     case 'photo':
-                                        console.log("FFFF")
+                                        // console.log('front')
+                                        // console.log(this.defaultPhotoList)
                                         this.defaultPhotoList.push({
                                             'name' : item.file_name,
                                             'url' : item.file_path,
                                         });
+                                        // console.log('back')
+                                        // console.log(this.defaultPhotoList)
+                                        // console.log(this.uploadPhotoList)
                                         break;
                                     case 'video':
                                         this.defaultVideoList.push({
@@ -622,9 +637,6 @@
                                         break;
                                 }
                             }
-                            // console.log(this.defaultDocList)
-                            // console.log(this.defaultPhotoList)
-                            // console.log(this.defaultVideoList)
 
                             this.project_id = form.workCode;
                             // console.log(form.workCode)
@@ -666,12 +678,14 @@
                     },function (res) {
                         console.log('Failed')
                     })
-            }
+            },
         },
         mounted () {
             this.uploadDocList = this.$refs.uploadDoc.fileList;
             this.uploadPhotoList = this.$refs.uploadPhoto.fileList;
             this.uploadVideoList = this.$refs.uploadVideo.fileList;
+            // this.uploadPhotoList = this.defaultPhotoList;
+            // console.log(this.uploadPhotoList)
             //设置Message默认属性
             this.$Message.config({
                 top: 100,
@@ -679,6 +693,7 @@
             });
         },
         created () {
+            // console.log(this.defaultPhotoList)
             this.get_project_detail('0001')
         },
     }
