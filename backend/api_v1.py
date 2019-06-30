@@ -538,7 +538,8 @@ class expert_set_password(Resource):
             data = request.get_json()
             mail = data.get('mail')
             password = data.get('password')
-            res = db.cexpert_set_password(mail, password)
+            print(mail, password)
+            res = db.expert_set_password(mail, password)
         except:
             pass
         finally:

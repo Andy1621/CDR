@@ -39,7 +39,9 @@
                         width="460"
                         :mask-closable="false"
                         @on-ok="okPro">
-                        <LInput v-model="professorEmail" labelContent="邮箱："></LInput>
+                        <LInput v-model="professorEmailRegister" labelContent="邮箱：" :disabled=true></LInput>
+                        <LInput v-model="professorPasswordRegister" labelContent="密码：" type="password"></LInput>
+                        <LInput v-model="professorPasswordConfirm" labelContent="确认密码：" type="password"></LInput>
                     </Modal>
                 </div>
             </div>
@@ -60,6 +62,9 @@
                 register: false,
                 professorRegister: false,
                 professorEmail: '',
+                professorEmailRegister: '',
+                professorPasswordRegister: '',
+                professorPasswordConfirm: '',
                 email:'',
                 emailRegister:'',
                 isProfessor: false,
@@ -77,6 +82,7 @@
         created(){
             let temp = this.$cookie.get('mail');
             let route = this.$route.query;
+            let messageContent = ["成功接收评审", "您已经接收该作品的评审", "您已经拒绝该作品的评审", "您已经评审过该作品"];
             if(route.token)
             {
                 let url = "http://127.0.0.1:5000/api/v1/check_code";
@@ -87,10 +93,18 @@
                     is_accept: route.is_accept == 'true'? true : false
                 }).then(function (res) {
                     console.log(res);
-                    if (res.body)
-                    {
-
+                    if (!res.body.registered) {
+                        this.professorRegister = true;
+                        this.professorEmailRegister = route.email
+                        messageContent[0]+='，请注册后评审'
+                        messageContent[1]+='，请注册后评审'
                     }
+                    else {
+                        this.email=route.email
+                        messageContent[0]+='，请登录后评审'
+                        messageContent[1]+='，请登录后评审'
+                    }
+                    alert(messageContent[res.body.old_status+1])
                 },function (res) {
                     console.log(res);
                 });
@@ -157,12 +171,20 @@
                 })
             },
             okPro(){
-                let url = '';
-                /*this.$http.post(url, {email: this.professorEmail}, {emulateJSON: true}).then(function (res) {
+                let url = 'http://127.0.0.1:5000/api/v1/expert_set_password';
+                let data = {
+                    mail: this.professorEmailRegister,
+                    password: this.professorPasswordRegister
+                }
+                if (this.professorPasswordRegister !== this.professorPasswordConfirm) {
+                    alert("两次输入的密码不相同！");
+                    return;
+                }
+                this.$http.post(url,data).then(function (res) {
                     console.log(res)
                 },function (res) {
                     console.log(res)
-                })*/
+                })
             },
         }
     }

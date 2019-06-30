@@ -396,6 +396,7 @@ class DbOperate:
         try:
             user = self.getCol('user')
             expert = user.find_one({'user_type': 'expert', 'mail': mail})
+            print(expert)
             if expert is None:
                 res['reason'] = "未找到专家"
                 return res
