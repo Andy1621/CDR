@@ -30,3 +30,7 @@ new Vue({
   components: { App },
   template: '<App/>'
 });
+Vue.prototype.$Notice.config({
+  top: 90,
+  duration: 3
+});

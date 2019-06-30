@@ -16,6 +16,7 @@
         <p class="size"><b>评审意见：</b>{{suggestion}}</p>
       </Modal>
     </div>
+    <router-view v-if="isRouterAlive"></router-view>
   </div>
 </template>
 
@@ -26,6 +27,7 @@
     components:{
       NavBar
     },
+    inject: ['reload'],
     data(){
       return{
         columns1: [
@@ -49,7 +51,7 @@
             width: 100,
             align: 'center',
             render: (h, params) => {
-              return h('div', params.row.status==2 ? [
+              return h('div', params.row.status=="已评审" ? [
                 h('Button', {
                   props: {
                     type: 'primary',
@@ -66,7 +68,7 @@
                       this.suggestion = this.rows1[params.index].suggestion;
                     }
                   }
-                }, params.row.status==2 ? '查看详情' : '')
+                }, params.row.status=="已评审" ? '查看详情' : '')
               ] : '不可操作')
             }
           }
@@ -91,22 +93,26 @@
                 h('Button', {
                   props: {
                     type: 'primary',
-                    size: 'small'
+                    size: 'small',
+                    disabled: this.button_able
                   },
                   style: {
                     marginRight:'5px'
                   },
                   on: {
                     click: () => {
+                      this.button_able = true;
                       let domin_url = 'http://127.0.0.1:5000';
                       let param = {mail:this.rows2[params.index].mail, project_code:this.proj_id};
                       this.$http.post(domin_url + "/api/v1/invite_mail",param).then(function (res) {
-                        var detail = (res.body.state);
+                        var detail = res.body.state;
                         if(detail == "fail"){
-                          this.$Message.info("出现异常")
+                          this.$Notice.open({title: "发送失败"});
+                          this.reload();
                         }
                         else{
-                          this.$Message.info("已发送邮件")
+                          this.$Notice.open({title: "已发送邮件"});
+                          this.reload();
                         }
                       }, function (res) {
                         alert(res);
@@ -123,7 +129,9 @@
         detail: false,
         proj_id: '0001',
         score: 1,
-        suggestion: ""
+        suggestion: "",
+        isRouterAlive: true,
+        button_able: false
       }
     },
     created(){
@@ -140,9 +148,25 @@
           }
         }).then(function (res) {
           if(res.body.state=="fail"){
-            this.$Message.info("获取数据失败")
+            this.$Notice.open({title: "获取数据失败"});
           }
           else{
+            for (let item of res.body.list_invited) {
+              switch (item.status) {
+                case -1:
+                  item.status = "待回应";
+                  break;
+                case 0:
+                  item.status = "已接受";
+                  break;
+                case 1:
+                  item.status = "已拒绝";
+                  break;
+                case 2:
+                  item.status = "已评审";
+                  break;
+              }
+            }
             this.rows1 = res.body.list_invited;
             this.rows2 = res.body.list_uninvited;
           }

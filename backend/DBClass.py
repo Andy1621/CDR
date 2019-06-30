@@ -411,19 +411,34 @@ class DbOperate:
         return res
 
     '''
+    判断某专家是否已被邀请参评某作品
+    '''
+    def is_expInvitedProj(self, mail, proj_id):
+        try:
+            test = self.getCol("expert_project").find_one({'expert_mail': mail, 'project_code': proj_id})
+            # 专家已被邀请过参评该作品
+            if test:
+                return True
+            # 专家未被邀请过参评该作品
+            else:
+                return False
+        except:
+            return False
+
+    '''
     校团委发送邮件
     '''
     def send_mail(self, mail, header, message):
         try:
             msg = MIMEText(message, 'html', 'utf-8')
             msg['Subject'] = Header(header, 'utf-8')
-            msg['From'] = u'校团委 <team_997ywwg@163.com>'
-            msg['To'] = u'<' + mail + u'>'
+            msg['From'] = '校团委 <team_997ywwg@163.com>'
+            msg['To'] = '<' + mail + u'>'
             # 输入Email地址和口令:
-            from_addr = u'team_997ywwg@163.com'
-            password = u'nxdmdyzxcxk233'
+            from_addr = 'team_997ywwg@163.com'
+            password = 'nxdmdyzxcxk233'
             # 输入SMTP服务器地址:
-            smtp_server = u'smtp.163.com'
+            smtp_server = 'smtp.163.com'
             # 输入收件人地址:
             to_addr = mail
             server = smtplib.SMTP(smtp_server)
@@ -497,7 +512,7 @@ class DbOperate:
                 res['reason'] = "邮件发送失败"
                 return res
             res['state'] = 'success'
-
+            print("okokoooooooooooooooo")
         except:
             return res
         return res

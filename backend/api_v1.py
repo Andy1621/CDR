@@ -535,9 +535,12 @@ class invite_mail(Resource):
             expert_name = ""
             project_name = ""
             project_code = data.get('project_code')
-            res = db.invite_mail(mail, expert_name, project_name, project_code)
-            if res['state'] == 'success':
-                res = db.add_proj_exp(mail, project_code)
+            if not db.is_expInvitedProj(mail, project_code):
+                res = db.invite_mail(mail, expert_name, project_name, project_code)
+                if res['state'] == 'success':
+                    res = db.add_proj_exp(mail, project_code)
+            else:
+                return jsonify(res)
         except:
             pass
         finally:
