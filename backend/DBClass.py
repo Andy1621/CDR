@@ -432,6 +432,48 @@ class DbOperate:
         finally:
             return res
 
+    '''
+    获取专家评审项目信息
+    '''
+
+    def expert_review_list(self, email):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
+            print('b')
+            find_project = self.getCol(
+                'expert_project').find({'expert_mail': email,'status': '已接受'})
+            print(email)
+            # 搜索到专家对应的列表
+            if find_project:
+                print('a')
+                project_lists = []
+                project_list = {}
+                for fp in find_project:
+                    proj_id = fp['project_code']
+                    proj = self.getCol('project').find_one({'project_code': proj_id},{'project_name':1, 'competition_id':1})
+                    proj_name = proj['project_name']
+                    comp = self.getCol('competition').find_one({'_id': ObjectId(proj['competition_id'])}, {'project_name': 1, 'expert_comments_ddl': 1})
+                    comp_name = comp['project_name']
+                    exp_com_ddl = comp['expert_comments_ddl']
+                    project_list = {
+                        'project_id': proj_id,
+                        'project_name': proj_name,
+                        'competition_name': comp_name,
+                        'expert_comments_ddl': exp_com_ddl
+                    }
+                    project_lists.append(project_list)
+                res['state'] = 'Success'
+                res['reason'] = 'None'
+                res['project_lists'] = project_lists
+            # 专家不存在
+            else:
+                res['state'] = 'Success'
+                res['reason'] = '专家没有评审的项目'
+        except:
+            pass
+        finally:
+            return res
+
 
     '''
     查询竞赛所有作品信息

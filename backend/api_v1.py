@@ -123,6 +123,21 @@ class DownloadFiles(Resource):
         finally:
             return jsonify(res)
 
+# 获取专家评审项目信息
+class GetExpertReviewList(Resource):
+    def post(self):
+        res = {"state":"fail"}
+        try:
+            data = request.get_json()
+            expert_email = data.get('email')
+            db_res = db.expert_review_list(expert_email)
+            res['project_lists'] = db_res['project_lists']
+            res['state'] = 'Success'
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
 
 
 '''
@@ -346,7 +361,7 @@ class RegisterExpert(Resource):
 """
 校团委查看竞赛的所有作品信息
 """
-class stageProList(Resource):
+class StageProList(Resource):
     def post(self):
         res = {"state": "fail"}
         try:
@@ -426,9 +441,10 @@ api.add_resource(GetTableInfo, "/api/vi/get_table_info", endpoint="getTableInfo"
 api.add_resource(Login, '/api/v1/login', endpoint='login')
 api.add_resource(RegisterExpert, '/api/v1/registerexpert', endpoint='registerexpert')
 api.add_resource(RegisterStudent, '/api/v1/registerstudent', endpoint='registerstudent')
-api.add_resource(stageProList, '/api/v1/stageprolist', endpoint='stageprolist')
+api.add_resource(StageProList, '/api/v1/stageprolist', endpoint='stageprolist')
 api.add_resource(GetExpertInviteList, '/api/v1/getExpertInviteList', endpoint='getExpertInviteList')
 api.add_resource(DownloadFiles, '/api/v1/download_files', endpoint='downloadFiles')
+api.add_resource(GetExpertReviewList, '/api/v1/get_expert_review_list', endpoint='expertReviewList')
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", debug=True)
