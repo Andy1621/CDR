@@ -67,6 +67,7 @@ class DbOperate:
                                                         'competition_id': competition_id,
                                                         'status': 'editing'})
                 res['state'] = 'success'
+                res['reason'] = 'None'
                 project_code = str(result.inserted_id)
                 res['project_code'] = project_code
                 form = {'workCode': project_code}
@@ -136,6 +137,26 @@ class DbOperate:
                 html_url = Config.DOMAIN_NAME + "/static/export_html/" + filename
                 res['state'] = 'success'
                 res['html_url'] = html_url
+            else:
+                res['reason'] = "项目不存在"
+        except:
+            pass
+        finally:
+            return res
+
+    '''
+    删除项目报名
+    参数：
+        项目编号project_code
+    '''
+    def delete_apply(self,project_code):
+        res = {'state': 'fail', 'reason': "未知错误"}
+        try:
+            project = self.getCol('project').find_one({'project_code': project_code})
+            if project:
+                self.getCol('project').find_one_and_delete({'project_code': project_code})
+                res['state'] = 'success'
+                res['reason'] = 'None'
             else:
                 res['reason'] = "项目不存在"
         except:
