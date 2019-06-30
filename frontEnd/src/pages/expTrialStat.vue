@@ -127,6 +127,7 @@
       }
     },
     created(){
+      this.proj_id = this.$route.query.projectID;
       this.getTwoList();
     },
     methods:{
