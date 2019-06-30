@@ -89,7 +89,7 @@ class DeleteFile(Resource):
                 res['content'] = 'The file does not exists'
                 raise FError("Error")
             os.remove(file_path)
-            db_res = db.delete_attachment(project_code, file_type, file_path)
+            db_res = db.delete_attachment(project_code, file_path)
             if db_res.get('state') == 'fail':
                 res['reason'] = db_res.get('reason')
                 raise FError("Error")

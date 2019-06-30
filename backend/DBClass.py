@@ -263,7 +263,7 @@ class DbOperate:
     '''
     删除附件
     '''
-    def delete_attachment(self, project_code, file_type, file_path):
+    def delete_attachment(self, project_code, file_path):
         res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
         try:
             find_project = self.getCol('project').find_one({'project_code': project_code}, {'project_files' : 1})
