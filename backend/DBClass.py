@@ -796,7 +796,7 @@ class DbOperate:
                 res['reason'] = '查询成功'
                 for com in com_collection.find():
                     com['count'] = project_collection.find({'competition_id': str(com['_id'])}).count()
-                    com['id'] = str(com['_id'])
+                    com['competition_id'] = str(com['_id'])
                     com.pop('_id')
                     res['contests'].append(com)
         except:
