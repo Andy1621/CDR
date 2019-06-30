@@ -20,19 +20,23 @@
                 columns:[
                     {
                         title: '竞赛名称',
-                        key: 'competitionName'
+                        key: 'competition_name'
                     },
                     {
                         title: '开始时间',
-                        key: 'startTime'
+                        key: 'begin_time'
                     },
                     {
                         title: '结束时间',
-                        key: 'endTime'
+                        key: 'end_time'
                     },
                     {
-                        title: '参赛组数',
-                        key: 'groupNumber'
+                      title: '竞赛状态',
+                      key: 'com_status'
+                    },
+                    {
+                        title: '作品数量',
+                        key: 'count'
                     },
                     {
                         title: '操作',
@@ -50,29 +54,54 @@
                                     },
                                     on: {
                                         click: () => {
-                                            /*this.$router.push({
-                                                path: '/apply',
+                                            this.$router.push({
+                                                path: '/stageProList',
                                                 query: {
-                                                    projectID: params.row.projectID
+                                                    projectID: params.row.competition_id
                                                 }
-                                            })*/
+                                            })
                                         }
                                     }
-                                }, '查看参赛作品')
+                                }, '竞赛入口')
                             ])
                         }
                     }
                 ],
                 rows:[
-                    {
-                        competitionName: '冯如杯',
-                        startTime: '2019-06-29',
-                        endTime: '2018-07-10',
-                        groupNumber: 233
-                    }
+                    // {
+                    //     competitionName: '冯如杯',
+                    //     startTime: '2019-06-29',
+                    //     endTime: '2018-07-10',
+                    //     groupNumber: 233
+                    // }
                 ],
             }
+        },
+      created() {
+        this.getcomList()
+      },
+      methods:{
+        getcomList(){
+          let domin_url = 'http://127.0.0.1:5000';
+          let params = {};
+          this.$http.post(domin_url + "/api/v1/contestlist",params,{
+            headers:{
+              'Content-Type':"application/json",
+            }
+          }).then(function (res) {
+            var detail = res.body;
+            console.log("请求反回数据 ",detail);
+            if(detail.state =="fail"){
+              this.$Message.info("获取数据失败")
+            }
+            else{
+              this.rows = detail.contests
+            }
+          }, function (res) {
+            alert(res);
+          });
         }
+      }
     }
 </script>
 

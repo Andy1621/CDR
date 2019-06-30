@@ -26,7 +26,7 @@
       data(){
         return{
           current:3,
-          competition_id:'5d170bd90a21e6053e45f3eb',//'5d1862380a21e6053e46c958',
+          competition_id:'5d1862380a21e6053e46c958',//''5d170bd90a21e6053e45f3eb,
           t:["校团委初审","专家初评","进入答辩","最终结果"],
           A_list:[],
           B_list:[],
@@ -44,7 +44,7 @@
             },
             {
               title: '第一作者',
-              key: 'first-author'
+              key: 'author_name'
             },
             {
               title: '状态',
