@@ -3,13 +3,18 @@
     <NavBar></NavBar>
     <div class="body">
       <h3>第29届冯如杯</h3>
+      <Circle :size="250" :trail-width="4" :stroke-width="5" :percent="75" stroke-linecap="square" stroke-color="#43a3fb">
+        <div class="demo-Circle-custom">
+          <p>消费人群规模</p>
+        </div>
+      </Circle>
       <Steps :current="current" style="margin: 30px">
-        <Step title="校团委初审" status="finish"  @click.native="jump(0)"></Step>
-        <Step title="专家初评" status="finish"  @click.native="jump(1)"></Step>
-        <Step title="进入答辩" status="process"  @click.native="jump(2)"></Step>
-        <Step title="最终结果" status="wait" @click.native="jump(3)"></Step>
+        <Step title="校团委初审"  @click.native="jump(0)"></Step>
+        <Step title="专家初评"  @click.native="jump(1)"></Step>
+        <Step title="进入答辩"  @click.native="jump(2)"></Step>
+        <Step title="最终结果"  @click.native="jump(3)"></Step>
       </Steps>
-      <Table stripe border :columns="columns" :data="rows" ref="table" ></Table>
+      <Table stripe border :columns="columns" :data="rows" ref="table" style="margin-right: 9%"></Table>
     </div>
   </div>
 </template>
@@ -23,21 +28,23 @@
       },
       data(){
         return{
-          current:0,
-          competition_id:'1',
-          com_status:2,
+          current:3,
+          competition_id:'5d1862380a21e6053e46c958',
+          // status_1:'finish',
+          // status_2:'process',
+          // status_3:'wait',
           A_list:[],
           B_list:[],
           C_list:[],
           D_list:[],
           columns: [
-            {
-              title: '作品id',
-              key: 'project_code'
-            },
+            // {
+            //   title: '作品id',
+            //   key: 'project_code'
+            // },
             {
               title: '作品名称',
-              key: 'name'
+              key: 'project_name'
             },
             {
               title: '第一作者',
@@ -45,16 +52,43 @@
             },
             {
               title: '状态',
-              key: 'status'
+              key: 'project_status'
             },
+            {
+              title: '操作',
+              key: 'oper',
+              width: 200,
+              align: 'center',
+              render: (h, params) => {
+                return h('div', [
+                  h('Button', {
+                    props: {
+                      type: 'primary',
+                      size: 'small'
+                    },
+                    style: {
+                      marginRight:'5px'
+                    },
+                    on: {
+                      click: () => {
+                        this.$router.push({
+                          path: '/firstTrial',
+                          query: {
+                            projectID: params.row.project_code
+                          }
+                        })
+                      }
+                    }
+                  }, '查看'),
+                ])
+              }
+            }
           ],
           rows:[]
         }
       },
       created() {
         this.getProList();
-        this.current = this.com_status;
-        this.changeList();
       },
       methods:{
         getProList(){
@@ -72,10 +106,12 @@
             }
             else{
               this.com_status = detail.com_status-1;
-              this.A_list = detail.A_list;
-              this.B_list = detail.B_list;
-              this.C_list = detail.C_list;
-              this.D_list = detail.D_list;
+              this.current = this.com_status;
+              this.A_list = detail.A_List;
+              this.B_list = detail.B_List;
+              this.C_list = detail.C_List;
+              this.D_list = detail.D_List;
+              this.changeList()
             }
           }, function (res) {
             alert(res);
@@ -132,4 +168,5 @@
   step{
     cursor:pointer;
   }
+
 </style>

@@ -357,7 +357,27 @@ class DbOperate:
             return res
         except:
             return res
- 
+
+    '''
+    专家设置密码
+    '''
+    def expert_set_password(self, mail, password):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
+            user = self.getCol('user')
+            expert = user.find_one({'user_type': 'expert', 'mail': mail})
+            if expert is None:
+                res['reason'] = "未找到专家"
+                return res
+            if expert['password'] != "":
+                res['reason'] = "已设置密码"
+                return res
+            user.update_one({'user_type': 'expert', 'mail': mail}, {"$set": {'password': password}})
+            res['state'] = 'success'
+        except:
+            return res
+        return res
+
     '''
     校团委发送邮件
     '''
