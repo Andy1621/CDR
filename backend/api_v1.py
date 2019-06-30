@@ -524,7 +524,7 @@ class GetExpertInviteList(Resource):
             return jsonify(res)
 
 '''
-检查邮箱和邀请码
+邀请专家并插入关系
 '''
 class invite_mail(Resource):
     def post(self):
@@ -536,6 +536,8 @@ class invite_mail(Resource):
             project_name = ""
             project_code = data.get('project_code')
             res = db.invite_mail(mail, expert_name, project_name, project_code)
+            if res['state'] == 'success':
+                res = db.add_proj_exp(mail, project_code)
         except:
             pass
         finally:
