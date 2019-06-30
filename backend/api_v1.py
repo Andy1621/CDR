@@ -510,6 +510,40 @@ class GetExpertInviteList(Resource):
         finally:
             return jsonify(res)
 
+'''
+检查邮箱和邀请码
+'''
+class check_code(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            mail = data.get('mail')
+            invitation_code = data.get('invitation_code')
+            project_code = data.get('project_code')
+            is_accept = data.get('is_accept')
+            res = db.check_code(mail, invitation_code, project_code, is_accept)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+'''
+专家设置密码
+'''
+class expert_set_password(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            mail = data.get('mail')
+            password = data.get('password')
+            res = db.cexpert_set_password(mail, password)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
 ################################################################################################################
 
 # 添加api资源
@@ -534,6 +568,8 @@ api.add_resource(DownloadFiles, '/api/v1/download_files', endpoint='downloadFile
 api.add_resource(GetExpertReviewList, '/api/v1/get_expert_review_list', endpoint='expertReviewList')
 api.add_resource(SubmitReview, '/api/v1/submit_review', endpoint='submitReview')
 api.add_resource(StoreReview, '/api/v1/store_review', endpoint='storeReview')
+api.add_resource(check_code, '/api/v1/check_code', endpoint='check_code')
+api.add_resource(expert_set_password, '/api/v1/expert_set_password', endpoint='expert_set_password')
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", debug=True)
