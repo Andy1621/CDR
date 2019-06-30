@@ -11,6 +11,7 @@ import competitionList from '@/pages/competitionList'
 import professorManagement from '@/pages/professorManagement'
 import projectReview from '@/pages/projectReview'
 import projectDetail from '@/pages/projectDetail'
+import stageProList from '@/pages/stageProList'
 Vue.use(Router);
 
 export default new Router({
@@ -70,6 +71,11 @@ export default new Router({
             path: '/projectDetail',
             name: 'projectDetail',
             component: projectDetail,
+        },
+        {
+          path: '/stageProList',
+          name: 'stageProList',
+          component: stageProList,
         },
   ]
 })

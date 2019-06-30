@@ -15,6 +15,8 @@ import Config
 from email.mime.text import MIMEText
 from email.header import Header
 import smtplib
+import random
+import os
 
 
 
@@ -36,6 +38,7 @@ class DbOperate:
         col = db[name]
         return col
 
+################################################################################################
     '''
     保存申报信息
     '''
@@ -45,11 +48,15 @@ class DbOperate:
             project_code = params['workCode']
             project = self.getCol('project').find_one({'project_code': project_code})
             if project:
+                if 'mainTitle' in params.keys():
+                    project['project_name'] = params['mainTitle']
                 project['registration_form'] = params
                 self.getCol('project').update_one({'project_code': project_code}, {'$set': project})
+                filename = project_code + ".html"
+                replace_apply_html(params, filename)
                 res['state'] = 'success'
             else:
-                res['reason'] = "申请编号不存在"
+                res['reason'] = "项目编号不存在"
         except:
             pass
         finally:
@@ -58,24 +65,49 @@ class DbOperate:
     '''
     新增项目报名
     '''
-    def add_project(self, competition_id, email):
+    def add_project(self, competition_id, email, name):
         res = {'state': 'fail', 'reason': "未知错误"}
         try:
             competition = self.getCol('competition').find_one({'_id': ObjectId(competition_id)})
             if competition:
-                result = self.getCol('project').insert_one({'email': email,
-                                                        'competition_id': competition_id,
-                                                        'status': 'editing'})
+                # 生成项目编码
+                project_list = self.getCol('project')
+                num = random.randint(0, 99999)
+                code = str(num)
+                pro = project_list.find_one({'project_code': code})
+                cnt = 0
+                while pro is not None:
+                    num = (num + 1) % 100000
+                    code = str(num)
+                    pro = project_list.find_one({'project_code': code})
+                    cnt += 1
+                    if cnt > 100000:
+                        res['reason'] = '项目数量超限'
+                        return res
+                code.zfill(5)
+                t_project = {
+                    'project_name': '',
+                    'author_email': email,
+                    'author_name': name,
+                    'project_code': code,
+                    'competition_id': competition_id,
+                    'project_status': -1,
+                    'registration_form': {'workCode': code, 'mainTitle': '',
+                                          'department': '', 'mainType': '',
+                                          'name': '', 'stuId': '', 'birthday': '',
+                                          'education': '', 'major': '',
+                                          'enterTime': '', 'totalTitle': '',
+                                          'address': '', 'phone': '', 'email': '',
+                                          'applier': list(), 'title': '',
+                                          'type': '', 'description': '',
+                                          'creation': '', 'keyword': ''},
+                    'project_files': list()
+                }
+                self.getCol('project').insert_one(t_project)
                 res['state'] = 'success'
-                project_code = str(result.inserted_id)
-                res['project_code'] = project_code
-                form = {'workCode': project_code}
-                project = self.getCol('project').find_one({'_id': ObjectId(project_code)})
-                project['project_code'] = project_code
-                project['registration_form'] = form
-                self.getCol('project').update_one({'_id': ObjectId(project_code)}, {'$set': project})
-                filename = project_code + ".html"
-                replace_apply_html(form, filename)
+                res['project_code'] = code
+                # filename = code + ".html"
+                # replace_apply_html(t_project['registration_form'], filename)
             else:
                 res['reason'] = "竞赛不存在"
         except:
@@ -93,29 +125,15 @@ class DbOperate:
             if project:
                 res['state'] = 'success'
                 project.pop('_id')
-                t_project = {
-                    'project_name': '',
-                    'project_code': '',
-                    'competition_id': '',
-                    'project_status': '',
-                    'registration_form': {'workCode': project_code, 'mainTitle': '',
-                                          'department': '', 'mainType': '',
-                                          'name': '', 'stuId': '', 'birthday': '',
-                                          'education': '', 'major': '',
-                                          'enterTime': '', 'totalTitle': '',
-                                          'address': '', 'phone': '', 'email': '',
-                                          'applier': list(), 'title': '',
-                                          'type': '', 'description': '',
-                                          'creation': '', 'keyword': ''},
-                    'project_files': list()
-                }
-                for key in project.keys():
-                    if key == 'registration_form':
-                        for c_key in project[key].keys():
-                            t_project['registration_form'][c_key] = project[key][c_key]
-                    else:
-                        t_project[key] = project[key]
-                res['project'] = t_project
+                temp_files = list()
+                project_files = project['project_files']
+                for file in project_files:
+                    temp = file['file_path'].split('/')
+                    temp_files.append({
+                        'file_name': temp[-1].split('_')[-1],
+                        'file_path': Config.DOMAIN_NAME + '/' + '/'.join(temp[-3:])})
+                project['project_files'] = temp_files
+                res['project'] = project
             else:
                 res['reason'] = "项目不存在"
         except:
@@ -143,6 +161,58 @@ class DbOperate:
         finally:
             return res
 
+
+    '''
+    删除项目报名
+    '''
+    def delete_project(self, project_code):
+        res = {'state': 'fail', 'reason': "未知错误"}
+        try:
+            project = self.getCol('project').find_one({'project_code': project_code})
+            if project:
+                files = self.getCol('project').find_one({'project_code': project_code},  {'project_files': 1})
+                project_files = files['project_files']
+                flag = True
+                basedir = os.path.abspath(os.path.dirname(__file__))
+                for pf in project_files:
+                    file_path = basedir + "/static/" + pf['file_type'] + "/" + pf["file_path"]
+                    if not os.path.exists(file_path):
+                        res['reason'] = '附件不存在，请联系管理员'
+                        flag = False
+                        break
+                    os.remove(file_path)
+                if flag:
+                    html_path = basedir + "/static/export_html/" + project_code + '.html'
+                    os.remove(html_path)
+                    self.getCol('project').remove({'project_code': project_code})
+                    res['state'] = 'success'
+            else:
+                res['reason'] = "项目不存在"
+        except:
+            pass
+        finally:
+            return res
+
+
+    '''
+    提交项目报名
+    '''
+    def submit_project(self, project_code):
+        res = {'state': 'fail', 'reason': "未知错误"}
+        try:
+            project = self.getCol('project').find_one({'project_code': project_code})
+            if project:
+                project['project_status'] = 0
+                self.getCol('project').update_one({'project_code': project_code}, {'$set': project})
+                res['state'] = 'success'
+            else:
+                res['reason'] = "项目不存在"
+        except:
+            pass
+        finally:
+            return res
+
+        
 ##############################################################################################
     '''
     检查邮箱是否已注册
@@ -216,7 +286,7 @@ class DbOperate:
     用户登录
     '''
     def compare_password(self, password, mail, user_type):
-        res = {'username':'', 'state': 'fail', 'reason': '网络错误或其他问题!'}
+        res = {'username': '', 'state': 'fail', 'reason': '网络错误或其他问题!'}
         try:
             find_user = self.getCol('user').find_one({'mail': mail})
             # 搜索到唯一用户
@@ -265,6 +335,36 @@ class DbOperate:
             return False
         return True
  
+    '''
+    对于某个项目，返回邀请过和未邀请得专家列表
+    '''
+    def get_project_expert_list(self, project_code):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
+            expert_project = self.getCol('expert_project')
+            user = self.getCol('user')
+            list_invited = expert_project.find({'project_code': project_code}, {"_id": 0,
+                                                                                "expert_mail": 1,
+                                                                                "username": 1,
+                                                                                'status': 1,
+                                                                                'score': 1,
+                                                                                'suggestion': 1})
+            invited = []
+            res_invited = []
+            for item0 in list_invited:
+                res_invited.append(item0)
+                invited.append(item0['expert_mail'])
+            list_all = user.find({'user_type': 'expert'}, {"_id": 0, "mail": 1, "username": 1})
+            list_uninvited = []
+            for item1 in list_all:
+                if item1['mail'] not in invited:
+                    list_uninvited.append(item1)
+            res['list_invited'] = res_invited
+            res['list_uninvited'] = list_uninvited
+            res['state'] = 'success'
+        except:
+            return res
+        return res
 
 ##############################################################################################
     '''
@@ -273,10 +373,12 @@ class DbOperate:
     def insert_attachment(self, project_code, file_type, file_path):
         res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
         try:
-            find_project = self.getCol('project').find_one({'project_code': project_code}, {'project_files' : 1})
+            find_project = self.getCol('project').find_one({'project_code': project_code}, {'project_files': 1})
             # 搜索到唯一项目
             if find_project:
                 project_files = find_project.get('project_files')
+                if not project_files:
+                    project_files = []
                 project_file = {
                     'file_type': file_type,
                     'file_path': file_path
@@ -291,7 +393,7 @@ class DbOperate:
                     project_files.append(project_file)
                     self.getCol('project').update_one({'project_code': project_code},
                                                   {"$set": {"project_files": project_files}})
-                    res['state'] = 'Success'
+                    res['state'] = 'success'
                     res['reason'] = 'None'
             # 项目不存在
             else:
@@ -331,11 +433,143 @@ class DbOperate:
             pass
         finally:
             return res
+
+    '''
+    获取附件列表
+    '''
+    def require_attachments(self, project_code):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
+            find_project = self.getCol('project').find_one({'project_code': project_code}, {'project_files': 1})
+            # 搜索到唯一项目
+            if find_project:
+                project_files = find_project.get('project_files')
+                if len(project_files) > 0:
+                    res['project_files'] = project_files
+                    res['state'] = 'Success'
+                    res['reason'] = 'None'
+                else:
+                    res['state'] = '该项目无附件'
+            # 项目不存在
+            else:
+                res['reason'] = '项目不存在'
+        except:
+            pass
+        finally:
+            return res
+
+
+    '''
+    查询竞赛所有作品信息
+    '''
+    def num2status(self,num):
+        num_map = {
+            -1:'编辑中',
+            0:'已提交',
+            1:'通过初审，专家评审中',
+            2:'凉凉',
+            3:'进入现场答辩',
+            4:'优秀奖',
+            5:'三等奖',
+            6: '二等奖',
+            7: '一等奖',
+        }
+        return num_map[num]
+
+    '''
+    任意阶段看A或B，A或B的显示规则
+    '''
+    def rule_A(self, A_List):
+        for index, project in enumerate(A_List):
+            if project['project_status'] >= 1:
+                A_List[index]['project_status'] = 1
+            A_List[index]['project_status'] = self.num2status(A_List[index]['project_status'])
+            print(A_List[index])
+        return A_List
+
+    '''
+    C阶段看C，C的显示规则
+    '''
+    def rule_CC(self, C_List):
+        for index, project in enumerate(C_List):
+            if project['project_status'] >= 3:
+                C_List[index]['project_status'] = 3
+            C_List[index]['project_status'] = self.num2status(C_List[index]['project_status'])
+        return C_List
+
+    '''
+    D阶段看C，C的显示规则
+    '''
+    def rule_DC(self, C_List):
+        for index, project in enumerate(C_List):
+            if project['project_status'] >= 3:
+                C_List[index]['project_status'] = 3
+            elif project['project_status'] <= 2:
+                C_List[index]['project_status'] = 2
+            C_List[index]['project_status'] = self.num2status(C_List[index]['project_status'])
+        return C_List
+
+    '''
+    D阶段看D，D的显示规则
+    '''
+    def rule_D(self, D_List):
+        for index, project in enumerate(D_List):
+            D_List[index]['project_status'] = self.num2status(D_List[index]['project_status'])
+        return D_List
+
+    def get_contest_projects(self, competition_id):
+        res = {
+            'state': 'fail',
+            'reason': '网络出错或BUG出现！',
+            'A_List': [],
+            'B_List': [],
+            'C_List': [],
+            'D_List': [],
+            'com_status': '',
+        }
+        project_collection = self.getCol('project')
+        com_collection = self.getCol('competition')
+        try:
+            projects = []
+            for item in project_collection.find({'competition_id': competition_id}, {'_id':0}):
+                projects.append(item)
+            com_status = com_collection.find_one({'_id': ObjectId(competition_id)})['com_status']
+            res['com_status'] = com_status
+            print(com_status)
+            if len(projects)>0:
+                res['state'] = 'success'
+                res['reason'] = '成功获取竞赛作品列表'
+                # 当前状态是初审
+                if com_status == 1:
+                    res['A_List'] = self.rule_A(projects)
+                # 当前状态是初评
+                elif com_status == 2:
+                    res['A_List'] = self.rule_A(projects)
+                    res['B_List'] = self.rule_A(list(filter(lambda x:x['project_status'] >= 1 , projects)))
+                # 当前状态是筛选并现场答辩
+                elif com_status == 3:
+                    res['A_List'] = self.rule_A(projects)
+                    res['B_List'] = self.rule_A(list(filter(lambda x:x['project_status'] >= 1 , projects)))
+                    res['C_List'] = self.rule_CC(list(filter(lambda x:x['project_status'] >= 1 , projects)))
+                # 当前状态是录入并公布最终结果
+                elif com_status == 4:
+                    res['A_List'] = self.rule_A(projects)
+                    res['B_List'] = self.rule_A(list(filter(lambda x:x['project_status'] >= 1 , projects)))
+                    res['C_List'] = self.rule_DC(list(filter(lambda x:x['project_status'] >= 1 , projects)))
+                    res['D_List'] = self.rule_D(list(filter(lambda x: x['project_status'] >= 3, projects)))
+            elif len(projects) == 0:
+                res['reason'] = '竞赛作品列表为空'
+
+        except:
+            pass
+        finally:
+            return res
+
 ###############################################################################################
 
     '''
     初审改变作品状态
-    proj_id：项目id（字符串）   result：初审结果（字符串 'True' 'False'）
+    proj_id:项目id（字符串）   result:初审结果（字符串 'True' 'False'）
     '''
     def first_trial_change(self, proj_id, result):
         res = {'state': 'fail', 'reason': '网络出错或BUG出现！'}
@@ -345,9 +579,9 @@ class DbOperate:
             # 成功搜索到该项目
             if find_proj:
                 if result == 'True':
-                    now_stat = '通过初审'
+                    now_stat = 1
                 else:
-                    now_stat = '凉凉'
+                    now_stat = -1
                 proj_list.update_one({"project_code": proj_id},
                                      {"$set": {"project_status": now_stat}})
                 res['state'] = 'success'

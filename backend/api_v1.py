@@ -13,7 +13,7 @@ from flask_restful import Api, Resource
 from flask_cors import *
 from DBClass import DbOperate
 import Config
-from utils import encode
+from utils import encode, make_zip
 
 app = Flask(__name__)
 CORS(app, resources=r'/*')
@@ -59,14 +59,16 @@ class UpFile(Resource):
                 if ext[1:] not in ALLOWED_EXTENSIONS_DOC:
                     res['reason'] = 'File''s type is not allowed'
                     raise FError("Error")
-            file_path = path + file.filename
+            file_name = project_code + '_' + file.filename
+            file_path = path + file_name
             file.save(file_path)
             db_res = db.insert_attachment(project_code, file_type, file_path)
             if db_res.get('state') == 'fail':
                 res['reason'] = db_res.get('reason')
                 raise FError("Error")
             res['state'] = "success"
-            res['url'] = Config.DOMAIN_NAME + '/static/' + file_type + '/' + file.filename
+            res['url'] = Config.DOMAIN_NAME + '/static/' + file_type + '/' + file_name
+            res['file_name'] = file.filename
         except:
             pass
         finally:
@@ -78,13 +80,13 @@ class DeleteFile(Resource):
     def get(self):
         res = {"state": "fail"}
         try:
-            data = request.form
+            data = request.args
             file_type = data.get('type')  # video/ doc/ photo
             file_name = data.get('file_name')
             project_code = data.get('project_code')
             basedir = os.path.abspath(os.path.dirname(__file__))
             path = basedir + "/static/" + file_type + "/"
-            file_path = path + file_name
+            file_path = path + project_code + '_' + file_name
             if not os.path.exists(file_path):
                 res['content'] = 'The file does not exists'
                 raise FError("Error")
@@ -99,6 +101,29 @@ class DeleteFile(Resource):
         finally:
             return jsonify(res)
 
+
+# 打包下载附件
+class DownloadFiles(Resource):
+    def get(self):
+        res = {"state": "fail"}
+        try:
+            project_code = request.args.get('project_code')
+            basedir = os.path.abspath(os.path.dirname(__file__))
+            out_filename = basedir + '/static/zip/' + project_code + '.zip'
+            db_res = db.require_attachments(project_code)
+            if db_res['state'] == 'fail':
+                res['reason'] = db_res['reason']
+                raise FError
+            source_list = db_res['project_files']
+            make_zip(source_list,out_filename)
+            res['state'] = 'Success'
+            res['url'] = Config.DOMAIN_NAME + '/static/zip/' + project_code + '.zip'
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+################################################################################################
 
 '''
 保存项目报名
@@ -198,7 +223,8 @@ class AddProject(Resource):
             data = request.get_json()
             competition_id = data.get('competition_id')
             email = data.get('email')
-            res = db.add_project(competition_id, email)
+            name = data.get('name')
+            res = db.add_project(competition_id, email, name)
         except:
             pass
         finally:
@@ -239,19 +265,37 @@ class ViewApply(Resource):
         finally:
             return jsonify(res)
 
+
 '''
 删除项目报名
 参数：
     项目编号project_code
 '''
-
 class DeleteProject(Resource):
     def get(self):
         res = {"state": "fail"}
         try:
             data = request.args
             project_code = data.get('project_code')
-            res = db.view_apply(project_code)
+            res = db.delete_project(project_code)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+
+'''
+提交项目报名
+参数：
+    项目编号project_code
+'''
+class SubmitProject(Resource):
+    def get(self):
+        res = {"state": "fail"}
+        try:
+            data = request.args
+            project_code = data.get('project_code')
+            res = db.submit_project(project_code)
         except:
             pass
         finally:
@@ -326,8 +370,9 @@ class stageProList(Resource):
         res = {"state": "fail"}
         try:
             data = request.get_json()
-            contestid = data.get('contestid')
-            res = db.get_contest_projects(contestid)
+            competition_id = data.get('competition_id')
+            print(competition_id)
+            res = db.get_contest_projects(competition_id)
         except:
             pass
         finally:
@@ -369,6 +414,24 @@ class GetTableInfo(Resource):
 
 ################################################################################################################
 
+'''
+获取邀请/未邀请专家列表
+    proj_id：项目id（字符串）
+'''
+class GetExpertInviteList(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            proj_id = data.get('proj_id')
+            res = db.get_project_expert_list(proj_id)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+################################################################################################################
+
 # 添加api资源
 api = Api(app)
 api.add_resource(UpFile, "/api/v1/up_file", endpoint="upFile")
@@ -378,12 +441,15 @@ api.add_resource(GetProjectDetail, "/api/v1/get_project_detail", endpoint="getPr
 api.add_resource(DeleteProject, "/api/v1/delete_project", endpoint="deleteProject")
 api.add_resource(ViewApply, "/api/v1/view_apply", endpoint="viewApply")
 api.add_resource(DeleteFile, "/api/v1/delete_file", endpoint="deleteFile")
+api.add_resource(SubmitProject, "/api/v1/submit_project", endpoint="submitProject")
 api.add_resource(FirstTrialChange, "/api/vi/first_trial_change", endpoint="firstTrialChange")
 api.add_resource(GetTableInfo, "/api/vi/get_table_info", endpoint="getTableInfo")
 api.add_resource(Login, '/api/v1/login', endpoint='login')
 api.add_resource(RegisterExpert, '/api/v1/registerexpert', endpoint='registerexpert')
 api.add_resource(RegisterStudent, '/api/v1/registerstudent', endpoint='registerstudent')
 api.add_resource(stageProList, '/api/v1/stageprolist', endpoint='stageprolist')
+api.add_resource(GetExpertInviteList, '/api/v1/getExpertInviteList', endpoint='getExpertInviteList')
+api.add_resource(DownloadFiles, '/api/v1/download_files', endpoint='downloadFiles')
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", debug=True)
