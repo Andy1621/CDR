@@ -132,7 +132,7 @@ class DbOperate:
                     temp_files.append({
                         'file_name': temp[-1].split('_')[-1],
                         'file_path': Config.DOMAIN_NAME + '/' + '/'.join(temp[-3:]),
-                        'file_type': temp[-2]
+                        'file_type': file['file_type']
                         })
                 project['project_files'] = temp_files
                 res['project'] = project
