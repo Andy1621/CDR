@@ -13,7 +13,7 @@ from flask_restful import Api, Resource
 from flask_cors import *
 from DBClass import DbOperate
 import Config
-from utils import encode
+from utils import encode, make_zip
 
 app = Flask(__name__)
 CORS(app, resources=r'/*')
@@ -67,6 +67,7 @@ class UpFile(Resource):
                 raise FError("Error")
             res['state'] = "success"
             res['url'] = Config.DOMAIN_NAME + '/static/' + file_type + '/' + file.filename
+            res['file_name'] = file.filename
         except:
             pass
         finally:
@@ -78,7 +79,7 @@ class DeleteFile(Resource):
     def get(self):
         res = {"state": "fail"}
         try:
-            data = request.form
+            data = request.args
             file_type = data.get('type')  # video/ doc/ photo
             file_name = data.get('file_name')
             project_code = data.get('project_code')
@@ -98,6 +99,29 @@ class DeleteFile(Resource):
             pass
         finally:
             return jsonify(res)
+
+
+# 打包下载附件
+class DownloadFiles(Resource):
+    def get(self):
+        res = {"state": "fail"}
+        try:
+            project_code = request.args.get('project_code')
+            basedir = os.path.abspath(os.path.dirname(__file__))
+            out_filename = basedir + '/static/zip/' + project_code + '.zip'
+            db_res = db.require_attachments(project_code)
+            if db_res['state'] == 'fail':
+                res['reason'] = db_res['reason']
+                raise FError
+            source_list = db_res['project_files']
+            make_zip(source_list,out_filename)
+            res['state'] = 'Success'
+            res['url'] = Config.DOMAIN_NAME + '/static/zip/' + project_code + '.zip'
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
 
 
 '''

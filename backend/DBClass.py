@@ -331,6 +331,31 @@ class DbOperate:
             pass
         finally:
             return res
+
+
+    '''
+    获取附件列表
+    '''
+    def require_attachments(self, project_code):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
+            find_project = self.getCol('project').find_one({'project_code': project_code}, {'project_files': 1})
+            # 搜索到唯一项目
+            if find_project:
+                project_files = find_project.get('project_files')
+                if len(project_files) > 0:
+                    res['project_files'] = project_files
+                    res['state'] = 'Success'
+                    res['reason'] = 'None'
+                else:
+                    res['state'] = '该项目无附件'
+            # 项目不存在
+            else:
+                res['reason'] = '项目不存在'
+        except:
+            pass
+        finally:
+            return res
 ###############################################################################################
 
     '''
