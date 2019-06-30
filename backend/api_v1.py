@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 # encoding: utf-8
 '''
 @author: Kunchnag Li
@@ -513,6 +513,24 @@ class GetExpertInviteList(Resource):
 '''
 检查邮箱和邀请码
 '''
+class invite_mail(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            mail = data.get('mail')
+            expert_name = ""
+            project_name = ""
+            project_code = data.get('project_code')
+            res = db.invite_mail(mail, expert_name, project_name, project_code)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+'''
+检查邮箱和邀请码
+'''
 class check_code(Resource):
     def post(self):
         res = {"state": "fail"}
@@ -571,6 +589,8 @@ api.add_resource(SubmitReview, '/api/v1/submit_review', endpoint='submitReview')
 api.add_resource(StoreReview, '/api/v1/store_review', endpoint='storeReview')
 api.add_resource(check_code, '/api/v1/check_code', endpoint='check_code')
 api.add_resource(expert_set_password, '/api/v1/expert_set_password', endpoint='expert_set_password')
+api.add_resource(invite_mail, '/api/v1/invite_mail', endpoint='invite_mail')
+
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", debug=True)

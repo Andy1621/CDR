@@ -12,6 +12,7 @@ import professorManagement from '@/pages/professorManagement'
 import projectReview from '@/pages/projectReview'
 import projectDetail from '@/pages/projectDetail'
 import stageProList from '@/pages/stageProList'
+import expTrialStat from '@/pages/expTrialStat'
 Vue.use(Router);
 
 export default new Router({
@@ -76,6 +77,11 @@ export default new Router({
           path: '/stageProList',
           name: 'stageProList',
           component: stageProList,
+        },
+        {
+          path: '/expTrialStat',
+          name: 'expTrialStat',
+          component: expTrialStat,
         },
   ]
 })

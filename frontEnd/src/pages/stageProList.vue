@@ -2,17 +2,14 @@
   <div>
     <NavBar></NavBar>
     <div class="body">
-      <h3>第29届冯如杯</h3>
-      <Circle :size="250" :trail-width="4" :stroke-width="5" :percent="75" stroke-linecap="square" stroke-color="#43a3fb">
-        <div class="demo-Circle-custom">
-          <p>消费人群规模</p>
-        </div>
-      </Circle>
+      <h3>
+        第29届冯如杯
+      </h3>
       <Steps :current="current" style="margin: 30px">
-        <Step title="校团委初审"  @click.native="jump(0)"></Step>
-        <Step title="专家初评"  @click.native="jump(1)"></Step>
-        <Step title="进入答辩"  @click.native="jump(2)"></Step>
-        <Step title="最终结果"  @click.native="jump(3)"></Step>
+        <Step :title=t[0]  @click.native="jump(0)"></Step>
+        <Step :title=t[1]  @click.native="jump(1)"></Step>
+        <Step :title=t[2]  @click.native="jump(2)"></Step>
+        <Step :title=t[3]  @click.native="jump(3)"></Step>
       </Steps>
       <Table stripe border :columns="columns" :data="rows" ref="table" style="margin-right: 9%"></Table>
     </div>
@@ -29,10 +26,8 @@
       data(){
         return{
           current:3,
-          competition_id:'5d1862380a21e6053e46c958',
-          // status_1:'finish',
-          // status_2:'process',
-          // status_3:'wait',
+          competition_id:'5d170bd90a21e6053e45f3eb',//'5d1862380a21e6053e46c958',
+          t:["校团委初审","专家初评","进入答辩","最终结果"],
           A_list:[],
           B_list:[],
           C_list:[],
@@ -44,7 +39,8 @@
             // },
             {
               title: '作品名称',
-              key: 'project_name'
+              key: 'project_name',
+              width:320
             },
             {
               title: '第一作者',
@@ -105,7 +101,9 @@
               this.$Message.info("获取数据失败")
             }
             else{
+              this.percent = detail.com_status/4 * 100;
               this.com_status = detail.com_status-1;
+              this.t[this.com_status] = this.t[this.com_status] + "(正在进行)";
               this.current = this.com_status;
               this.A_list = detail.A_List;
               this.B_list = detail.B_List;
@@ -163,7 +161,7 @@
     border-left: 5px solid purple;
     padding: 0 0 0 15px!important;
     font-size: 28px!important;
-    margin: 24px 0!important;
+    margin: 20px 0!important;
   }
   step{
     cursor:pointer;

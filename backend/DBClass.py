@@ -7,6 +7,7 @@
 @time: 2019/6/28 14:45
 @desc:
 '''
+import copy
 
 from pymongo import MongoClient
 from utils import replace_apply_html
@@ -462,7 +463,9 @@ class DbOperate:
             accept_addr = "http://localhost:8080/#/?token=" + invitation_code + \
                           "&email=" + mail + \
                           "&project_code=" + project_code + "&is_accept=" + "true"
-            refuse_addr = "???"
+            refuse_addr = "http://localhost:8080/#/?token=" + invitation_code + \
+                          "&email=" + mail + \
+                          "&project_code=" + project_code + "&is_accept=" + "false"
             message = "如果您接受此邀请，请点击链接: " + accept_addr + " 进入竞赛系统。\n" + "如果您希望拒绝此邀请，请点击链接: " + refuse_addr + " 。\n"
             if self.send_mail(mail, header, message) is False:
                 res['reason'] = "邮件发送失败"
@@ -695,12 +698,12 @@ class DbOperate:
     任意阶段看A或B，A或B的显示规则
     '''
     def rule_A(self, A_List):
-        for index, project in enumerate(A_List):
+        temp = A_List.copy()
+        for index, project in enumerate(temp):
             if project['project_status'] >= 1:
-                A_List[index]['project_status'] = 1
-            A_List[index]['project_status'] = self.num2status(A_List[index]['project_status'])
-            print(A_List[index])
-        return A_List
+                temp[index]['project_status'] = 1
+            temp[index]['project_status'] = self.num2status(temp[index]['project_status'])
+        return temp
 
     '''
     C阶段看C，C的显示规则
@@ -750,31 +753,29 @@ class DbOperate:
                 projects.append(item)
             com_status = com_collection.find_one({'_id': ObjectId(competition_id)})['com_status']
             res['com_status'] = com_status
-            print(com_status)
             if len(projects) > 0:
                 res['state'] = 'success'
                 res['reason'] = '成功获取竞赛作品列表'
                 # 当前状态是初审
                 if com_status == 1:
-                    res['A_List'] = self.rule_A(projects)
+                    res['A_List'] = self.rule_A(copy.deepcopy(projects))
                 # 当前状态是初评
                 elif com_status == 2:
-                    res['A_List'] = self.rule_A(projects)
-                    res['B_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 1, projects)))
+                    res['A_List'] = self.rule_A(copy.deepcopy(projects))
+                    res['B_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
                 # 当前状态是筛选并现场答辩
                 elif com_status == 3:
-                    res['A_List'] = self.rule_A(projects)
-                    res['B_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 1, projects)))
-                    res['C_List'] = self.rule_CC(list(filter(lambda x: x['project_status'] >= 1, projects)))
+                    res['A_List'] = self.rule_A(copy.deepcopy(projects))
+                    res['B_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
+                    res['C_List'] = self.rule_CC(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
                 # 当前状态是录入并公布最终结果
                 elif com_status == 4:
-                    res['A_List'] = self.rule_A(projects)
-                    res['B_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 1, projects)))
-                    res['C_List'] = self.rule_DC(list(filter(lambda x: x['project_status'] >= 1, projects)))
-                    res['D_List'] = self.rule_D(list(filter(lambda x: x['project_status'] >= 3, projects)))
+                    res['A_List'] = self.rule_A(copy.deepcopy(projects))
+                    res['B_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
+                    res['C_List'] = self.rule_DC(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
+                    res['D_List'] = self.rule_D(list(filter(lambda x: x['project_status'] >= 3, copy.deepcopy(projects))))
             elif len(projects) == 0:
                 res['reason'] = '竞赛作品列表为空'
-
         except:
             pass
         finally:
