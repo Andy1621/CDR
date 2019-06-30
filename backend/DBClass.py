@@ -326,14 +326,16 @@ class DbOperate:
                                                                                 'score': 1,
                                                                                 'suggestion': 1})
             invited = []
+            res_invited = []
             for item0 in list_invited:
+                res_invited.append(item0)
                 invited.append(item0['expert_mail'])
             list_all = user.find({'user_type': 'expert'}, {"mail": 1, "username": 1, 'invitation_code': 1})
             list_uninvited = []
             for item1 in list_all:
                 if item1['mail'] not in invited:
                     list_uninvited.append(item1)
-            res['list_invited'] = list_invited
+            res['list_invited'] = res_invited
             res['list_uninvited'] = list_uninvited
             res['state'] = 'success'
         except:
