@@ -239,19 +239,19 @@ class ViewApply(Resource):
         finally:
             return jsonify(res)
 
+
 '''
 删除项目报名
 参数：
     项目编号project_code
 '''
-
 class DeleteProject(Resource):
     def get(self):
         res = {"state": "fail"}
         try:
             data = request.args
             project_code = data.get('project_code')
-            res = db.view_apply(project_code)
+            res = db.delete_project(project_code)
         except:
             pass
         finally:

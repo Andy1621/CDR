@@ -15,6 +15,8 @@ import Config
 from email.mime.text import MIMEText
 from email.header import Header
 import smtplib
+import random
+import os
 
 
 
@@ -45,11 +47,15 @@ class DbOperate:
             project_code = params['workCode']
             project = self.getCol('project').find_one({'project_code': project_code})
             if project:
+                if 'mainTitle' in params.keys():
+                    project['project_name'] = params['mainTitle']
                 project['registration_form'] = params
                 self.getCol('project').update_one({'project_code': project_code}, {'$set': project})
+                filename = project_code + ".html"
+                replace_apply_html(params, filename)
                 res['state'] = 'success'
             else:
-                res['reason'] = "申请编号不存在"
+                res['reason'] = "项目编号不存在"
         except:
             pass
         finally:
@@ -63,19 +69,43 @@ class DbOperate:
         try:
             competition = self.getCol('competition').find_one({'_id': ObjectId(competition_id)})
             if competition:
-                result = self.getCol('project').insert_one({'email': email,
-                                                        'competition_id': competition_id,
-                                                        'status': 'editing'})
+                # 生成项目编码
+                project_list = self.getCol('project')
+                num = random.randint(0, 99999)
+                code = str(num)
+                pro = project_list.find_one({'project_code': code})
+                cnt = 0
+                while pro is not None:
+                    num = (num + 1) % 100000
+                    code = str(num)
+                    pro = project_list.find_one({'project_code': code})
+                    cnt += 1
+                    if cnt > 100000:
+                        res['reason'] = '项目数量超限'
+                        return res
+                code.zfill(5)
+                t_project = {
+                    'project_name': '',
+                    'author_email': email,
+                    'project_code': code,
+                    'competition_id': competition_id,
+                    'project_status': 'editing',
+                    'registration_form': {'workCode': code, 'mainTitle': '',
+                                          'department': '', 'mainType': '',
+                                          'name': '', 'stuId': '', 'birthday': '',
+                                          'education': '', 'major': '',
+                                          'enterTime': '', 'totalTitle': '',
+                                          'address': '', 'phone': '', 'email': '',
+                                          'applier': list(), 'title': '',
+                                          'type': '', 'description': '',
+                                          'creation': '', 'keyword': ''},
+                    'project_files': list()
+                }
+                self.getCol('project').insert_one(t_project)
                 res['state'] = 'success'
-                project_code = str(result.inserted_id)
-                res['project_code'] = project_code
-                form = {'workCode': project_code}
-                project = self.getCol('project').find_one({'_id': ObjectId(project_code)})
-                project['project_code'] = project_code
-                project['registration_form'] = form
-                self.getCol('project').update_one({'_id': ObjectId(project_code)}, {'$set': project})
-                filename = project_code + ".html"
-                replace_apply_html(form, filename)
+                res['project_code'] = code
+                # filename = code + ".html"
+                # replace_apply_html(t_project['registration_form'], filename)
             else:
                 res['reason'] = "竞赛不存在"
         except:
@@ -93,29 +123,15 @@ class DbOperate:
             if project:
                 res['state'] = 'success'
                 project.pop('_id')
-                t_project = {
-                    'project_name': '',
-                    'project_code': '',
-                    'competition_id': '',
-                    'project_status': '',
-                    'registration_form': {'workCode': project_code, 'mainTitle': '',
-                                          'department': '', 'mainType': '',
-                                          'name': '', 'stuId': '', 'birthday': '',
-                                          'education': '', 'major': '',
-                                          'enterTime': '', 'totalTitle': '',
-                                          'address': '', 'phone': '', 'email': '',
-                                          'applier': list(), 'title': '',
-                                          'type': '', 'description': '',
-                                          'creation': '', 'keyword': ''},
-                    'project_files': list()
-                }
-                for key in project.keys():
-                    if key == 'registration_form':
-                        for c_key in project[key].keys():
-                            t_project['registration_form'][c_key] = project[key][c_key]
-                    else:
-                        t_project[key] = project[key]
-                res['project'] = t_project
+                temp_files = list()
+                project_files = project['project_files']
+                for file in project_files:
+                    temp = file['file_path'].split('/')
+                    temp_files.append({
+                        'file_name': temp[-1],
+                        'file_path': Config.DOMAIN_NAME + '/' + '/'.join(temp[-3:])})
+                project['project_files'] = temp_files
+                res['project'] = project
             else:
                 res['reason'] = "项目不存在"
         except:
@@ -143,6 +159,37 @@ class DbOperate:
         finally:
             return res
 
+
+    '''
+    删除项目报名
+    '''
+    def delete_project(self, project_code):
+        res = {'state': 'fail', 'reason': "未知错误"}
+        try:
+            project = self.getCol('project').find_one({'project_code': project_code})
+            if project:
+                files = self.getCol('project').find_one({'project_code': project_code},  {'project_files': 1})
+                project_files = files['project_files']
+                flag = True
+                basedir = os.path.abspath(os.path.dirname(__file__))
+                for pf in project_files:
+                    file_path = basedir + "/static/" + pf['file_type'] + "/" + pf["file_path"]
+                    if not os.path.exists(file_path):
+                        res['reason'] = '附件不存在，请联系管理员'
+                        flag = False
+                        break
+                    os.remove(file_path)
+                if flag:
+                    html_path = basedir + "/static/export_html/" + project_code + '.html'
+                    os.remove(html_path)
+                    self.getCol('project').remove({'project_code': project_code})
+                    res['state'] = 'success'
+            else:
+                res['reason'] = "项目不存在"
+        except:
+            pass
+        finally:
+            return res
 ##############################################################################################
     '''
     检查邮箱是否已注册
@@ -216,7 +263,7 @@ class DbOperate:
     用户登录
     '''
     def compare_password(self, password, mail, user_type):
-        res = {'username':'', 'state': 'fail', 'reason': '网络错误或其他问题!'}
+        res = {'username': '', 'state': 'fail', 'reason': '网络错误或其他问题!'}
         try:
             find_user = self.getCol('user').find_one({'mail': mail})
             # 搜索到唯一用户
@@ -273,7 +320,7 @@ class DbOperate:
     def insert_attachment(self, project_code, file_type, file_path):
         res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
         try:
-            find_project = self.getCol('project').find_one({'project_code': project_code}, {'project_files' : 1})
+            find_project = self.getCol('project').find_one({'project_code': project_code}, {'project_files': 1})
             # 搜索到唯一项目
             if find_project:
                 project_files = find_project.get('project_files')
@@ -291,7 +338,7 @@ class DbOperate:
                     project_files.append(project_file)
                     self.getCol('project').update_one({'project_code': project_code},
                                                   {"$set": {"project_files": project_files}})
-                    res['state'] = 'Success'
+                    res['state'] = 'success'
                     res['reason'] = 'None'
             # 项目不存在
             else:
