@@ -153,10 +153,9 @@
                 </Form>
             </div>
             <div class="form" v-show="current == 3">
-                <h4 style="margin-bottom: 20px">相关文档上传（仅限PDF）</h4>
+                <h4 style="margin-bottom: 20px">相关文档（仅限PDF）</h4>
                 <Upload
                     ref="uploadDoc"
-                    multiple
                     :show-upload-list="true"
                     :default-file-list="defaultDocList"
                     :on-success="handleSuccessDoc"
@@ -173,7 +172,7 @@
                     <Button v-show="!readonly" icon="ios-document" style="width: 100px">文档上传</Button>
                 </Upload>
                 <Divider/>
-                <h4 style="margin-bottom: 20px">作品图片上传（{{photo_cnt}}/5）</h4>
+                <h4 style="margin-bottom: 20px">作品图片（{{photo_cnt}}/5）</h4>
                 <div v-if="false" class="demo-upload-list" v-for="item in uploadPhotoList">
                     <template v-if="item.status === 'finished'">
                         <img :src="item.url">
@@ -187,7 +186,6 @@
                     </template>
                 </div>
                 <Upload
-                    v-show="!readonly"
                     ref="uploadPhoto"
                     :show-upload-list="true"
                     :default-file-list="defaultPhotoList"
@@ -212,7 +210,7 @@
                     <img :src="imgUrl" v-if="visible" style="width: 100%">
                 </Modal>
                 <Divider/>
-                <h4 style="margin-bottom: 20px">作品视频上传（仅限 mp4 flv）</h4>
+                <h4 style="margin-bottom: 20px">作品视频（仅限 mp4 flv）</h4>
                 <Upload
                     ref="uploadVideo"
                     :show-upload-list="true"
@@ -235,7 +233,7 @@
             <Button type="primary" :disabled="current == 0" @click="pre_step">上一步</Button>
             <Button type="primary" :disabled="current == 3" @click="next_step">下一步</Button>
             <Button type="primary" v-show="!readonly" @click="save_data" style="margin-left: 20px">保存到草稿箱</Button>
-            <Button type="success" v-show="current == 3 && !readonly">提交</Button>
+            <Button type="success" v-show="current == 3 && !readonly" @click="submit_project">提交</Button>
         </div>
     </div>
 </template>
@@ -253,6 +251,7 @@
                 readonly: false,
                 project_id: '',
                 photo_cnt: 0,
+                change_btn_click: false,
                 type_doc: {
                     'file_type' : 'doc',
                     'project_code' : '',
@@ -414,11 +413,12 @@
                         if (valid) {
                             // this.$Message.success('Success!');
                             this.current += 1;
+                            this.change_btn_click = true;
+                            this.save_data();
                         } else {
                             this.$Message.error('信息有误');
                         }
                     });
-                    this.save_data();
                 }
             },
             pre_step(){
@@ -427,12 +427,28 @@
                 }
                 else{
                     this.current -= 1;
+                    this.change_btn_click = true;
                     this.save_data();
                 }
             },
             check_table(){
                 // check table
-                this.$Message.info('Check Table')
+                // this.$Message.info('Check Table')
+                this.$http.get(this.$baseURL + '/api/v1/view_apply',{params:{'project_code': this.project_id}})
+                    .then(function (res) {
+                        var detail = res.body
+                        console.log(detail)
+                        if(detail.state == 'fail'){
+                            this.$Message.error(detail.reason)
+                        }
+                        else{
+                            // this.$Message.success('Yeeeees')
+                            // window.location.href = detail.html_url
+                            window.open(detail.html_url)
+                        }
+                    },function (res) {
+                        this.$Message.error('Failed')
+                    })
             },
             save_data(){
                 // save data function
@@ -466,10 +482,29 @@
                         var detail = res.body;
                         console.log(detail)
                         if(detail.state == 'fail'){
-                            this.$Message.error('保存失败')
+                            this.$Message.error('保存失败 ' + detail.reason)
                         }
                         else{
-                            this.$Message.success('保存成功')
+                            if(!this.change_btn_click)
+                                this.$Message.success('保存成功')
+                            this.change_btn_click = false;
+                        }
+                    },function (res) {
+                        this.$Message.error('Failed')
+                    })
+            },
+            submit_project(){
+                this.save_data()
+                this.$http.get(this.$baseURL + '/api/v1/submit_project',{params:{'project_code': this.project_id}})
+                    .then(function (res) {
+                        var detail = res.body
+                        console.log(detail)
+                        if(detail.state == 'fail'){
+                            this.$Message.error('提交失败')
+                        }
+                        else{
+                            this.$Message.success('提交成功')
+                            this.readonly = true
                         }
                     },function (res) {
                         this.$Message.error('Failed')
@@ -647,6 +682,7 @@
                             console.log()
                         }
                         else{
+                            this.readonly = detail.project.project_status !== -1;
                             var form = detail.project.registration_form;
                             console.log(form)
                             // console.log(this.defaultPhotoList)
@@ -805,5 +841,4 @@
     #sidebar-nav.sidebar{
         padding-top: 0px;
     }
-    /*upload end*/
 </style>
