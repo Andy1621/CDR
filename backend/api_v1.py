@@ -251,7 +251,7 @@ class DeleteProject(Resource):
         try:
             data = request.args
             project_code = data.get('project_code')
-            res = db.delete_apply(project_code)
+            res = db.view_apply(project_code)
         except:
             pass
         finally:
