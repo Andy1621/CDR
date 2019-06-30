@@ -87,9 +87,10 @@
         },
         methods:{
             getProjectReviewList(){
-                let url = 'https://www.easy-mock.com/mock/5c833375e0e0f75c246237e4/example/mock';
-                this.$http.get(url, {params:{professerID: 'aaa'}}).then(function (res) {
-                    this.rows=res.body.rowsProject;
+                let url = 'http://127.0.0.1:5000/api/v1/get_expert_review_list';
+                this.$http.post(url, {email: 'qwer'},{emulateJSON: true}).then(function (res) {
+                    console.log(res)
+                    //this.rows=res.body.project_lists;
                 },function (res) {
                     console.log(res)
                 })
