@@ -57,7 +57,8 @@
                                             this.$router.push({
                                                 path: '/stageProList',
                                                 query: {
-                                                    projectID: params.row.competition_id
+                                                    competitionID: params.row.competition_id,
+                                                    competitionTitle: params.row.competition_name
                                                 }
                                             })
                                         }
@@ -95,6 +96,25 @@
               this.$Message.info("获取数据失败")
             }
             else{
+              for (let item of detail.contests) {
+                switch (item.com_status) {
+                  case 0:
+                    item.com_status = "学生作品提交";
+                    break;
+                  case 1:
+                    item.com_status = "校团委初审";
+                    break;
+                  case 2:
+                    item.com_status = "专家初评";
+                    break;
+                  case 3:
+                    item.com_status = "筛选作品及现场答辩";
+                    break;
+                  case 4:
+                    item.com_status = "已结束";
+                    break;
+                }
+              }
               this.rows = detail.contests
             }
           }, function (res) {

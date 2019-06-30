@@ -3,7 +3,7 @@
     <NavBar></NavBar>
     <div class="body">
       <h3>
-        第29届冯如杯
+        {{competition_title}}
       </h3>
       <Steps :current="current" style="margin: 30px">
         <Step :title=t[0]  @click.native="jump(0)"></Step>
@@ -27,6 +27,7 @@
         return{
           current:3,
           competition_id:'5d1862380a21e6053e46c958',//''5d170bd90a21e6053e45f3eb,
+          competition_title: "第29届冯如杯",
           com_status:0,
           t:["校团委初审","专家初评","进入答辩","最终结果"],
           A_list:[],
@@ -95,7 +96,8 @@
         }
       },
       created() {
-        this.competition_id = this.$route.query.projectID
+        this.competition_id = this.$route.query.competitionID
+        this.competition_title = this.$route.query.competitionTitle
         this.getProList();
       },
       methods:{

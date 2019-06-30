@@ -247,7 +247,7 @@
         }
       },
       created() {
-        this.basicInfo.id = this.$route.query.project_code;
+        this.basicInfo.id = this.$route.query.projectID;
         console.log(this.basicInfo.id);
         this.getFormMess();
       },
