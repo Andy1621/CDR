@@ -131,7 +131,9 @@ class DbOperate:
                     temp = file['file_path'].split('/')
                     temp_files.append({
                         'file_name': temp[-1].split('_')[-1],
-                        'file_path': Config.DOMAIN_NAME + '/' + '/'.join(temp[-3:])})
+                        'file_path': Config.DOMAIN_NAME + '/' + '/'.join(temp[-3:]),
+                        'file_type': temp[-2]
+                        })
                 project['project_files'] = temp_files
                 res['project'] = project
             else:
@@ -499,13 +501,12 @@ class DbOperate:
     '''
     获取专家评审项目信息
     '''
-
     def expert_review_list(self, email):
         res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
         try:
             print('b')
             find_project = self.getCol(
-                'expert_project').find({'expert_mail': email,'status': '已接受'})
+                'expert_project').find({'expert_mail': email,'status': '0'})
             print(email)
             # 搜索到专家对应的列表
             if find_project:
