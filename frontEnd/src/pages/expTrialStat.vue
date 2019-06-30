@@ -99,14 +99,9 @@
                   on: {
                     click: () => {
                       let domin_url = 'http://127.0.0.1:5000';
-                      let params = {'mail':this.rows2[params.index].mail, 'project_code':this.proj_id};
-                      this.$http.post(domin_url + "/api/v1/invite_mail",params,{
-                        headers:{
-                          'Content-Type':"application/json",
-                        }
-                      }).then(function (res) {
+                      let param = {mail:this.rows2[params.index].mail, project_code:this.proj_id};
+                      this.$http.post(domin_url + "/api/v1/invite_mail",param).then(function (res) {
                         var detail = (res.body.state);
-                        console.log(detail);
                         if(detail == "fail"){
                           this.$Message.info("出现异常")
                         }
@@ -126,7 +121,7 @@
         rows1: [],
         rows2: [],
         detail: false,
-        proj_id: '1',
+        proj_id: '0001',
         score: 1,
         suggestion: ""
       }

@@ -415,13 +415,13 @@ class DbOperate:
         try:
             msg = MIMEText(message, 'plain', 'utf-8')
             msg['Subject'] = Header(header, 'utf-8')
-            msg['From'] = '校团委 <team_997ywwg@163.com>'
-            msg['To'] = '<' + mail + '>'
+            msg['From'] = u'校团委 <team_997ywwg@163.com>'
+            msg['To'] = u'<' + mail + u'>'
             # 输入Email地址和口令:
-            from_addr = 'team_997ywwg@163.com'
-            password = 'nxdmdyzxcxk233'
+            from_addr = u'team_997ywwg@163.com'
+            password = u'nxdmdyzxcxk233'
             # 输入SMTP服务器地址:
-            smtp_server = 'smtp.163.com'
+            smtp_server = u'smtp.163.com'
             # 输入收件人地址:
             to_addr = mail
             server = smtplib.SMTP(smtp_server)
@@ -452,7 +452,7 @@ class DbOperate:
                 return res
             comp_code = pro["competition_id"]
             competition = self.getCol('competition')
-            comp = competition.find_one({'competition_id': comp_code})
+            comp = competition.find_one({'_id': ObjectId(comp_code)})
             if comp is None:
                 res['reason'] = "未找到竞赛"
                 return res
