@@ -351,6 +351,8 @@ class DbOperate:
             # 搜索到唯一项目
             if find_project:
                 project_files = find_project.get('project_files')
+                if not project_files:
+                    project_files = []
                 project_file = {
                     'file_type': file_type,
                     'file_path': file_path
