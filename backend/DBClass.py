@@ -458,7 +458,9 @@ class DbOperate:
                 return res
             comp_name = comp["competition_name"]
             header = comp_name + "项目评审邀请"
-            accept_addr = "http://localhost:8080/#/?token=" + invitation_code + "&email=" + mail
+            accept_addr = "http://localhost:8080/#/?token=" + invitation_code + \
+                          "&email=" + mail + \
+                          "&project_code=" + project_code + "&is_accept=" + "true"
             refuse_addr = "???"
             message = "如果您接受此邀请，请点击链接: " + accept_addr + " 进入竞赛系统。\n" + "如果您希望拒绝此邀请，请点击链接: " + refuse_addr + " 。\n"
             if self.send_mail(mail, header, message) is False:
@@ -493,8 +495,8 @@ class DbOperate:
                 res['registered'] = False
             else:
                 res['registered'] = True
-            res['old_status'] = expert["password"]
-            if expert["password"] == -1:
+            res['old_status'] = status
+            if status == -1:
                 if is_accept:
                     new_status = 0
                 else:
