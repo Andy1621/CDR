@@ -393,6 +393,24 @@ class GetTableInfo(Resource):
 
 ################################################################################################################
 
+'''
+获取邀请/未邀请专家列表
+    proj_id：项目id（字符串）
+'''
+class GetExpertInviteList(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            proj_id = data.get('proj_id')
+            res = db.get_project_expert_list(proj_id)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+################################################################################################################
+
 # 添加api资源
 api = Api(app)
 api.add_resource(UpFile, "/api/v1/up_file", endpoint="upFile")
@@ -408,6 +426,7 @@ api.add_resource(Login, '/api/v1/login', endpoint='login')
 api.add_resource(RegisterExpert, '/api/v1/registerexpert', endpoint='registerexpert')
 api.add_resource(RegisterStudent, '/api/v1/registerstudent', endpoint='registerstudent')
 api.add_resource(stageProList, '/api/v1/stageprolist', endpoint='stageprolist')
+api.add_resource(GetExpertInviteList, '/api/v1/getExpertInviteList', endpoint='getExpertInviteList')
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", debug=True)

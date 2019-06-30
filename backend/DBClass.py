@@ -265,6 +265,33 @@ class DbOperate:
             return False
         return True
  
+    '''
+    对于某个项目，返回邀请过和未邀请得专家列表
+    '''
+    def get_project_expert_list(self, project_code):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
+            expert_project = self.getCol('expert_project')
+            user = self.getCol('user')
+            list_invited = expert_project.find({'project_code': project_code}, {"expert_mail": 1,
+                                                                                "username": 1,
+                                                                                'status': 1,
+                                                                                'score': 1,
+                                                                                'suggestion': 1})
+            invited = []
+            for item0 in list_invited:
+                invited.append(item0['expert_mail'])
+            list_all = user.find({'user_type': 'expert'}, {"mail": 1, "username": 1, 'invitation_code': 1})
+            list_uninvited = []
+            for item1 in list_all:
+                if item1['mail'] not in invited:
+                    list_uninvited.append(item1)
+            res['list_invited'] = list_invited
+            res['list_uninvited'] = list_uninvited
+            res['state'] = 'success'
+        except:
+            return res
+        return res
 
 ##############################################################################################
     '''
