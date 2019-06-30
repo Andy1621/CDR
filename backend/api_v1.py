@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 # encoding: utf-8
 '''
 @author: Kunchnag Li
@@ -129,7 +129,7 @@ class GetExpertReviewList(Resource):
     def post(self):
         res = {"state":"fail"}
         try:
-            data = request.get_json()
+            data = request.form
             expert_email = data.get('email')
             db_res = db.expert_review_list(expert_email)
             res['project_lists'] = db_res['project_lists']
@@ -318,6 +318,24 @@ class SubmitProject(Resource):
 
 
 '''
+获取项目列表
+参数：
+    学生邮箱author_email
+'''
+class GetProjectList(Resource):
+    def get(self):
+        res = {"state": "fail"}
+        try:
+            data = request.args
+            author_email = data.get('author_email')
+            res = db.get_project_list(author_email)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+
+'''
 保存评审意见
 参数：
     项目编号project_code
@@ -495,6 +513,24 @@ class GetExpertInviteList(Resource):
 '''
 检查邮箱和邀请码
 '''
+class invite_mail(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            mail = data.get('mail')
+            expert_name = ""
+            project_name = ""
+            project_code = data.get('project_code')
+            res = db.invite_mail(mail, expert_name, project_name, project_code)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+'''
+检查邮箱和邀请码
+'''
 class check_code(Resource):
     def post(self):
         res = {"state": "fail"}
@@ -538,6 +574,7 @@ api.add_resource(DeleteProject, "/api/v1/delete_project", endpoint="deleteProjec
 api.add_resource(ViewApply, "/api/v1/view_apply", endpoint="viewApply")
 api.add_resource(DeleteFile, "/api/v1/delete_file", endpoint="deleteFile")
 api.add_resource(SubmitProject, "/api/v1/submit_project", endpoint="submitProject")
+api.add_resource(GetProjectList, '/api/v1/get_project_list', endpoint='fetProjectList')
 api.add_resource(FirstTrialChange, "/api/vi/first_trial_change", endpoint="firstTrialChange")
 api.add_resource(GetTableInfo, "/api/vi/get_table_info", endpoint="getTableInfo")
 api.add_resource(Login, '/api/v1/login', endpoint='login')
@@ -551,6 +588,8 @@ api.add_resource(SubmitReview, '/api/v1/submit_review', endpoint='submitReview')
 api.add_resource(StoreReview, '/api/v1/store_review', endpoint='storeReview')
 api.add_resource(check_code, '/api/v1/check_code', endpoint='check_code')
 api.add_resource(expert_set_password, '/api/v1/expert_set_password', endpoint='expert_set_password')
+api.add_resource(invite_mail, '/api/v1/invite_mail', endpoint='invite_mail')
+
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", debug=True)
