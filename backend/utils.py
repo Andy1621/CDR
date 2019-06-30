@@ -65,22 +65,22 @@ def replace_apply_html(form, filename):
         data = f1.read()
         html = BeautifulSoup(data, 'lxml')
         for key in form.keys():
+            if len(form[key]) == 0:
+                continue
             if key == 'applier':
                 for i, applier in enumerate(form[key]):
                     for c_key in applier.keys():
                         temp_component = html.select('#' + c_key + str(i + 1))
                         temp_component[0].string = applier[c_key]
             elif key == 'type':
-                if form[key] in workType.keys():
-                    temp_component = html.select('#' + key)
-                    temp_component[0].string = workType[form[key]]
+                temp_component = html.select('#' + key)
+                temp_component[0].string = workType[form[key]]
             elif key == 'mainType':
                 temp_component = html.select('#' + form[key])
                 temp_component[0]['class'] = "glyphicon glyphicon-check"
             elif key == 'education':
-                if form[key] in educationType.keys():
-                    temp_component = html.select('#' + key)
-                    temp_component[0].string = educationType[form[key]]
+                temp_component = html.select('#' + key)
+                temp_component[0].string = educationType[form[key]]
             else:
                 temp_component = html.select('#' + key)
                 temp_component[0].string = form[key]
