@@ -330,7 +330,7 @@ class DbOperate:
             for item0 in list_invited:
                 res_invited.append(item0)
                 invited.append(item0['expert_mail'])
-            list_all = user.find({'user_type': 'expert'}, {"mail": 1, "username": 1, 'invitation_code': 1})
+            list_all = user.find({'user_type': 'expert'}, {"mail": 1, "username": 1})
             list_uninvited = []
             for item1 in list_all:
                 if item1['mail'] not in invited:
