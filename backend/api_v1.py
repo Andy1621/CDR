@@ -369,7 +369,21 @@ class GetTableInfo(Resource):
 
 ################################################################################################################
 
-
+'''
+获取邀请/未邀请专家列表
+    proj_id：项目id（字符串）
+'''
+class GetExpertInviteList(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            proj_id = data.get('proj_id')
+            res = db.get_project_expert_list(proj_id)
+        except:
+            pass
+        finally:
+            return jsonify(res)
 
 ################################################################################################################
 
