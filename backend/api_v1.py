@@ -326,8 +326,8 @@ class stageProList(Resource):
         res = {"state": "fail"}
         try:
             data = request.get_json()
-            contestid = data.get('contestid')
-            res = db.get_contest_projects(contestid)
+            competition_id = data.get('competition_id')
+            res = db.get_contest_projects(competition_id)
         except:
             pass
         finally:

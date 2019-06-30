@@ -331,11 +331,119 @@ class DbOperate:
             pass
         finally:
             return res
+
+    '''
+    查询竞赛所有作品信息
+    '''
+    def num2status(self,num):
+        num_map = {
+            -1:'编辑中',
+            0:'已提交',
+            1:'通过初审，专家评审中',
+            2:'凉凉',
+            3:'进入现场答辩',
+            4:'优秀奖',
+            5:'三等奖',
+            6: '二等奖',
+            7: '一等奖',
+        }
+        return num_map[num]
+
+    '''
+    任意阶段看A或B，A或B的显示规则
+    '''
+    def rule_A(self, A_List):
+        for index, project in enumerate(A_List):
+            if project['project_status'] >= 1:
+                A_List[index]['project_status'] = 1
+            A_List[index]['project_status'] = self.num2status(A_List[index]['project_status'])
+        return A_List
+
+    '''
+    C阶段看C，C的显示规则
+    '''
+    def rule_CC(self, C_List):
+        for index, project in enumerate(C_List):
+            if project['project_status'] >= 3:
+                C_List[index]['project_status'] = 3
+            C_List[index]['project_status'] = self.num2status(C_List[index]['project_status'])
+        return C_List
+
+    '''
+    D阶段看C，C的显示规则
+    '''
+    def rule_DC(self, C_List):
+        for index, project in enumerate(C_List):
+            if project['project_status'] >= 3:
+                C_List[index]['project_status'] = 3
+            elif project['project_status'] <= 2:
+                C_List[index]['project_status'] = 2
+            C_List[index]['project_status'] = self.num2status(C_List[index]['project_status'])
+        return C_List
+
+    '''
+    D阶段看D，D的显示规则
+    '''
+    def rule_D(self, D_List):
+        for index, project in enumerate(D_List):
+            D_List[index]['project_status'] = self.num2status(D_List[index]['project_status'])
+        return D_List
+
+    '''
+    过滤ABCD_List返回的字段，只返回
+    '''
+
+    def get_contest_projects(self, competition_id):
+        res = {
+            'state': 'fail',
+            'reason': '网络出错或BUG出现！',
+            'A_List': [],
+            'B_List': [],
+            'C_List': [],
+            'D_List': [],
+            'com_status': '',
+        }
+        project_collection = self.getCol('project')
+        com_collection = self.getCol('competition')
+        try:
+            projects = project_collection.find({'competition_id': competition_id})
+            com_status = com_collection.find_one({'_id': competition_id})['com_status']
+            res['com_status'] = com_status
+
+            if len(projects)>0:
+                res['state'] = 'success'
+                res['reason'] = '成功获取竞赛作品列表'
+                # 当前状态是初审
+                if com_status == 1:
+                    res['A_List'] = self.rule_A(projects)
+                # 当前状态是初评
+                elif com_status == 2:
+                    res['A_List'] = self.rule_A(projects)
+                    res['B_List'] = self.rule_A(list(filter(lambda x:x['project_status'] >= 1 , projects)))
+                # 当前状态是筛选并现场答辩
+                elif com_status == 3:
+                    res['A_List'] = self.rule_A(projects)
+                    res['B_List'] = self.rule_A(list(filter(lambda x:x['project_status'] >= 1 , projects)))
+                    res['C_List'] = self.rule_CC(list(filter(lambda x:x['project_status'] >= 1 , projects)))
+                # 当前状态是录入并公布最终结果
+                elif com_status == 4:
+                    res['A_List'] = self.rule_A(projects)
+                    res['B_List'] = self.rule_A(list(filter(lambda x:x['project_status'] >= 1 , projects)))
+                    res['C_List'] = self.rule_DC(list(filter(lambda x:x['project_status'] >= 1 , projects)))
+                    res['D_List'] = self.rule_D(list(filter(lambda x: x['project_status'] >= 3, projects)))
+            elif len(projects) == 0:
+                res ['reason'] = '竞赛作品列表为空'
+        except:
+            pass
+        finally:
+            return res
+
+
 ###############################################################################################
 
     '''
     初审改变作品状态
-    proj_id：项目id（字符串）   result：初审结果（字符串 'True' 'False'）
+    proj_id:项目id（字符串）   result:初审结果（字符串 'True' 'False'）
     '''
     def first_trial_change(self, proj_id, result):
         res = {'state': 'fail', 'reason': '网络出错或BUG出现！'}
