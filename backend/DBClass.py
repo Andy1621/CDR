@@ -312,6 +312,33 @@ class DbOperate:
             return False
         return True
  
+    '''
+    对于某个项目，返回邀请过和未邀请得专家列表
+    '''
+    def get_project_expert_list(self, project_code):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
+            expert_project = self.getCol('expert_project')
+            user = self.getCol('user')
+            list_invited = expert_project.find({'project_code': project_code}, {"expert_mail": 1,
+                                                                                "username": 1,
+                                                                                'status': 1,
+                                                                                'score': 1,
+                                                                                'suggestion': 1})
+            invited = []
+            for item0 in list_invited:
+                invited.append(item0['expert_mail'])
+            list_all = user.find({'user_type': 'expert'}, {"mail": 1, "username": 1, 'invitation_code': 1})
+            list_uninvited = []
+            for item1 in list_all:
+                if item1['mail'] not in invited:
+                    list_uninvited.append(item1)
+            res['list_invited'] = list_invited
+            res['list_uninvited'] = list_uninvited
+            res['state'] = 'success'
+        except:
+            return res
+        return res
 
 ##############################################################################################
     '''
@@ -378,6 +405,31 @@ class DbOperate:
             pass
         finally:
             return res
+
+
+    '''
+    获取附件列表
+    '''
+    def require_attachments(self, project_code):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
+            find_project = self.getCol('project').find_one({'project_code': project_code}, {'project_files': 1})
+            # 搜索到唯一项目
+            if find_project:
+                project_files = find_project.get('project_files')
+                if len(project_files) > 0:
+                    res['project_files'] = project_files
+                    res['state'] = 'Success'
+                    res['reason'] = 'None'
+                else:
+                    res['state'] = '该项目无附件'
+            # 项目不存在
+            else:
+                res['reason'] = '项目不存在'
+        except:
+            pass
+        finally:
+            return res
 ###############################################################################################
 
     '''
@@ -392,9 +444,9 @@ class DbOperate:
             # 成功搜索到该项目
             if find_proj:
                 if result == 'True':
-                    now_stat = '通过初审'
+                    now_stat = 1
                 else:
-                    now_stat = '凉凉'
+                    now_stat = -1
                 proj_list.update_one({"project_code": proj_id},
                                      {"$set": {"project_status": now_stat}})
                 res['state'] = 'success'
