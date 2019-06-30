@@ -461,6 +461,7 @@ class DbOperate:
             if project['project_status'] >= 1:
                 A_List[index]['project_status'] = 1
             A_List[index]['project_status'] = self.num2status(A_List[index]['project_status'])
+            print(A_List[index])
         return A_List
 
     '''
@@ -493,10 +494,6 @@ class DbOperate:
             D_List[index]['project_status'] = self.num2status(D_List[index]['project_status'])
         return D_List
 
-    '''
-    过滤ABCD_List返回的字段，只返回
-    '''
-
     def get_contest_projects(self, competition_id):
         res = {
             'state': 'fail',
@@ -510,9 +507,12 @@ class DbOperate:
         project_collection = self.getCol('project')
         com_collection = self.getCol('competition')
         try:
-            projects = project_collection.find({'competition_id': competition_id})
-            com_status = com_collection.find_one({'_id': competition_id})['com_status']
+            projects = []
+            for item in project_collection.find({'competition_id': competition_id}, {'_id':0}):
+                projects.append(item)
+            com_status = com_collection.find_one({'_id': ObjectId(competition_id)})['com_status']
             res['com_status'] = com_status
+            print(com_status)
             if len(projects)>0:
                 res['state'] = 'success'
                 res['reason'] = '成功获取竞赛作品列表'
@@ -535,7 +535,8 @@ class DbOperate:
                     res['C_List'] = self.rule_DC(list(filter(lambda x:x['project_status'] >= 1 , projects)))
                     res['D_List'] = self.rule_D(list(filter(lambda x: x['project_status'] >= 3, projects)))
             elif len(projects) == 0:
-                res ['reason'] = '竞赛作品列表为空'
+                res['reason'] = '竞赛作品列表为空'
+
         except:
             pass
         finally:
