@@ -205,17 +205,53 @@ class AddProject(Resource):
             return jsonify(res)
 
 '''
+获取项目信息
+参数：
+    项目编号project_code
+'''
+class GetProjectDetail(Resource):
+    def get(self):
+        res = {"state": "fail"}
+        try:
+            data = request.args
+            project_code = data.get('project_code')
+            res = db.get_project_detail(project_code)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+
+'''
 查看报名表
 参数：
-    项目编号project_id
+    项目编号project_code
 '''
 class ViewApply(Resource):
     def get(self):
         res = {"state": "fail"}
         try:
             data = request.args
-            project_id = data.get('project_id')
-            res = db.view_apply(project_id)
+            project_code = data.get('project_code')
+            res = db.view_apply(project_code)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+'''
+删除项目报名
+参数：
+    项目编号project_code
+'''
+
+class DeleteProject(Resource):
+    def get(self):
+        res = {"state": "fail"}
+        try:
+            data = request.args
+            project_code = data.get('project_code')
+            res = db.view_apply(project_code)
         except:
             pass
         finally:
@@ -323,6 +359,8 @@ api = Api(app)
 api.add_resource(UpFile, "/api/v1/up_file", endpoint="upFile")
 api.add_resource(StoreProject, "/api/v1/store_project", endpoint="storeProject")
 api.add_resource(AddProject, "/api/v1/add_project", endpoint="addProject")
+api.add_resource(GetProjectDetail, "/api/v1/get_project_detail", endpoint="getProjectDetail")
+api.add_resource(DeleteProject, "/api/v1/delete_project", endpoint="deleteProject")
 api.add_resource(ViewApply, "/api/v1/view_apply", endpoint="viewApply")
 api.add_resource(DeleteFile, "/api/v1/delete_file", endpoint="deleteFile")
 api.add_resource(FirstTrialChange, "/api/vi/first_trial_change", endpoint="firstTrialChange")

@@ -42,11 +42,11 @@ class DbOperate:
     def store_project(self, params):
         res = {'state': 'fail', 'reason': "信息字段出错"}
         try:
-            project_id = params['workCode']
-            project = self.getCol('project').find_one({'_id': ObjectId(project_id)})
+            project_code = params['workCode']
+            project = self.getCol('project').find_one({'project_code': project_code})
             if project:
-                project['form'] = params
-                self.getCol('project').update_one({'_id': ObjectId(project_id)}, {'$set': project})
+                project['registration_form'] = params
+                self.getCol('project').update_one({'project_code': project_code}, {'$set': project})
                 res['state'] = 'success'
             else:
                 res['reason'] = "申请编号不存在"
@@ -67,13 +67,14 @@ class DbOperate:
                                                         'competition_id': competition_id,
                                                         'status': 'editing'})
                 res['state'] = 'success'
-                project_id = str(result.inserted_id)
-                res['project_id'] = project_id
-                form = {'workCode': project_id}
-                project = self.getCol('project').find_one({'_id': ObjectId(project_id)})
-                project['form'] = form
-                self.getCol('project').update_one({'_id': ObjectId(project_id)}, {'$set': project})
-                filename = project_id + ".html"
+                project_code = str(result.inserted_id)
+                res['project_code'] = project_code
+                form = {'workCode': project_code}
+                project = self.getCol('project').find_one({'_id': ObjectId(project_code)})
+                project['project_code'] = project_code
+                project['registration_form'] = form
+                self.getCol('project').update_one({'_id': ObjectId(project_code)}, {'$set': project})
+                filename = project_code + ".html"
                 replace_apply_html(form, filename)
             else:
                 res['reason'] = "竞赛不存在"
@@ -83,15 +84,55 @@ class DbOperate:
             return res
 
     '''
-    查看申请表
+    获取项目信息
     '''
-    def view_apply(self, project_id):
+    def get_project_detail(self, project_code):
         res = {'state': 'fail', 'reason': "未知错误"}
         try:
-            form = self.getCol('project').find_one({'_id': ObjectId(project_id)})
-            if form:
-                filename = project_id + ".html"
-                replace_apply_html(form, filename)
+            project = self.getCol('project').find_one({'project_code': project_code})
+            if project:
+                res['state'] = 'success'
+                project.pop('_id')
+                t_project = {
+                    'project_name': '',
+                    'project_code': '',
+                    'competition_id': '',
+                    'project_status': '',
+                    'registration_form': {'workCode': project_code, 'mainTitle': '',
+                                          'department': '', 'mainType': '',
+                                          'name': '', 'stuId': '', 'birthday': '',
+                                          'education': '', 'major': '',
+                                          'enterTime': '', 'totalTitle': '',
+                                          'address': '', 'phone': '', 'email': '',
+                                          'applier': list(), 'title': '',
+                                          'type': '', 'description': '',
+                                          'creation': '', 'keyword': ''},
+                    'project_files': list()
+                }
+                for key in project.keys():
+                    if key == 'registration_form':
+                        for c_key in project[key].keys():
+                            t_project['registration_form'][c_key] = project[key][c_key]
+                    else:
+                        t_project[key] = project[key]
+                res['project'] = t_project
+            else:
+                res['reason'] = "项目不存在"
+        except:
+            pass
+        finally:
+            return res
+
+    '''
+    查看申请表
+    '''
+    def view_apply(self, project_code):
+        res = {'state': 'fail', 'reason': "未知错误"}
+        try:
+            project = self.getCol('project').find_one({'project_code': project_code})
+            if project:
+                filename = project_code + ".html"
+                replace_apply_html(project['registration_form'], filename)
                 html_url = Config.DOMAIN_NAME + "/static/export_html/" + filename
                 res['state'] = 'success'
                 res['html_url'] = html_url
@@ -266,7 +307,7 @@ class DbOperate:
     def delete_attachment(self, project_code, file_path):
         res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
         try:
-            find_project = self.getCol('project').find_one({'project_code': project_code}, {'project_files' : 1})
+            find_project = self.getCol('project').find_one({'project_code': project_code}, {'project_files': 1})
             # 搜索到唯一项目
             if find_project:
                 project_files = find_project.get('project_files')
