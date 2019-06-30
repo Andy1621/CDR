@@ -458,6 +458,19 @@ class StageProList(Resource):
         finally:
             return jsonify(res)
 
+"""
+校团委查看竞赛列表
+"""
+class ContestList(Resource):
+    def post(self):
+        res = {'state': 'fail'}
+        try:
+            res = db.get_contests()
+        except:
+            pass
+        finally:
+            return res
+
 ##############################################################################################################
 '''
 初审改变作品状态
@@ -555,8 +568,8 @@ class expert_set_password(Resource):
         try:
             data = request.get_json()
             mail = data.get('mail')
-            password = data.get('password')
-            res = db.cexpert_set_password(mail, password)
+            password = encode(data.get('password'))
+            res = db.expert_set_password(mail, password)
         except:
             pass
         finally:
@@ -589,7 +602,7 @@ api.add_resource(StoreReview, '/api/v1/store_review', endpoint='storeReview')
 api.add_resource(check_code, '/api/v1/check_code', endpoint='check_code')
 api.add_resource(expert_set_password, '/api/v1/expert_set_password', endpoint='expert_set_password')
 api.add_resource(invite_mail, '/api/v1/invite_mail', endpoint='invite_mail')
-
+api.add_resource(ContestList, '/api/v1/contestlist', endpoint='contestlist')
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", debug=True)
