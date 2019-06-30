@@ -418,6 +418,7 @@ class stageProList(Resource):
         try:
             data = request.get_json()
             competition_id = data.get('competition_id')
+            print(competition_id)
             res = db.get_contest_projects(competition_id)
         except:
             pass
