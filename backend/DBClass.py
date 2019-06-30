@@ -495,8 +495,8 @@ class DbOperate:
                 res['registered'] = False
             else:
                 res['registered'] = True
-            res['old_status'] = expert["password"]
-            if expert["password"] == -1:
+            res['old_status'] = status
+            if status == -1:
                 if is_accept:
                     new_status = 0
                 else:
