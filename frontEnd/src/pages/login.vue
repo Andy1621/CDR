@@ -93,6 +93,11 @@
                     is_accept: route.is_accept == 'true'? true : false
                 }).then(function (res) {
                     console.log(res);
+                    if (res.body.state == 'fail')
+                    {
+                        alert('抱歉，系统出现问题，请稍后再试！');
+                        return
+                    }
                     if (!res.body.registered) {
                         this.professorRegister = true;
                         this.professorEmailRegister = route.email
