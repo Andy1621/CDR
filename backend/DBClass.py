@@ -320,7 +320,8 @@ class DbOperate:
         try:
             expert_project = self.getCol('expert_project')
             user = self.getCol('user')
-            list_invited = expert_project.find({'project_code': project_code}, {"expert_mail": 1,
+            list_invited = expert_project.find({'project_code': project_code}, {"_id": 0,
+                                                                                "expert_mail": 1,
                                                                                 "username": 1,
                                                                                 'status': 1,
                                                                                 'score': 1,
@@ -330,7 +331,7 @@ class DbOperate:
             for item0 in list_invited:
                 res_invited.append(item0)
                 invited.append(item0['expert_mail'])
-            list_all = user.find({'user_type': 'expert'}, {"mail": 1, "username": 1})
+            list_all = user.find({'user_type': 'expert'}, {"_id": 0, "mail": 1, "username": 1})
             list_uninvited = []
             for item1 in list_all:
                 if item1['mail'] not in invited:
