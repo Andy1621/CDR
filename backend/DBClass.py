@@ -132,7 +132,7 @@ class DbOperate:
                     temp_files.append({
                         'file_name': temp[-1].split('_')[-1],
                         'file_path': Config.DOMAIN_NAME + '/' + '/'.join(temp[-3:]),
-                        'file_type': temp[-2]
+                        'file_type': file['file_type']
                         })
                 project['project_files'] = temp_files
                 res['project'] = project
@@ -213,6 +213,35 @@ class DbOperate:
             return res
 
     '''
+    获取项目列表
+    '''
+    def get_project_list(self, author_email):
+        res = {'state': 'fail', 'reason': "未知错误"}
+        try:
+            temp_list = self.getCol('project').find({'author_email': author_email},
+                                                    {'project_code': 1,
+                                                     'project_name': 1,
+                                                     'competition_id': 1,
+                                                     'project_status': 1})
+            project_list = list()
+            for p in temp_list:
+                print(p['competition_id'])
+                competition_name = self.getCol('competition').find_one({'_id': ObjectId(p['competition_id'])},
+                                                                       {'competition_name': 1})
+                project_list.append({
+                    'project_code': p['project_code'],
+                    'project_name': p['project_name'],
+                    'competition_id': p['competition_id'],
+                    'project_status': p['project_status'],
+                    'competition_name': competition_name['competition_name']
+                })
+            res['state'] = 'success'
+            res['project_list'] = project_list
+        except:
+            pass
+        finally:
+            return res
+    '''
     保存评审意见
     '''
     def store_review(self, project_code, expert_email, score, suggestion):
@@ -240,7 +269,8 @@ class DbOperate:
     def submit_review(self, project_code, expert_email):
         res = {'state': 'fail', 'reason': "未知错误"}
         try:
-            review = self.getCol('expert_project').find_one({'project_code': project_code, 'expert_email': expert_email})
+            review = self.getCol('expert_project').find_one({'project_code': project_code,
+                                                             'expert_email': expert_email})
             if review and review['status'] == 0:
                 review['status'] = 2
                 self.getCol('expert_project').update_one({'project_code': project_code,
@@ -609,20 +639,18 @@ class DbOperate:
     def expert_review_list(self, email):
         res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
         try:
-            print('b')
             find_project = self.getCol(
-                'expert_project').find({'expert_mail': email,'status': '0'})
-            print(email)
+                'expert_project').find({'expert_mail': email, 'status': 0})
             # 搜索到专家对应的列表
             if find_project:
-                print('a')
-                project_lists = []
-                project_list = {}
+                project_lists = list()
                 for fp in find_project:
                     proj_id = fp['project_code']
-                    proj = self.getCol('project').find_one({'project_code': proj_id},{'project_name':1, 'competition_id':1})
+                    proj = self.getCol('project').find_one({'project_code': proj_id},
+                                                           {'project_name': 1, 'competition_id': 1})
                     proj_name = proj['project_name']
-                    comp = self.getCol('competition').find_one({'_id': ObjectId(proj['competition_id'])}, {'project_name': 1, 'expert_comments_ddl': 1})
+                    comp = self.getCol('competition').find_one({'_id': ObjectId(proj['competition_id'])},
+                                                               {'project_name': 1, 'expert_comments_ddl': 1})
                     comp_name = comp['project_name']
                     exp_com_ddl = comp['expert_comments_ddl']
                     project_list = {
@@ -650,13 +678,13 @@ class DbOperate:
     '''
     def num2status(self,num):
         num_map = {
-            -1:'编辑中',
-            0:'已提交',
-            1:'通过初审，专家评审中',
-            2:'凉凉',
-            3:'进入现场答辩',
-            4:'优秀奖',
-            5:'三等奖',
+            -1: '编辑中',
+            0: '已提交',
+            1: '通过初审，专家评审中',
+            2: '凉凉',
+            3: '进入现场答辩',
+            4: '优秀奖',
+            5: '三等奖',
             6: '二等奖',
             7: '一等奖',
         }
@@ -717,12 +745,12 @@ class DbOperate:
         com_collection = self.getCol('competition')
         try:
             projects = []
-            for item in project_collection.find({'competition_id': competition_id}, {'_id':0}):
+            for item in project_collection.find({'competition_id': competition_id}, {'_id': 0}):
                 projects.append(item)
             com_status = com_collection.find_one({'_id': ObjectId(competition_id)})['com_status']
             res['com_status'] = com_status
             print(com_status)
-            if len(projects)>0:
+            if len(projects) > 0:
                 res['state'] = 'success'
                 res['reason'] = '成功获取竞赛作品列表'
                 # 当前状态是初审
@@ -731,17 +759,17 @@ class DbOperate:
                 # 当前状态是初评
                 elif com_status == 2:
                     res['A_List'] = self.rule_A(projects)
-                    res['B_List'] = self.rule_A(list(filter(lambda x:x['project_status'] >= 1 , projects)))
+                    res['B_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 1, projects)))
                 # 当前状态是筛选并现场答辩
                 elif com_status == 3:
                     res['A_List'] = self.rule_A(projects)
-                    res['B_List'] = self.rule_A(list(filter(lambda x:x['project_status'] >= 1 , projects)))
-                    res['C_List'] = self.rule_CC(list(filter(lambda x:x['project_status'] >= 1 , projects)))
+                    res['B_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 1, projects)))
+                    res['C_List'] = self.rule_CC(list(filter(lambda x: x['project_status'] >= 1, projects)))
                 # 当前状态是录入并公布最终结果
                 elif com_status == 4:
                     res['A_List'] = self.rule_A(projects)
-                    res['B_List'] = self.rule_A(list(filter(lambda x:x['project_status'] >= 1 , projects)))
-                    res['C_List'] = self.rule_DC(list(filter(lambda x:x['project_status'] >= 1 , projects)))
+                    res['B_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 1, projects)))
+                    res['C_List'] = self.rule_DC(list(filter(lambda x: x['project_status'] >= 1, projects)))
                     res['D_List'] = self.rule_D(list(filter(lambda x: x['project_status'] >= 3, projects)))
             elif len(projects) == 0:
                 res['reason'] = '竞赛作品列表为空'
