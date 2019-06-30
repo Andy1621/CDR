@@ -671,7 +671,7 @@ class DbOperate:
         res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
         try:
             find_project = self.getCol(
-                'expert_project').find({'expert_mail': email, 'status': 0})
+                'expert_project').find({'expert_mail': email, 'status': {'$ne': 1} })
             # 搜索到专家对应的列表
             if find_project:
                 project_lists = list()
@@ -681,8 +681,8 @@ class DbOperate:
                                                            {'project_name': 1, 'competition_id': 1})
                     proj_name = proj['project_name']
                     comp = self.getCol('competition').find_one({'_id': ObjectId(proj['competition_id'])},
-                                                               {'project_name': 1, 'expert_comments_ddl': 1})
-                    comp_name = comp['project_name']
+                                                               {'competition_name': 1, 'expert_comments_ddl': 1})
+                    comp_name = comp['competition_name']
                     exp_com_ddl = comp['expert_comments_ddl']
                     project_list = {
                         'project_id': proj_id,
@@ -802,6 +802,7 @@ class DbOperate:
                     res['C_List'] = self.rule_DC(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
                     res['D_List'] = self.rule_D(list(filter(lambda x: x['project_status'] >= 3, copy.deepcopy(projects))))
             elif len(projects) == 0:
+                res['state'] = 'success'
                 res['reason'] = '竞赛作品列表为空'
         except:
             pass

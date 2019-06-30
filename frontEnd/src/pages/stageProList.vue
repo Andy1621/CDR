@@ -27,6 +27,7 @@
         return{
           current:3,
           competition_id:'5d1862380a21e6053e46c958',//''5d170bd90a21e6053e45f3eb,
+          com_status:0,
           t:["校团委初审","专家初评","进入答辩","最终结果"],
           A_list:[],
           B_list:[],
@@ -67,12 +68,22 @@
                     },
                     on: {
                       click: () => {
-                        this.$router.push({
-                          path: '/firstTrial',
-                          query: {
-                            projectID: params.row.project_code
-                          }
-                        })
+                        if(this.com_status==0) {
+                          this.$router.push({
+                            path: '/firstTrial',
+                            query: {
+                              projectID: params.row.project_code
+                            }
+                          })
+                        }
+                        else if(this.com_status == 1){
+                          this.$router.push({
+                            path: '/expTrialStat',
+                            query: {
+                              projectID: params.row.project_code
+                            }
+                          })
+                        }
                       }
                     }
                   }, '查看'),
@@ -84,6 +95,7 @@
         }
       },
       created() {
+        this.competition_id = this.$route.query.projectID
         this.getProList();
       },
       methods:{
