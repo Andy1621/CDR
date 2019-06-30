@@ -65,6 +65,7 @@
             <li v-if="role==='school'"><router-link :to="{path:'/addCompetition'}" class="" exact><i class="lnr lnr-plus-circle"></i> <span>添加竞赛</span></router-link></li>
             <li v-if="role==='school'"><router-link :to="{path:'/announce'}" class="" exact><i class="lnr lnr-alarm"></i> <span>发布公告</span></router-link></li>
             <li v-if="role==='school'"><router-link :to="{path:'/professorManagement'}" class="" exact><i class="lnr lnr-mustache"></i> <span>管理专家</span></router-link></li>
+            <li v-if="role==='professor'"><router-link :to="{path:'/projectReview'}" class="" exact><i class="lnr lnr-thumbs-up"></i> <span>作品评审</span></router-link></li>
           </ul>
         </nav>
       </div>
