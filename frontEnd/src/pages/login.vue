@@ -103,8 +103,9 @@
                         this.email=route.email
                         messageContent[0]+='，请登录后评审'
                         messageContent[1]+='，请登录后评审'
+                        this.role='professor'
                     }
-                    alert(messageContent[res.body.old_status+1])
+                    this.$Message.info(messageContent[res.body.old_status+1])
                 },function (res) {
                     console.log(res);
                 });
