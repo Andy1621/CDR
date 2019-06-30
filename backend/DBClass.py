@@ -436,6 +436,29 @@ class DbOperate:
         return True
 
     '''
+    添加项目-专家关系
+    '''
+    def add_proj_exp(self, expert_email, project_code):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
+            user_list = self.getCol("user")
+            test = user_list.find_one({'mail': expert_email})
+            # 专家账号存在
+            if test:
+                name = test['username']
+                new_relation = {"project_code": project_code, "expert_mail": expert_email, "username": name,
+                                "score": 0, "suggestion": "", "status": -1}
+                exp_proj = self.getCol("expert_project")
+                exp_proj.insert_one(new_relation)
+                res['state'] = 'success'
+            # 专家账号不存在
+            else:
+                res['reason'] = "专家账号不存在"
+            return res
+        except:
+            return res
+
+    '''
     向专家发送邀请邮件
     '''
     def invite_mail(self, mail, expert_name, project_name, project_code):
@@ -474,6 +497,7 @@ class DbOperate:
                 res['reason'] = "邮件发送失败"
                 return res
             res['state'] = 'success'
+
         except:
             return res
         return res
