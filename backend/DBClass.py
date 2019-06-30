@@ -448,9 +448,9 @@ class DbOperate:
                 else:
                     new_status = 1
                 expert_project.update_many({'expert_mail': mail, 'project_code': project_code}, {"$set": {'status': new_status}})
-                res['operation_ok'] = True
+                # res['operation_ok'] = True
             else:
-                res['registered'] = False
+                1  # res['registered'] = False
             res['state'] = 'success'
         except:
             return res
