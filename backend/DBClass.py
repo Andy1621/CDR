@@ -785,7 +785,7 @@ class DbOperate:
     查看竞赛列表
     """
     def get_contests(self):
-        res = {'state': 'fail', 'reason': '网络出错或BUG出现！', 'count': 0, 'contests': [], }
+        res = {'state': 'fail', 'reason': '网络出错或BUG出现！', 'contests': [], }
         com_collection = self.getCol('competition')
         project_collection = self.getCol('project')
         try:
