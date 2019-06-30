@@ -397,9 +397,9 @@ class DbOperate:
             # 成功搜索到该项目
             if find_proj:
                 if result == 'True':
-                    now_stat = '通过初审'
+                    now_stat = 1
                 else:
-                    now_stat = '凉凉'
+                    now_stat = -1
                 proj_list.update_one({"project_code": proj_id},
                                      {"$set": {"project_status": now_stat}})
                 res['state'] = 'success'
