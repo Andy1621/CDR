@@ -780,6 +780,29 @@ class DbOperate:
         finally:
             return res
 
+    """
+    查看竞赛列表
+    """
+    def get_contests(self):
+        res = {'state': 'fail', 'reason': '网络出错或BUG出现！', 'count': 0, 'contests': [], }
+        com_collection = self.getCol('competition')
+        project_collection = self.getCol('project')
+        try:
+            if com_collection.count()<1:
+                res['reason'] = '竞赛列表为空'
+            else:
+                res['state'] = 'success'
+                res['reason'] = '查询成功'
+                for com in com_collection.find():
+                    com['count'] = project_collection.find({'competition_id': str(com['_id'])}).count()
+                    com['id'] = str(com['_id'])
+                    com.pop('_id')
+                    res['contests'].append(com)
+        except:
+            pass
+        finally:
+            return res
+
 ###############################################################################################
 
     '''
