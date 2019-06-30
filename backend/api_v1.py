@@ -122,7 +122,7 @@ class DownloadFiles(Resource):
         finally:
             return jsonify(res)
 
-
+################################################################################################
 
 '''
 保存项目报名
@@ -222,7 +222,8 @@ class AddProject(Resource):
             data = request.get_json()
             competition_id = data.get('competition_id')
             email = data.get('email')
-            res = db.add_project(competition_id, email)
+            name = data.get('name')
+            res = db.add_project(competition_id, email, name)
         except:
             pass
         finally:
@@ -276,6 +277,24 @@ class DeleteProject(Resource):
             data = request.args
             project_code = data.get('project_code')
             res = db.delete_project(project_code)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+
+'''
+提交项目报名
+参数：
+    项目编号project_code
+'''
+class SubmitProject(Resource):
+    def get(self):
+        res = {"state": "fail"}
+        try:
+            data = request.args
+            project_code = data.get('project_code')
+            res = db.submit_project(project_code)
         except:
             pass
         finally:
@@ -420,6 +439,7 @@ api.add_resource(GetProjectDetail, "/api/v1/get_project_detail", endpoint="getPr
 api.add_resource(DeleteProject, "/api/v1/delete_project", endpoint="deleteProject")
 api.add_resource(ViewApply, "/api/v1/view_apply", endpoint="viewApply")
 api.add_resource(DeleteFile, "/api/v1/delete_file", endpoint="deleteFile")
+api.add_resource(SubmitProject, "/api/v1/submit_project", endpoint="submitProject")
 api.add_resource(FirstTrialChange, "/api/vi/first_trial_change", endpoint="firstTrialChange")
 api.add_resource(GetTableInfo, "/api/vi/get_table_info", endpoint="getTableInfo")
 api.add_resource(Login, '/api/v1/login', endpoint='login')

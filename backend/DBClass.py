@@ -38,6 +38,7 @@ class DbOperate:
         col = db[name]
         return col
 
+################################################################################################
     '''
     保存申报信息
     '''
@@ -64,7 +65,7 @@ class DbOperate:
     '''
     新增项目报名
     '''
-    def add_project(self, competition_id, email):
+    def add_project(self, competition_id, email, name):
         res = {'state': 'fail', 'reason': "未知错误"}
         try:
             competition = self.getCol('competition').find_one({'_id': ObjectId(competition_id)})
@@ -87,9 +88,10 @@ class DbOperate:
                 t_project = {
                     'project_name': '',
                     'author_email': email,
+                    'author_email': name,
                     'project_code': code,
                     'competition_id': competition_id,
-                    'project_status': 'editing',
+                    'project_status': -1,
                     'registration_form': {'workCode': code, 'mainTitle': '',
                                           'department': '', 'mainType': '',
                                           'name': '', 'stuId': '', 'birthday': '',
@@ -190,6 +192,27 @@ class DbOperate:
             pass
         finally:
             return res
+
+
+    '''
+    提交项目报名
+    '''
+    def submit_project(self, project_code):
+        res = {'state': 'fail', 'reason': "未知错误"}
+        try:
+            project = self.getCol('project').find_one({'project_code': project_code})
+            if project:
+                project['project_status'] = 0
+                self.getCol('project').update_one({'project_code': project_code}, {'$set': project})
+                res['state'] = 'success'
+            else:
+                res['reason'] = "项目不存在"
+        except:
+            pass
+        finally:
+            return res
+
+        
 ##############################################################################################
     '''
     检查邮箱是否已注册
