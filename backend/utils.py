@@ -11,6 +11,7 @@
 from bs4 import BeautifulSoup
 import hashlib
 import os
+import zipfile
 
 SPECIAL_STR = "cxk"                     # MD5加密特殊字符串
 MD5_LEN = 10                            # 加密组合长度
@@ -94,6 +95,16 @@ def encode(password):
     special = hl.hexdigest()
     final_password = final_password[: -MD5_LEN] + special[-MD5_LEN:]
     return final_password
+
+
+# 打包文件
+def make_zip(source_dir_list, output_filename):
+    zipf = zipfile.ZipFile(output_filename, 'w')
+    for f in source_dir_list:
+        pathfile = f['file_path']
+        arcname = pathfile.split('/')[-1]
+        zipf.write(pathfile,arcname)
+    zipf.close()
 
 
 if __name__ == '__main__':
