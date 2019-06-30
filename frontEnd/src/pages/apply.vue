@@ -161,6 +161,7 @@
                     :default-file-list="defaultDocList"
                     :on-success="handleSuccessDoc"
                     :on-remove="handleRemoveDoc"
+                    :on-preview="docView"
                     :format="['pdf']"
                     :max-size="20480"
                     :on-format-error="handleFormatErrorDoc"
@@ -172,7 +173,7 @@
                     <Button v-show="!readonly" icon="ios-document" style="width: 100px">文档上传</Button>
                 </Upload>
                 <Divider/>
-                <h4 style="margin-bottom: 20px">作品图片上传</h4>
+                <h4 style="margin-bottom: 20px">作品图片上传（{{photo_cnt}}/5）</h4>
                 <div v-if="false" class="demo-upload-list" v-for="item in uploadPhotoList">
                     <template v-if="item.status === 'finished'">
                         <img :src="item.url">
@@ -198,7 +199,6 @@
                     :on-format-error="handleFormatError"
                     :on-exceeded-size="handleMaxSize"
                     :before-upload="handleBeforeUpload"
-                    multiple
                     type="select"
                     action="http://127.0.0.1:5000/api/v1/up_file"
                     :data = type_photo
@@ -206,7 +206,7 @@
 <!--                    <div style="width: 96px;height:96px;line-height: 100px;">-->
 <!--                        <Icon type="ios-camera" size="30"></Icon>-->
 <!--                    </div>-->
-                    <Button :disabled="uploadVideoList.length>=5" v-show="!readonly" icon="ios-image" style="width: 100px">图片上传</Button>
+                    <Button :disabled="photo_cnt>=5" v-show="!readonly" icon="ios-image" style="width: 100px">图片上传</Button>
                 </Upload>
                 <Modal title="预览图片" draggable v-model="visible">
                     <img :src="imgUrl" v-if="visible" style="width: 100%">
@@ -219,6 +219,7 @@
                     :default-file-list="defaultVideoList"
                     :on-success="handleSuccessVideo"
                     :on-remove="handleRemoveVideo"
+                    :on-preview="videoView"
                     :format="['mp4','flv']"
                     :max-size="102400"
                     :on-format-error="handleFormatErrorVideo"
@@ -251,6 +252,7 @@
                 current: 3,
                 readonly: false,
                 project_id: '',
+                photo_cnt: 0,
                 type_doc: {
                     'file_type' : 'doc',
                     'project_code' : '',
@@ -360,22 +362,14 @@
                 defaultDocList: [],
                 defaultPhotoList: [
                     // {
-                    //     'name': 'file1',
-                    //     'url': 'http://127.0.0.1:5000/static/photo/1561694068_32.3-2.png'
-                    // },
-                    // {
-                    //     'name': 'file2',
-                    //     'url': 'http://127.0.0.1:5000/static/photo/Test123.png'
-                    // },
-                    {
-                        'name': 'file3.jpg',
-                        'url': 'https://o5wwk8baw.qnssl.com/7eb99afb9d5f317c912f08b5212fd69a/avatar'
-                    }
+                    //     'name': 'file3.jpg',
+                    //     'url': 'https://o5wwk8baw.qnssl.com/7eb99afb9d5f317c912f08b5212fd69a/avatar'
+                    // }
                 ],
                 defaultVideoList: [],
                 imgUrl: '',
                 visible: false,
-                filtList: [],
+                fileList: [],
                 uploadPhotoList: [],
                 uploadVideoList: [],
                 uploadDocList: [],
@@ -442,7 +436,44 @@
             },
             save_data(){
                 // save data function
-                this.$Message.info('Save Data')
+                // this.$Message.info('Save Data')
+                let params = {
+                    'workCode' : this.basicInfo.workCode,
+                    'mainTitle' : this.basicInfo.project,
+                    'department' : this.basicInfo.college,
+                    'mainType' : this.basicInfo.type,
+
+                    'name' : this.authorInfo.name,
+                    'stuId' : this.authorInfo.stu_id,
+                    'birthday' : this.authorInfo.birth,
+                    'education' : this.authorInfo.edu_background,
+                    'major' : this.authorInfo.major,
+                    'enterTime' : this.authorInfo.school_date,
+                    'totalTitle' : this.authorInfo.project,
+                    'address' : this.authorInfo.address,
+                    'phone' : this.authorInfo.phone,
+                    'email' : this.authorInfo.email,
+                    'applier' : this.authorInfo.cooperators,
+
+                    'title' : this.projectInfo.project,
+                    'type' : this.projectInfo.type,
+                    'description' : this.projectInfo.introduction,
+                    'creation' : this.projectInfo.innovation,
+                    'keyword' : this.projectInfo.keyword,
+                };
+                this.$http.post(this.$baseURL + '/api/v1/store_project',params)
+                    .then(function (res) {
+                        var detail = res.body;
+                        console.log(detail)
+                        if(detail.state == 'fail'){
+                            this.$Message.error('保存失败')
+                        }
+                        else{
+                            this.$Message.success('保存成功')
+                        }
+                    },function (res) {
+                        this.$Message.error('Failed')
+                    })
             },
             //upload
             handleView (name) {
@@ -455,6 +486,9 @@
                 this.visible = true;
             },
             handleRemove (file) {
+                console.log(file)
+                console.log(file.name)
+                console.log(this.project_id)
                 const fileList = this.$refs.uploadPhoto.fileList;
                 this.$http.get(this.$baseURL + '/api/v1/delete_file',{params:{'type':'photo','file_name':file.name,'project_code':this.project_id}})
                     .then(function (res) {
@@ -465,7 +499,8 @@
                         }
                         else{
                             console.log('Success')
-                            this.$refs.uploadPhoto.fileList.splice(fileList.indexOf(file), 1);
+                            this.photo_cnt -= 1
+                            // this.$refs.uploadPhoto.fileList.splice(fileList.indexOf(file), 1);
                         }
                     })
                 },
@@ -479,6 +514,7 @@
                 else{
                     this.$Message.success('成功上传')
                     file.url = res.file_path;
+                    this.photo_cnt += 1
                     // this.refresh_list()
                     console.log(this.uploadPhotoList)
                 }
@@ -496,7 +532,7 @@
                 });
             },
             handleBeforeUpload () {
-                const check = this.uploadPhotoList.length < 5;
+                const check = this.photo_cnt < 5;
                 if (!check) {
                     this.$Notice.warning({
                         title: '最多只能上传5张图片'
@@ -505,6 +541,9 @@
                 return check;
             },
             //upload video
+            videoView(file){
+                console.log(file)
+            },
             handleSuccessVideo (res, file) {
                 console.log(res);
                 if(res.state == 'fail')
@@ -550,6 +589,9 @@
                 return check;
             },
             //upload file
+            docView(file){
+                console.log(file)
+            },
             handleSuccessDoc (res, file) {
                 console.log(res);
                 if(res.state == 'fail')
@@ -608,7 +650,7 @@
                             var form = detail.project.registration_form;
                             console.log(form)
                             // console.log(this.defaultPhotoList)
-                            console.log(this.defaultDocList)
+                            // console.log(this.defaultDocList)
                             this.fileList = detail.project.project_files;
                             for(let item of this.fileList){
                                 switch(item.file_type){
@@ -638,6 +680,7 @@
                                 }
                             }
 
+                            this.photo_cnt = this.defaultPhotoList.length
                             this.project_id = form.workCode;
                             // console.log(form.workCode)
                             this.type_doc = {
@@ -683,7 +726,7 @@
         mounted () {
             this.uploadDocList = this.$refs.uploadDoc.fileList;
             this.uploadPhotoList = this.$refs.uploadPhoto.fileList;
-            this.uploadVideoList = this.$refs.uploadVideo.fileList;
+            this.uploadVideoList = this.defaultVideoList;
             // this.uploadPhotoList = this.defaultPhotoList;
             // console.log(this.uploadPhotoList)
             //设置Message默认属性
