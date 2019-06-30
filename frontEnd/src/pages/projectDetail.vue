@@ -12,19 +12,19 @@
             <div class="form" v-show="current == 0">
                 <Form ref="basicInfo" :model="basicInfo" :label-width="80">
                     <FormItem label="作品全称">
-                        <Input v-model="basicInfo.projectName" readonly></Input>
+                        <Input v-model="basicInfo.title" readonly></Input>
                     </FormItem>
                     <FormItem label="作品分类">
-                        <Input v-model="basicInfo.projectType" readonly></Input>
+                        <Input v-model="basicInfo.type" readonly></Input>
                     </FormItem>
                     <FormItem label="创新点">
-                        <Input v-model="basicInfo.innovation" readonly></Input>
+                        <Input v-model="basicInfo.creation" readonly></Input>
                     </FormItem>
                     <FormItem label="关键词">
                         <Input v-model="basicInfo.keyword" readonly></Input>
                     </FormItem>
                     <FormItem label="项目介绍">
-                        <Input v-model="basicInfo.introduction" type="textarea" readonly></Input>
+                        <Input v-model="basicInfo.description" type="textarea" readonly></Input>
                     </FormItem>
                 </Form>
             </div>
@@ -62,26 +62,52 @@
         },
         data(){
             return {
-                current: 2,
-                basicInfo: {
-                    projectName: 'name',
-                    projectType: 'sads',
-                    keyword: '',
-                    introduction: '',
-                    innovation: ''
-                },
+                current: 0,
+                basicInfo: {},
                 reviewInfo:{
                     marks: '',
                     comment: ''
                 },
+                dictionary:{
+                    A: '机械与控制（包括机械、仪器仪表、自动化控制、工程、交通、建筑等）',
+                    B: '信息技术（包括计算机、电信、通讯、电子等）',
+                    C: '数理（包括数学、物理、地球与空间科学等）',
+                    D: '生命科学(包括生物､农学､药学､医学､健康､卫生､食品等)',
+                    E: '能源化工（包括能源、材料、石油、化学、化工、生态、环保等）',
+                    F: '哲学社会科学（包括哲学、经济、社会、法律、教育、管理）'
+                }
             }
         },
         created(){
-
+            let url = this.$baseURL + '/api/v1/get_project_detail'
+            this.$http.get(url, {params:{project_code: this.$route.query.project_id}}).then(function (res) {
+                console.log(res)
+                this.basicInfo = res.body.project.registration_form
+                this.basicInfo.type=this.dictionary[this.basicInfo.type]
+            },function (res) {
+                console.log(res)
+            })
         },
         methods: {
             saveReview(){
-                this.$Message.info('save')
+                let url = this.$baseURL + '/api/v1/store_review';
+                let data = {
+                    project_code: this.$route.query.project_id,
+                    expert_email: this.$cookie.get('mail'),
+                    score: this.reviewInfo.marks,
+                    review: this.reviewInfo.comment
+                }
+                this.$http.post(url, data).then(function (res) {
+                    console.log(res)
+                    if (res.body.state == 'fail'){
+                        alert(res.body.reason)
+                    }
+                    else {
+                        this.$Message.info('保存成功！')
+                    }
+                },function (res) {
+                    console.log(res)
+                })
             },
             upReview(){
                 if (this.reviewInfo.marks==''||this.reviewInfo.comment=='')

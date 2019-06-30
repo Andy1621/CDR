@@ -20,19 +20,19 @@
                 columns:[
                     {
                         title: '作品ID',
-                        key: 'projectID'
+                        key: 'project_id'
                     },
                     {
                         title: '作品名称',
-                        key: 'projectName'
+                        key: 'project_name'
                     },
                     {
                         title: '竞赛名称',
-                        key: 'competition'
+                        key: 'competition_name'
                     },
                     {
                         title: '评审截止',
-                        key: 'endTime'
+                        key: 'expert_comments_ddl'
                     },
                     {
                         title: '操作',
@@ -55,7 +55,7 @@
                                             this.$router.push({
                                                 path: '/projectDetail',
                                                 query: {
-                                                    projectID: params.row.projectID
+                                                    project_id: params.row.project_id
                                                 }
                                             })
                                         }
@@ -90,7 +90,7 @@
                 let url = 'http://127.0.0.1:5000/api/v1/get_expert_review_list';
                 this.$http.post(url, {email: 'qwer'},{emulateJSON: true}).then(function (res) {
                     console.log(res)
-                    //this.rows=res.body.project_lists;
+                    this.rows=res.body.project_lists;
                 },function (res) {
                     console.log(res)
                 })
