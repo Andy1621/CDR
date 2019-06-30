@@ -1,0 +1,121 @@
+<template>
+    <div>
+        <NavBar></NavBar>
+        <div class="body">
+            <Button primary style="position: fixed; right: 20%; top: 115px" @click="$router.go(-1)">返回</Button>
+            <h3 style="margin: 20px 0 30px 47%">作品详情</h3>
+            <Steps :current="current" style="margin-left: 12%">
+                <Step title="项目基本信息" content="分类、创新、关键词、总体说明" icon="ios-information-circle-outline" @click.native="current = 0"></Step>
+                <Step title="项目相关文件" content="文档、视频、图片" icon="ios-camera" @click.native="current = 1"></Step>
+                <Step title="评审打分" content="给出评价和分数" icon="ios-chatboxes" @click.native="current = 2"></Step>
+            </Steps>
+            <div class="form" v-show="current == 0">
+                <Form ref="basicInfo" :model="basicInfo" :label-width="80">
+                    <FormItem label="作品全称">
+                        <Input v-model="basicInfo.projectName" readonly></Input>
+                    </FormItem>
+                    <FormItem label="作品分类">
+                        <Input v-model="basicInfo.projectType" readonly></Input>
+                    </FormItem>
+                    <FormItem label="创新点">
+                        <Input v-model="basicInfo.innovation" readonly></Input>
+                    </FormItem>
+                    <FormItem label="关键词">
+                        <Input v-model="basicInfo.keyword" readonly></Input>
+                    </FormItem>
+                    <FormItem label="项目介绍">
+                        <Input v-model="basicInfo.introduction" type="textarea" readonly></Input>
+                    </FormItem>
+                </Form>
+            </div>
+            <div v-show="current==1">
+                图片视频
+            </div>
+            <div v-show="current==2">
+                <Form ref="reviewInfo" :model="reviewInfo" :label-width="80">
+                    <FormItem label="评分">
+                        <Input v-model="reviewInfo.marks"></Input>
+                    </FormItem>
+                    <FormItem label="评价">
+                        <Input v-model="reviewInfo.comment" type="textarea"></Input>
+                    </FormItem>
+                </Form>
+            </div>
+            <Button type="primary" shape="circle" :disabled="current == 0" @click="current-=current>0?1:0" icon="ios-arrow-back" style="margin-right: 30%;margin-left: 30%"></Button>
+            <Button type="primary" shape="circle" :disabled="current == 2" @click="current+=current<2?1:0" icon="ios-arrow-forward"></Button>
+            <div style="margin: 15px 0 0 40%" v-show="current == 2">
+                <Button type="primary" style="margin-right:6%" @click="saveReview" >保存</Button>
+                <Button type="error" @click="upReview">提交</Button>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+    import NavBar from '../components/NavBar.vue'
+    import LInput from '../components/InputWithLabel.vue'
+    export default {
+        name: "projectDetail",
+        components: {
+            NavBar,
+            LInput
+        },
+        data(){
+            return {
+                current: 2,
+                basicInfo: {
+                    projectName: 'name',
+                    projectType: 'sads',
+                    keyword: '',
+                    introduction: '',
+                    innovation: ''
+                },
+                reviewInfo:{
+                    marks: '',
+                    comment: ''
+                },
+            }
+        },
+        created(){
+
+        },
+        methods: {
+            saveReview(){
+                this.$Message.info('save')
+            },
+            upReview(){
+                if (this.reviewInfo.marks==''||this.reviewInfo.comment=='')
+                {
+                    alert("请将评审信息填写完整！")
+                    return
+                }
+                else {
+                    this.$Message.info('save')
+                }
+            },
+        },
+    }
+</script>
+
+<style scoped>
+    .body{
+        margin: 0 100px 50px 480px;
+        position: relative;
+        top: 100px;
+        border: 1px dashed black;
+        border-radius: 20px;
+        /*margin: 100px 0px 50px 30%;*/
+        padding: 10px;
+        width: 50%;
+        /*text-align: center;*/
+        min-height: 470px;
+        min-width: 600px;
+        color: black;
+    }
+    .form{
+        text-align: left;
+        padding: 3px;
+        margin-bottom: 5px;
+        font-size: 15px;
+    }
+</style>
