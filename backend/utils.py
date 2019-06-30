@@ -11,6 +11,7 @@
 from bs4 import BeautifulSoup
 import hashlib
 import os
+import zipfile
 
 SPECIAL_STR = "cxk"                     # MD5加密特殊字符串
 MD5_LEN = 10                            # 加密组合长度
@@ -64,22 +65,22 @@ def replace_apply_html(form, filename):
         data = f1.read()
         html = BeautifulSoup(data, 'lxml')
         for key in form.keys():
+            if len(form[key]) == 0:
+                continue
             if key == 'applier':
                 for i, applier in enumerate(form[key]):
                     for c_key in applier.keys():
                         temp_component = html.select('#' + c_key + str(i + 1))
                         temp_component[0].string = applier[c_key]
             elif key == 'type':
-                if form[key] in workType.keys():
-                    temp_component = html.select('#' + key)
-                    temp_component[0].string = workType[form[key]]
+                temp_component = html.select('#' + key)
+                temp_component[0].string = workType[form[key]]
             elif key == 'mainType':
                 temp_component = html.select('#' + form[key])
                 temp_component[0]['class'] = "glyphicon glyphicon-check"
             elif key == 'education':
-                if form[key] in educationType.keys():
-                    temp_component = html.select('#' + key)
-                    temp_component[0].string = educationType[form[key]]
+                temp_component = html.select('#' + key)
+                temp_component[0].string = educationType[form[key]]
             else:
                 temp_component = html.select('#' + key)
                 temp_component[0].string = form[key]
@@ -94,6 +95,16 @@ def encode(password):
     special = hl.hexdigest()
     final_password = final_password[: -MD5_LEN] + special[-MD5_LEN:]
     return final_password
+
+
+# 打包文件
+def make_zip(source_dir_list, output_filename):
+    zipf = zipfile.ZipFile(output_filename, 'w')
+    for f in source_dir_list:
+        pathfile = f['file_path']
+        arcname = pathfile.split('/')[-1]
+        zipf.write(pathfile,arcname)
+    zipf.close()
 
 
 if __name__ == '__main__':
