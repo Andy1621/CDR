@@ -203,17 +203,21 @@ class DbOperate:
     '''
     提交项目报名
     '''
-    def submit_project(self, project_code):
+    def submit_project(self, params):
         res = {'state': 'fail', 'reason': "未知错误"}
         try:
+            project_code = params['workCode']
             project = self.getCol('project').find_one({'project_code': project_code})
             if project:
+                if 'mainTitle' in params.keys():
+                    project['project_name'] = params['mainTitle']
+                project['registration_form'] = params
                 project['project_status'] = 0
                 self.getCol('project').update_one({'project_code': project_code}, {'$set': project})
+                filename = project_code + ".html"
+                replace_apply_html(params, filename)
                 res['state'] = 'success'
                 res['reason'] = ''
-            else:
-                res['reason'] = "项目编号不存在"
         except:
             pass
         finally:
@@ -277,16 +281,19 @@ class DbOperate:
     '''
     提交评审意见
     '''
-    def submit_review(self, project_code, expert_email):
+    def submit_review(self, project_code, expert_email, score, suggestion):
         res = {'state': 'fail', 'reason': "未知错误"}
         try:
             review = self.getCol('expert_project').find_one({'project_code': project_code,
                                                              'expert_email': expert_email})
             if review and review['status'] == 0:
+                review['score'] = score
+                review['suggestion'] = suggestion
                 review['status'] = 2
                 self.getCol('expert_project').update_one({'project_code': project_code,
                                                           'expert_email': expert_email}, {'$set': review})
                 res['state'] = 'success'
+                res['status'] = review['status']
                 res['reason'] = ''
             else:
                 res['reason'] = "项目不存在或专家没有权利评审该项目"
