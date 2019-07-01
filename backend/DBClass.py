@@ -557,7 +557,7 @@ class DbOperate:
         return res
 
     '''
-    对于某个项目，返回邀请过和未邀请得专家列表
+    对于某个项目，返回邀请过和未邀请的专家列表
     '''
     def get_project_expert_list(self, project_code):
         res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
