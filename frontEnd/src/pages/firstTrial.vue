@@ -1,12 +1,13 @@
 <template>
   <div>
     <NavBar></NavBar>
-    <Breadcrumb>
-      <BreadcrumbItem to="/"></BreadcrumbItem>
-      <BreadcrumbItem to="/components/breadcrumb">Components</BreadcrumbItem>
-      <BreadcrumbItem>Breadcrumb</BreadcrumbItem>
-    </Breadcrumb>
     <div class="body">
+      <Breadcrumb style="text-align: left">
+        <BreadcrumbItem to="/competitionList">竞赛列表</BreadcrumbItem>
+        <BreadcrumbItem :to="{path:'/stageProList',query: {competitionID:this.$route.query.competition_id,}}">
+          {{this.$route.query.competition_title}}</BreadcrumbItem>
+        <BreadcrumbItem> "{{this.basicInfo.project}}" 作品申请表</BreadcrumbItem>
+      </Breadcrumb>
       <h3>作品申请表</h3>
       <Steps :current="current" style="margin: 30px">
         <Step title="作品基本信息" content="" @click.native="jump_0"></Step>
@@ -151,9 +152,11 @@
 
 <script>
     import NavBar from '../components/NavBar.vue'
+    import Divider from "../../static/css/iview/iview";
     export default {
       name: "firstTrial",
       components:{
+        Divider,
         NavBar
       },
       data(){

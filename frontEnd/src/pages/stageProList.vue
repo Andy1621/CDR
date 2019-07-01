@@ -2,6 +2,10 @@
   <div>
     <NavBar></NavBar>
     <div class="body">
+      <Breadcrumb style="text-align: left">
+        <BreadcrumbItem to="/competitionList">竞赛列表</BreadcrumbItem>
+        <BreadcrumbItem>{{this.competition_title}}</BreadcrumbItem>
+      </Breadcrumb>
       <h3>
         {{competition_title}}
       </h3>
@@ -76,7 +80,9 @@
                             path: '/firstTrial',
                             query: {
                               competition_id:this.competition_id,
+                              competition_title:this.competition_title,
                               projectID: params.row.project_code,
+
                             }
                           })
                         }
@@ -85,7 +91,9 @@
                             path: '/expTrialStat',
                             query: {
                               competition_id:this.competition_id,
+                              competition_title:this.competition_title,
                               projectID: params.row.project_code,
+                              projectName:params.row.project_name
                             }
                           })
                         }
