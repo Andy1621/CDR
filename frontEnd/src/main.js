@@ -5,6 +5,7 @@ import App from './App'
 import router from './router'
 import iView from 'iview';
 import 'iview/dist/styles/iview.css';
+import '../static/css/iview/styles/iview.css';
 import VueResource from 'vue-resource';
 import cookie from 'js-cookie'
 
