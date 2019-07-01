@@ -472,6 +472,45 @@ class SubmitReview(Resource):
             return jsonify(res)
 
 
+'''
+接受评审
+参数：
+    项目编号project_code
+    专家邮箱expert_email  
+'''
+class AcceptReview(Resource):
+    def get(self):
+        res = {"state": "fail"}
+        try:
+            data = request.args
+            project_code = data.get('project_code')
+            expert_email = data.get('expert_email')
+            res = db.accept_review(project_code, expert_email)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+
+'''
+拒绝评审
+参数：
+    项目编号project_code
+    专家邮箱expert_email  
+'''
+class RefuseReview(Resource):
+    def get(self):
+        res = {"state": "fail"}
+        try:
+            data = request.args
+            project_code = data.get('project_code')
+            expert_email = data.get('expert_email')
+            res = db.refuse_review(project_code, expert_email)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
 #######################################################################################################################
 """
 登录
@@ -694,6 +733,8 @@ api.add_resource(DownloadFiles, '/api/v1/download_files', endpoint='downloadFile
 api.add_resource(GetExpertReviewList, '/api/v1/get_expert_review_list', endpoint='expertReviewList')
 api.add_resource(SubmitReview, '/api/v1/submit_review', endpoint='submitReview')
 api.add_resource(StoreReview, '/api/v1/store_review', endpoint='storeReview')
+api.add_resource(AcceptReview, '/api/v1/accept_review', endpoint='acceptReview')
+api.add_resource(RefuseReview, '/api/v1/refuse_review', endpoint='refuseReview')
 api.add_resource(GetReview, '/api/v1/get_review', endpoint='getReview')
 api.add_resource(check_code, '/api/v1/check_code', endpoint='check_code')
 api.add_resource(expert_set_password, '/api/v1/expert_set_password', endpoint='expert_set_password')
