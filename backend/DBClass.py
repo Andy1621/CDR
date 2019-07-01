@@ -584,7 +584,7 @@ class DbOperate:
             comp_name = comp["competition_name"]
             header = comp_name + "项目评审邀请"
             # front_ip = "http://localhost:8080"
-            front_ip = "http://114.116.189.128:8080"
+            front_ip = "http://114.116.189.128"
             accept_addr = front_ip + "/#/?token=" + invitation_code + \
                           "&email=" + mail + \
                           "&project_code=" + project_code + "&is_accept=" + "true"
