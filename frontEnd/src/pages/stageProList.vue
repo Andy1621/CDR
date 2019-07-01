@@ -11,7 +11,7 @@
         <Step :title=t[2]  @click.native="jump(2)"></Step>
         <Step :title=t[3]  @click.native="jump(3)"></Step>
       </Steps>
-      <Table stripe border :columns="columns" :data="rows" ref="table" style="margin-right: 9%"></Table>
+      <Table stripe border :columns="columns" :data="rows" ref="table" style="margin-right: 9%;margin-left:6%"></Table>
     </div>
   </div>
 </template>
@@ -25,9 +25,10 @@
       },
       data(){
         return{
+          btshow:[],
           current:3,
           competition_id:'5d1862380a21e6053e46c958',//''5d170bd90a21e6053e45f3eb,
-          competition_title: "第29届冯如杯",
+          competition_title: "",
           com_status:0,
           t:["校团委初审","专家初评","进入答辩","最终结果"],
           A_list:[],
@@ -62,26 +63,29 @@
                   h('Button', {
                     props: {
                       type: 'primary',
-                      size: 'small'
+                      size: 'small',
+                      disabled:this.btshow[params.index]
                     },
                     style: {
                       marginRight:'5px'
                     },
                     on: {
                       click: () => {
-                        if(this.com_status==0) {
+                        if(this.current == 0) {
                           this.$router.push({
                             path: '/firstTrial',
                             query: {
-                              projectID: params.row.project_code
+                              competition_id:this.competition_id,
+                              projectID: params.row.project_code,
                             }
                           })
                         }
-                        else if(this.com_status == 1){
+                        else if(this.current == 1){
                           this.$router.push({
                             path: '/expTrialStat',
                             query: {
-                              projectID: params.row.project_code
+                              competition_id:this.competition_id,
+                              projectID: params.row.project_code,
                             }
                           })
                         }
@@ -96,8 +100,8 @@
         }
       },
       created() {
-        this.competition_id = this.$route.query.competitionID
-        this.competition_title = this.$route.query.competitionTitle
+        this.competition_id = this.$route.query.competitionID;
+        //this.competition_title = this.$route.query.competitionTitle;
         this.getProList();
       },
       methods:{
@@ -115,7 +119,7 @@
               this.$Message.info("获取数据失败")
             }
             else{
-              this.percent = detail.com_status/4 * 100;
+              this.competition_title = detail.competition_name;
               this.com_status = detail.com_status-1;
               this.t[this.com_status] = this.t[this.com_status] + "(正在进行)";
               this.current = this.com_status;
@@ -124,12 +128,16 @@
               this.C_list = detail.C_List;
               this.D_list = detail.D_List;
               this.changeList()
+
             }
           }, function (res) {
             alert(res);
           });
         },
         changeList(){
+          if(this.btshow.length>0){
+            this.btshow.length = 0;
+          }
           switch (this.current) {
             case 0:
               this.rows = this.A_list;
@@ -144,6 +152,14 @@
               this.rows = this.D_list;
               break;
           }
+          for(let item of this.rows){
+            if(item.project_status=="编辑中"){
+              this.btshow.push(true)
+            }
+            else
+              this.btshow.push(false)
+          }
+          console.log(this.btshow)
         },
         jump(num){
           if(num <= this.com_status) {
