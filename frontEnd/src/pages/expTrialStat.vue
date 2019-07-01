@@ -1,10 +1,13 @@
 <template>
   <div>
     <NavBar></NavBar>
-    <div style="position: relation; left: 50%; top: 123px" >
-      <Button type="primary" ghost @click="$router.go(-1)">返回上一页</Button>
-    </div>
     <div class="body">
+      <Breadcrumb style="text-align: left">
+        <BreadcrumbItem to="/competitionList">竞赛列表</BreadcrumbItem>
+        <BreadcrumbItem :to="{path:'/stageProList',query: {competitionID:this.$route.query.competition_id,}}">
+          {{this.$route.query.competition_title}}</BreadcrumbItem>
+        <BreadcrumbItem> "{{this.$route.query.projectName}}"</BreadcrumbItem>
+      </Breadcrumb>
       <h3>专家评审状况</h3>
       <Table stripe border :columns="columns1" :data="rows1" height="450" ref="table"></Table>
     </div>
