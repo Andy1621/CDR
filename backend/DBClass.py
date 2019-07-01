@@ -512,7 +512,6 @@ class DbOperate:
                 res['reason'] = "邮件发送失败"
                 return res
             res['state'] = 'success'
-            print("okokoooooooooooooooo")
         except:
             return res
         return res
@@ -550,7 +549,7 @@ class DbOperate:
                 expert_project.update_many({'expert_mail': mail, 'project_code': project_code}, {"$set": {'status': new_status}})
                 # res['operation_ok'] = True
             else:
-                1  # res['registered'] = False
+                1  # res['operation_ok'] = False
             res['state'] = 'success'
         except:
             return res
