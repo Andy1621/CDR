@@ -691,6 +691,7 @@ class DbOperate:
                 project_lists = list()
                 for fp in find_project:
                     proj_id = fp['project_code']
+                    status = fp['status']
                     proj = self.getCol('project').find_one({'project_code': proj_id},
                                                            {'project_name': 1, 'competition_id': 1})
                     proj_name = proj['project_name']
@@ -702,7 +703,8 @@ class DbOperate:
                         'project_id': proj_id,
                         'project_name': proj_name,
                         'competition_name': comp_name,
-                        'expert_comments_ddl': exp_com_ddl
+                        'expert_comments_ddl': exp_com_ddl,
+                        'status': status
                     }
                     project_lists.append(project_list)
                 res['state'] = 'Success'
