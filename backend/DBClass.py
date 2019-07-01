@@ -256,6 +256,7 @@ class DbOperate:
                 review['suggestion'] = suggestion
                 self.getCol('expert_project').update_one({'project_code': project_code,
                                                           'expert_email': expert_email}, {'$set': review})
+                res['status'] = review['status']
                 res['state'] = 'success'
             else:
                 res['reason'] = "项目不存在或专家没有权利评审该项目"
