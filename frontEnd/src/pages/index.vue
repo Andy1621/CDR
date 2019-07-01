@@ -200,7 +200,7 @@
                 })
             },
             more_news(type){
-                this.$Message.info('moreNews')
+                // this.$Message.info('moreNews')
                 if(type == 'latest'){
                     this.newsType = '最新公告';
                     this.show_news = this.latest_news;
