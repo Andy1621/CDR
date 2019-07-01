@@ -302,15 +302,82 @@ class DeleteProject(Resource):
 '''
 提交项目报名
 参数：
-    项目编码project_code
+    1.作品编码workCode
+    2.封面作品名称mainTitle
+    3.院系名称department
+    4.类别用于封面打钩mainType(取值'type1','type2')
+    5.姓名name
+    6.学号stuId
+    7.出生年月birthday
+    8.学历education(取值'A','B','C','D', 代码里转换)
+    9.专业major
+    10.入学时间enterTime
+    11.作品全称totalTitle
+    12.通讯地址address
+    13.联系电话phone
+    14.邮箱email
+    15.申报者情况applier[{
+                    'name': 'xxx',
+                    'stuId': 'xxx',
+                    'education': 'xxx',
+                    'phone': 'xxx',
+                    'email'： 'xxx'}]
+    16.表2作品名称title
+    17.表2作品类型type(取值'A','B','C','D','E','F', 代码里转换)
+    18.作品总体情况说明description
+    19.创新点creation
+    20.关键词keyword
 '''
 class SubmitProject(Resource):
-    def get(self):
+    def post(self):
         res = {"state": "fail"}
         try:
-            data = request.args
-            project_code = data.get('project_code')
-            res = db.submit_project(project_code)
+            data = request.get_json()
+            params = {'workCode': data.get('workCode'), 'mainTitle': '', 'department': '',
+                      'mainType': '', 'name': '', 'stuId': '', 'birthday': '',
+                      'education': '', 'major': '', 'enterTime': '',
+                      'totalTitle': '', 'address': '', 'phone': '', 'email': '',
+                      'applier': list(), 'title': '', 'type': '', 'description': '',
+                      'creation': '', 'keyword': ''}
+            if data.get('mainTitle'):
+                params['mainTitle'] = data.get('mainTitle')
+            if data.get('department'):
+                params['department'] = data.get('department')
+            if data.get('mainType'):
+                params['mainType'] = data.get('mainType')
+            if data.get('name'):
+                params['name'] = data.get('name')
+            if data.get('stuId'):
+                params['stuId'] = data.get('stuId')
+            if data.get('birthday'):
+                params['birthday'] = data.get('birthday')
+            if data.get('education'):
+                params['education'] = data.get('education')
+            if data.get('major'):
+                params['major'] = data.get('major')
+            if data.get('enterTime'):
+                params['enterTime'] = data.get('enterTime')
+            if data.get('totalTitle'):
+                params['totalTitle'] = data.get('totalTitle')
+            if data.get('address'):
+                params['address'] = data.get('address')
+            if data.get('phone'):
+                params['phone'] = data.get('phone')
+            if data.get('email'):
+                params['email'] = data.get('email')
+            if data.get('applier'):
+                params['applier'] = data.get('applier')
+            if data.get('title'):
+                params['title'] = data.get('title')
+            if data.get('type'):
+                params['type'] = data.get('type')
+            if data.get('description'):
+                params['description'] = data.get('description')
+            if data.get('creation'):
+                params['creation'] = data.get('creation')
+            if data.get('keyword'):
+                params['keyword'] = data.get('keyword')
+            res = db.submit_project(params)
         except:
             pass
         finally:
@@ -386,15 +453,19 @@ class StoreReview(Resource):
 参数：
     项目编号project_code
     专家邮箱expert_email
+    专家评分score
+    评审意见suggestion
 '''
 class SubmitReview(Resource):
-    def get(self):
+    def post(self):
         res = {"state": "fail"}
         try:
-            data = request.args
+            data = request.get_json()
             project_code = data.get('project_code')
             expert_email = data.get('expert_email')
-            res = db.submit_review(project_code, expert_email)
+            score = data.get('score')
+            suggestion = data.get('suggestion')
+            res = db.submit_review(project_code, expert_email, score, suggestion)
         except:
             pass
         finally:

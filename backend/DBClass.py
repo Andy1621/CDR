@@ -56,6 +56,7 @@ class DbOperate:
                 filename = project_code + ".html"
                 replace_apply_html(params, filename)
                 res['state'] = 'success'
+                res['reason'] = ''
             else:
                 res['reason'] = "项目编号不存在"
         except:
@@ -106,6 +107,7 @@ class DbOperate:
                 }
                 self.getCol('project').insert_one(t_project)
                 res['state'] = 'success'
+                res['reason'] = ''
                 res['project_code'] = code
                 # filename = code + ".html"
                 # replace_apply_html(t_project['registration_form'], filename)
@@ -137,6 +139,7 @@ class DbOperate:
                         })
                 project['project_files'] = temp_files
                 res['project'] = project
+                res['reason'] = ''
             else:
                 res['reason'] = "项目不存在"
         except:
@@ -157,6 +160,7 @@ class DbOperate:
                 html_url = Config.DOMAIN_NAME + "/static/export_html/" + filename
                 res['state'] = 'success'
                 res['html_url'] = html_url
+                res['reason'] = ''
             else:
                 res['reason'] = "项目不存在"
         except:
@@ -188,6 +192,7 @@ class DbOperate:
                     os.remove(html_path)
                     self.getCol('project').remove({'project_code': project_code})
                     res['state'] = 'success'
+                    res['reason'] = ''
             else:
                 res['reason'] = "项目不存在"
         except:
@@ -198,16 +203,21 @@ class DbOperate:
     '''
     提交项目报名
     '''
-    def submit_project(self, project_code):
+    def submit_project(self, params):
         res = {'state': 'fail', 'reason': "未知错误"}
         try:
+            project_code = params['workCode']
             project = self.getCol('project').find_one({'project_code': project_code})
             if project:
+                if 'mainTitle' in params.keys():
+                    project['project_name'] = params['mainTitle']
+                project['registration_form'] = params
                 project['project_status'] = 0
                 self.getCol('project').update_one({'project_code': project_code}, {'$set': project})
+                filename = project_code + ".html"
+                replace_apply_html(params, filename)
                 res['state'] = 'success'
-            else:
-                res['reason'] = "项目编号不存在"
+                res['reason'] = ''
         except:
             pass
         finally:
@@ -237,6 +247,7 @@ class DbOperate:
                     'competition_name': competition_name['competition_name']
                 })
             res['state'] = 'success'
+            res['reason'] = ''
             res['project_list'] = project_list
         except:
             pass
@@ -256,7 +267,9 @@ class DbOperate:
                 review['suggestion'] = suggestion
                 self.getCol('expert_project').update_one({'project_code': project_code,
                                                           'expert_email': expert_email}, {'$set': review})
+                res['status'] = review['status']
                 res['state'] = 'success'
+                res['reason'] = ''
             else:
                 res['reason'] = "项目不存在或专家没有权利评审该项目"
         except:
@@ -268,16 +281,20 @@ class DbOperate:
     '''
     提交评审意见
     '''
-    def submit_review(self, project_code, expert_email):
+    def submit_review(self, project_code, expert_email, score, suggestion):
         res = {'state': 'fail', 'reason': "未知错误"}
         try:
             review = self.getCol('expert_project').find_one({'project_code': project_code,
                                                              'expert_email': expert_email})
             if review and review['status'] == 0:
+                review['score'] = score
+                review['suggestion'] = suggestion
                 review['status'] = 2
                 self.getCol('expert_project').update_one({'project_code': project_code,
                                                           'expert_email': expert_email}, {'$set': review})
                 res['state'] = 'success'
+                res['status'] = review['status']
+                res['reason'] = ''
             else:
                 res['reason'] = "项目不存在或专家没有权利评审该项目"
         except:
@@ -296,6 +313,7 @@ class DbOperate:
             if review and review['status'] == 0 or review and review['status'] == 2:
                 review.pop('_id')
                 res['state'] = 'success'
+                res['reason'] = '' 
                 res['review'] = review
             else:
                 res['reason'] = "项目不存在或专家没有权利评审该项目"
@@ -520,11 +538,13 @@ class DbOperate:
             accept_addr = "http://localhost:8080/#/?token=" + invitation_code + \
                           "&email=" + mail + \
                           "&project_code=" + project_code + "&is_accept=" + "true"
-            accept_addr = "<a href=\"" + accept_addr + "\">" + accept_addr + "</a>"
+            # accept_addr = "<a href=\"" + accept_addr + "\">" + accept_addr + "</a>"
+            accept_addr = "<a href=\"" + accept_addr + "\">" + "接受评审" + "</a>"
             refuse_addr = "http://localhost:8080/#/?token=" + invitation_code + \
                           "&email=" + mail + \
                           "&project_code=" + project_code + "&is_accept=" + "false"
-            refuse_addr = "<a href=\"" + refuse_addr + "\">" + refuse_addr + "</a>"
+            # refuse_addr = "<a href=\"" + refuse_addr + "\">" + refuse_addr + "</a>"
+            refuse_addr = "<a href=\"" + refuse_addr + "\">" + "拒绝评审" + "</a>"
             message = "<p>如果您接受此邀请，请点击链接: " + accept_addr + " 进入竞赛系统。\n</p>" + \
                       "<p>如果您希望拒绝此邀请，请点击链接: " + refuse_addr + " 。\n</p>"
             if self.send_mail(mail, header, message) is False:

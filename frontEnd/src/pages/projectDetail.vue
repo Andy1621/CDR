@@ -25,7 +25,7 @@
                         <Input v-model="basicInfo.keyword" readonly></Input>
                     </FormItem>
                     <FormItem label="项目介绍">
-                        <Input v-model="basicInfo.description" type="textarea" readonly></Input>
+                        <Input v-model="basicInfo.description" type="textarea" :rows="4" readonly></Input>
                     </FormItem>
                 </Form>
             </div>
@@ -91,6 +91,16 @@
             }, function (res) {
                 console.log(res)
             })
+            this.$http.post(this.$baseURL + '/api/v1/get_review', {
+                expert_email: this.$cookie.get('mail'),
+                project_code: this.$route.query.project_id
+            }).then(function (res) {
+                console.log(res)
+                this.reviewInfo.marks=res.body.review.score;
+                this.reviewInfo.comment=res.body.review.suggestion
+            }, function (res) {
+                console.log(res)
+            })
         },
         methods: {
             saveReview() {
@@ -113,6 +123,7 @@
                 })
             },
             upReview() {
+                this.saveReview()
                 if (this.reviewInfo.marks == '' || this.reviewInfo.comment == '') {
                     alert("请将评审信息填写完整！")
                     return
@@ -122,9 +133,7 @@
                     this.$http.get(url, {
                         params: {
                             project_code: this.$route.query.project_id,
-                            expert_email: this.$cookie.get('mail'),
-                            score: this.reviewInfo.marks,
-                            suggestion: this.reviewInfo.comment
+                            expert_email: this.$cookie.get('mail')
                         }
                     }).then(function (res) {
                         console.log(res)
