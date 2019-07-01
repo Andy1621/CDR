@@ -2,7 +2,7 @@
   <div id="wrapper">
     <nav class="navbar navbar-default navbar-fixed-top">
       <div class="brand" style="padding: 10px 0px 0px 10px">
-        <router-link :to="{path:'/'}"><img src="../../static/picture/melon.png" width="150px" alt="997雨我无瓜" class="img-responsive logo"></router-link>
+        <router-link :to="{path:'/index'}"><img src="../../static/picture/melon.png" width="150px" alt="997雨我无瓜" class="img-responsive logo"></router-link>
       </div>
       <div class="container-fluid">
         <div id="navbar-menu">

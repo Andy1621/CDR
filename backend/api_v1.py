@@ -119,7 +119,7 @@ class DownloadFiles(Resource):
             res['state'] = 'Success'
             res['url'] = Config.DOMAIN_NAME + '/static/zip/' + project_code + '.zip'
         except:
-            pass
+            res['reason'] = '可能是打包错误，查看本地是否有数据库中的数据'
         finally:
             return jsonify(res)
 

@@ -35,10 +35,10 @@
             <div v-show="current==2">
                 <Form ref="reviewInfo" :model="reviewInfo" :label-width="80">
                     <FormItem label="评分">
-                        <Input v-model="reviewInfo.marks"></Input>
+                        <Input v-model="reviewInfo.marks" :disabled="disable" placeholder="请输入评分，0-100"></Input>
                     </FormItem>
                     <FormItem label="评价">
-                        <Input v-model="reviewInfo.comment" type="textarea"></Input>
+                        <Input v-model="reviewInfo.comment" :disabled="disable" type="textarea" placeholder="请在此输入您的评价"></Input>
                     </FormItem>
                 </Form>
             </div>
@@ -66,13 +66,20 @@
         },
         data() {
             return {
-                current: 0,
+                disable: false,
+                current: 2,
                 basicInfo: {},
                 reviewInfo: {
                     marks: '',
                     comment: ''
                 },
                 dictionary: {
+                    dictionary: [
+                        "请您先接受该项目的评审",
+                        "",
+                        "您已经拒绝该项目的评审",
+                        "您已经评审过该做品"
+                    ],
                     A: '机械与控制（包括机械、仪器仪表、自动化控制、工程、交通、建筑等）',
                     B: '信息技术（包括计算机、电信、通讯、电子等）',
                     C: '数理（包括数学、物理、地球与空间科学等）',
@@ -95,9 +102,15 @@
                 expert_email: this.$cookie.get('mail'),
                 project_code: this.$route.query.project_id
             }).then(function (res) {
-                console.log(res)
-                this.reviewInfo.marks=res.body.review.score;
-                this.reviewInfo.comment=res.body.review.suggestion
+                console.log(res);
+                let temp = res.body.review;
+                this.reviewInfo.marks = temp.score;
+                this.reviewInfo.comment = temp.suggestion;
+                this.status = temp.status;
+                if (temp.status !== 0) {
+                    this.disable = true
+                    alert(this.dictionary.dictionary[temp.status + 1])
+                }
             }, function (res) {
                 console.log(res)
             })
@@ -123,20 +136,23 @@
                 })
             },
             upReview() {
-                this.saveReview()
-                if (this.reviewInfo.marks == '' || this.reviewInfo.comment == '') {
-                    alert("请将评审信息填写完整！")
-                    return
+                if (this.reviewInfo.marks === '' || this.reviewInfo.comment === '') {
+                    alert("请将评审信息填写完整！");
+                    return;
+                } else if(Number(this.reviewInfo.marks) < 0 || Number(this.reviewInfo.marks) > 100){
+                    alert("分数在0-100内，请填写正确的评分！")
                 } else {
-                    this.$Message.info('提交成功')
-                    let url = this.$baseURL + '/api/v1/submit_review'
-                    this.$http.get(url, {
-                        params: {
+                    let url = this.$baseURL + '/api/v1/submit_review';
+                    this.$http.post(url, {
                             project_code: this.$route.query.project_id,
-                            expert_email: this.$cookie.get('mail')
+                            expert_email: this.$cookie.get('mail'),
+                            score: this.reviewInfo.marks,
+                            suggestion: this.reviewInfo.comment
                         }
-                    }).then(function (res) {
-                        console.log(res)
+                    ).then(function (res) {
+                        console.log(res);
+                        this.disable = true;
+                        alert('提交成功');
                     }, function (res) {
                         console.log(res)
                     })

@@ -1,13 +1,16 @@
 <template>
   <div>
     <NavBar></NavBar>
-    <div class="body">
-      <h3>专家评审状况</h3>
-      <Table stripe border :columns="columns1" :data="rows1" height="555" ref="table"></Table>
+    <div style="position: relation; left: 50%; top: 123px" >
+      <Button type="primary" ghost @click="$router.go(-1)">返回上一页</Button>
     </div>
     <div class="body">
+      <h3>专家评审状况</h3>
+      <Table stripe border :columns="columns1" :data="rows1" height="450" ref="table"></Table>
+    </div>
+    <div class="body2">
       <h3>邀请专家</h3>
-      <Table stripe border :columns="columns2" :data="rows2" height="555" ref="table"></Table>
+      <Table stripe border :columns="columns2" :data="rows2" height="450" ref="table"></Table>
       <Modal
         v-model="detail"
         title="评审结果详情"
@@ -186,15 +189,27 @@
 <style scoped>
   .body{
     left: 280px;
+    top: 100px;
     position: relative;
     float: left;
-    top: 100px;
     border: 1px dashed black;
     border-radius: 5px;
-    margin-right: 0px;
     /*margin: 0px 500px 0px 0px;*/
     padding: 0px 20px 10px 20px;
-    width: 40%;
+    width: 35%;
+    /*text-align: center;*/
+    color: black;
+  }
+  .body2{
+    left: 280px;
+    top: 100px;
+    position: relative;
+    float: left;
+    border: 1px dashed black;
+    border-radius: 5px;
+    /*margin: 0px 500px 0px 0px;*/
+    padding: 0px 20px 10px 20px;
+    width: 45%;
     /*text-align: center;*/
     color: black;
   }
