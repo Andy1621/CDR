@@ -38,7 +38,8 @@
                         <Input v-model="reviewInfo.marks" :disabled="disable" placeholder="请输入评分，0-100"></Input>
                     </FormItem>
                     <FormItem label="评价">
-                        <Input v-model="reviewInfo.comment" :disabled="disable" type="textarea" placeholder="请在此输入您的评价"></Input>
+                        <Input v-model="reviewInfo.comment" :disabled="disable" type="textarea"
+                               placeholder="请在此输入您的评价"></Input>
                     </FormItem>
                 </Form>
             </div>
@@ -90,25 +91,31 @@
             }
         },
         created() {
-            let url = this.$baseURL + '/api/v1/get_project_detail'
+            let url = this.$baseURL + '/api/v1/get_project_detail';
             this.$http.get(url, {params: {project_code: this.$route.query.project_id}}).then(function (res) {
-                console.log(res)
-                this.basicInfo = res.body.project.registration_form
+                console.log(res);
+                this.basicInfo = res.body.project.registration_form;
                 this.basicInfo.type = this.dictionary[this.basicInfo.type]
             }, function (res) {
                 console.log(res)
-            })
+            });
             this.$http.post(this.$baseURL + '/api/v1/get_review', {
                 expert_email: this.$cookie.get('mail'),
                 project_code: this.$route.query.project_id
             }).then(function (res) {
                 console.log(res);
+                if (res.body.state === 'fail') {
+                    this.disable = true;
+                    alert("异常，请稍后再试！");
+                    this.$router.go(-1);
+                    return;
+                }
                 let temp = res.body.review;
                 this.reviewInfo.marks = temp.score;
                 this.reviewInfo.comment = temp.suggestion;
                 this.status = temp.status;
                 if (temp.status !== 0) {
-                    this.disable = true
+                    this.disable = true;
                     alert(this.dictionary.dictionary[temp.status + 1])
                 }
             }, function (res) {
@@ -139,7 +146,7 @@
                 if (this.reviewInfo.marks === '' || this.reviewInfo.comment === '') {
                     alert("请将评审信息填写完整！");
                     return;
-                } else if(Number(this.reviewInfo.marks) < 0 || Number(this.reviewInfo.marks) > 100){
+                } else if (Number(this.reviewInfo.marks) < 0 || Number(this.reviewInfo.marks) > 100) {
                     alert("分数在0-100内，请填写正确的评分！")
                 } else {
                     let url = this.$baseURL + '/api/v1/submit_review';
