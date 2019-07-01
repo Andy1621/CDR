@@ -785,6 +785,7 @@ class DbOperate:
             'C_List': [],
             'D_List': [],
             'com_status': '',
+            'competition_name': '',
         }
         project_collection = self.getCol('project')
         com_collection = self.getCol('competition')
@@ -793,7 +794,9 @@ class DbOperate:
             for item in project_collection.find({'competition_id': competition_id}, {'_id': 0}):
                 projects.append(item)
             com_status = com_collection.find_one({'_id': ObjectId(competition_id)})['com_status']
+            competition_name = com_collection.find_one({'_id': ObjectId(competition_id)})['competition_name']
             res['com_status'] = com_status
+            res['competition_name'] = competition_name
             if len(projects) > 0:
                 res['state'] = 'success'
                 res['reason'] = '成功获取竞赛作品列表'
