@@ -72,13 +72,17 @@
                                             let url = '';
                                             if (params.row.status=='已提交')
                                             {
-                                                url = '';
-                                                /*this.$http.get(url, {params:{projectID:p.row.projectID}).then(function (res) {
-                                                    location.href(res.body.url)
+                                                url = 'http://127.0.0.1:5000/api/v1/download_files';
+                                                this.$http.get(url, {params:{'project_code':'0001'}}).then(function (res) {
+                                                    // location.href(res.body.url)
+                                                    console.log(res.body)
+                                                    if(res.body.state!=='fail'){
+                                                        window.location.href = res.body.url;
+                                                    }
                                                 },function (res) {
                                                     console.log(res)
                                                 })
-                                                return;*/
+                                                return;
                                             }
                                             else
                                             {
