@@ -98,13 +98,13 @@
                                                 this.$Modal.confirm({
                                                     title:'是否确认删除',
                                                     onOk(){
-                                                        that.remove(params.index);
                                                         url = '';
                                                         this.$http.get(this.$baseURL + '/api/v1/delete_project', {params:{'project_code' : p.row.project_code}},{emulateJSON: true})
                                                             .then(function (res) {
                                                                 console.log(res.body)
                                                                 if(res.body.state == 'success'){
                                                                     this.$Message.success('成功删除')
+                                                                    that.remove(params.index);
                                                                 }
                                                                 else{
                                                                     this.$Message.error('删除失败 '+res.body.reason)
