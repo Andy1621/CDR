@@ -207,7 +207,7 @@ class DbOperate:
                 self.getCol('project').update_one({'project_code': project_code}, {'$set': project})
                 res['state'] = 'success'
             else:
-                res['reason'] = "项目不存在"
+                res['reason'] = "项目编号不存在"
         except:
             pass
         finally:
@@ -242,6 +242,7 @@ class DbOperate:
             pass
         finally:
             return res
+
     '''
     保存评审意见
     '''
@@ -275,7 +276,7 @@ class DbOperate:
             if review and review['status'] == 0:
                 review['status'] = 2
                 self.getCol('expert_project').update_one({'project_code': project_code,
-                                                   'expert_email': expert_email}, {'$set': review})
+                                                          'expert_email': expert_email}, {'$set': review})
                 res['state'] = 'success'
             else:
                 res['reason'] = "项目不存在或专家没有权利评审该项目"
@@ -284,6 +285,24 @@ class DbOperate:
         finally:
             return res
 
+    '''
+    获取评审意见
+    '''
+    def get_review(self, project_code, expert_email):
+        res = {'state': 'fail', 'reason': "未知错误"}
+        try:
+            review = self.getCol('expert_project').find_one({'project_code': project_code,
+                                                             'expert_email': expert_email})
+            if review and review['status'] == 0 or review and review['status'] == 2:
+                review.pop('_id')
+                res['state'] = 'success'
+                res['review'] = review
+            else:
+                res['reason'] = "项目不存在或专家没有权利评审该项目"
+        except:
+            pass
+        finally:
+            return res
 ##############################################################################################
     '''
     检查邮箱是否已注册
@@ -686,7 +705,7 @@ class DbOperate:
         res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
         try:
             find_project = self.getCol(
-                'expert_project').find({'expert_mail': email, 'status': {'$ne': 1} })
+                'expert_project').find({'expert_mail': email, 'status': {'$ne': 1}})
             # 搜索到专家对应的列表
             if find_project:
                 project_lists = list()
