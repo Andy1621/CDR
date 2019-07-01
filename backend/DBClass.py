@@ -359,7 +359,7 @@ class DbOperate:
     '''
     注册专家用户
     '''
-    def create_user_expert(self, mail, username):
+    def create_user_expert(self, mail, username, field):
         res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
         try:
             check = self.check_mail(mail)
@@ -371,8 +371,8 @@ class DbOperate:
                           'mail': mail,
                           'password': "",
                           'user_type': 'expert',
-                          'invitation_code': invitation_code
-                           }
+                          'field': field,
+                          'invitation_code': invitation_code}
             user_list = self.getCol("user")
             user_list.insert_one(new_expert)
             res['state'] = 'success'
@@ -531,7 +531,6 @@ class DbOperate:
                 res['reason'] = "邮件发送失败"
                 return res
             res['state'] = 'success'
-            print("okokoooooooooooooooo")
         except:
             return res
         return res
@@ -569,14 +568,14 @@ class DbOperate:
                 expert_project.update_many({'expert_mail': mail, 'project_code': project_code}, {"$set": {'status': new_status}})
                 # res['operation_ok'] = True
             else:
-                1  # res['registered'] = False
+                1  # res['operation_ok'] = False
             res['state'] = 'success'
         except:
             return res
         return res
 
     '''
-    对于某个项目，返回邀请过和未邀请得专家列表
+    对于某个项目，返回邀请过和未邀请的专家列表
     '''
     def get_project_expert_list(self, project_code):
         res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
@@ -594,7 +593,7 @@ class DbOperate:
             for item0 in list_invited:
                 res_invited.append(item0)
                 invited.append(item0['expert_mail'])
-            list_all = user.find({'user_type': 'expert'}, {"_id": 0, "mail": 1, "username": 1})
+            list_all = user.find({'user_type': 'expert'}, {"_id": 0, "mail": 1, "username": 1, 'field': 1})
             list_uninvited = []
             for item1 in list_all:
                 if item1['mail'] not in invited:
@@ -745,7 +744,7 @@ class DbOperate:
         num_map = {
             -1: '编辑中',
             0: '已提交',
-            1: '通过初审，专家评审中',
+            1: '通过初审',
             2: '凉凉',
             3: '进入现场答辩',
             4: '优秀奖',
@@ -805,6 +804,7 @@ class DbOperate:
             'C_List': [],
             'D_List': [],
             'com_status': '',
+            'competition_name': '',
         }
         project_collection = self.getCol('project')
         com_collection = self.getCol('competition')
@@ -813,7 +813,9 @@ class DbOperate:
             for item in project_collection.find({'competition_id': competition_id}, {'_id': 0}):
                 projects.append(item)
             com_status = com_collection.find_one({'_id': ObjectId(competition_id)})['com_status']
+            competition_name = com_collection.find_one({'_id': ObjectId(competition_id)})['competition_name']
             res['com_status'] = com_status
+            res['competition_name'] = competition_name
             if len(projects) > 0:
                 res['state'] = 'success'
                 res['reason'] = '成功获取竞赛作品列表'
@@ -894,33 +896,43 @@ class DbOperate:
             return res
 
     '''
-    获取提交表数据
+    获取提交表数据以及该作品所属竞赛当前所处阶段
     '''
     def get_table_info(self, proj_id):
         res = {'state': 'fail', 'reason': '网络出错或BUG出现！'}
         try:
-            proj = self.getCol('project').find_one({'project_code': proj_id}, {'registration_form': 1})
+            proj = self.getCol('project').find_one({'project_code': proj_id}, {'registration_form': 1,
+                                                                               'competition_id': 1})
             if proj:
-                form = proj['registration_form']
-                form.pop('workCode')
-                # 将类别选项改为汉字值
-                if form['mainType'] == 'type1':
-                    form['mainType'] = '科技发明制作'
+                # 查找对应竞赛
+                competition = self.getCol('competition').find_one({'_id': ObjectId(proj['competition_id'])},
+                                                                  {'com_status': 1})
+                if competition:
+                    # 先处理作品表数据
+                    form = proj['registration_form']
+                    form.pop('workCode')
+                    # 将类别选项改为汉字值
+                    if form['mainType'] == 'type1':
+                        form['mainType'] = '科技发明制作'
+                    else:
+                        form['mainType'] = '调查报告和学术论文'
+                    # 将学历选项改为汉字值
+                    if form['education'] == 'A':
+                        form['education'] = '大专'
+                    elif form['education'] == 'B':
+                        form['education'] = '大学本科'
+                    elif form['education'] == 'C':
+                        form['education'] = '硕士研究生'
+                    else:
+                        form['education'] = '博士研究生'
+                    # 设置结果值
+                    form['com_status'] = competition['com_status']
+                    res['state'] = 'success'
+                    res['msg'] = form
                 else:
-                    form['mainType'] = '调查报告和学术论文'
-                # 将学历选项改为汉字值
-                if form['education'] == 'A':
-                    form['education'] = '大专'
-                elif form['education'] == 'B':
-                    form['education'] = '大学本科'
-                elif form['education'] == 'C':
-                    form['education'] = '硕士研究生'
-                else:
-                    form['education'] = '博士研究生'
-                res['state'] = 'success'
-                res['msg'] = form
+                    res['reason'] = '作品所属竞赛不存在'
             else:
-                res['reason'] = '该项目不存在'
+                res['reason'] = '该作品不存在'
             return res
         except:
             return res
