@@ -1,6 +1,11 @@
 <template>
   <div>
     <NavBar></NavBar>
+    <Breadcrumb>
+      <BreadcrumbItem to="/"></BreadcrumbItem>
+      <BreadcrumbItem to="/components/breadcrumb">Components</BreadcrumbItem>
+      <BreadcrumbItem>Breadcrumb</BreadcrumbItem>
+    </Breadcrumb>
     <div class="body">
       <h3>作品申请表</h3>
       <Steps :current="current" style="margin: 30px">
@@ -81,32 +86,33 @@
           <Row v-for="(item,index) in authorInfo.cooperators" :key="index">
             <h5>合作者{{index+1}}</h5>
             <Col span="8">
-              <FormItem label="姓名" :key="index" :prop="'cooperators.'+ index +'.name'" :rules="{required: true, message:'姓名不能为空', trigger: 'blur'}">
+              <FormItem label="姓名" :key="index" :prop="'cooperators.'+ index +'.name'" :rules="{required: false, message:'姓名不能为空', trigger: 'blur'}">
                 <Input v-model="item.name" readonly></Input>
               </FormItem>
             </Col>
             <Col span="8">
-              <FormItem label="学号" :key="index" :prop="'cooperators.'+ index +'.stu_id'" :rules="{required: true, message:'学号不能为空', trigger: 'blur'}">
-                <Input v-model="item.stu_id" readonly></Input>
+              <FormItem label="学号" :key="index" :prop="'cooperators.'+ index +'.stu_id'" :rules="{required: false, message:'学号不能为空', trigger: 'blur'}">
+                <Input v-model="item.stuId" readonly></Input>
               </FormItem>
             </Col>
             <Col span="8">
-              <FormItem label="现学历" :key="index" :prop="'cooperators.'+ index +'.edu'" :rules="{required: true, message:'请选择现学历', trigger: 'change'}">
-                <Select v-model="item.edu" :disabled="readonly">
-                  <Option value="A">A.专科</Option>
-                  <Option value="B">B.大学本科</Option>
-                  <Option value="C">C.硕士研究生</Option>
-                  <Option value="D">D.博士研究生</Option>
-                </Select>
+              <FormItem label="现学历" :key="index" :prop="'cooperators.'+ index +'.edu'" :rules="{required: false, message:'请选择现学历', trigger: 'change'}">
+                <Input v-model="item.education" readonly></Input>
+                <!--<Select v-model="item.edu" :disabled="readonly">-->
+                  <!--<Option value="A">A.专科</Option>-->
+                  <!--<Option value="B">B.大学本科</Option>-->
+                  <!--<Option value="C">C.硕士研究生</Option>-->
+                  <!--<Option value="D">D.博士研究生</Option>-->
+                <!--</Select>-->
               </FormItem>
             </Col>
             <Col span="12">
-              <FormItem label="联系电话" :key="index" :prop="'cooperators.'+ index +'.phone'" :rules="{required: true, message:'联系电话不能为空', trigger: 'blur'}">
+              <FormItem label="联系电话" :key="index" :prop="'cooperators.'+ index +'.phone'" :rules="{required: false, message:'联系电话不能为空', trigger: 'blur'}">
                 <Input v-model="item.phone" readonly></Input>
               </FormItem>
             </Col>
             <Col span="12">
-              <FormItem label="邮箱"  :key="index" :prop="'cooperators.'+ index +'.email'" :rules="{required: true, message:'邮箱为空或格式错误', type: 'email', trigger: 'blur'}">
+              <FormItem label="邮箱"  :key="index" :prop="'cooperators.'+ index +'.email'" :rules="{required: false, message:'邮箱为空或格式错误', type: 'email', trigger: 'blur'}">
                 <Input v-model="item.email" readonly></Input>
               </FormItem>
             </Col>
@@ -136,8 +142,8 @@
       <Button type="primary" shape="circle" :disabled="current == 0" @click="pre_step" icon="ios-arrow-back" style="margin-right: 30%"></Button>
       <Button type="primary" shape="circle" :disabled="current == 2" @click="next_step" icon="ios-arrow-forward"></Button>
       <div style="margin-top: 10px">
-        <Button type="primary" v-show="current == 2" style="margin-right:6%" @click="pass('True')" >通过</Button>
-        <Button type="error" v-show="current == 2" @click="pass('False')">不通过</Button>
+        <Button type="primary" v-show="current == 2" :disabled="show" style="margin-right:6%" @click="pass('True')" >通过</Button>
+        <Button type="error" v-show="current == 2" :disabled="show" @click="pass('False')">不通过</Button>
       </div>
     </div>
   </div>
@@ -154,6 +160,7 @@
         return {
           readonly: true,
           current: 0,
+          show:false,
           basicInfo: {
             id:'1',
             project: 'ZebraScience',
@@ -312,6 +319,8 @@
               this.$Message.info("获取数据失败")
             }
             else{
+              if(detail.com_status > 1)
+                this.show=true;
               this.basicInfo.project = detail.mainTitle;
               this.basicInfo.college = detail.department;
               this.basicInfo.type = detail.mainType;
@@ -331,6 +340,7 @@
               this.projectInfo.introduction = detail.description;
               this.projectInfo.innovation = detail.creation;
               this.projectInfo.keyword = detail.keyword;
+              this.authorInfo.cooperators = detail.applier;
               switch (detail.type) {
                 case 'A':
                   this.projectInfo.type = '机械与控制（包括机械、仪器仪表、自动化控制、工程、交通、建筑等）';
@@ -370,7 +380,13 @@
               this.$Message.info("评审失败")
             }
             else{
-              this.$Message.info("评审成功")
+              this.$Notice.open({title: "评审完成",duration:0.5});
+              this.$router.push({
+                path: '/stageProList',
+                query: {
+                  competitionID:this.$route.query.competition_id,
+                }
+              })
             }
           }, function (res) {
             alert(res);
