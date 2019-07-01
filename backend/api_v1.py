@@ -460,7 +460,7 @@ class SubmitReview(Resource):
     def post(self):
         res = {"state": "fail"}
         try:
-            data = request.args
+            data = request.get_json()
             project_code = data.get('project_code')
             expert_email = data.get('expert_email')
             score = data.get('score')
