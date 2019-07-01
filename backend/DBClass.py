@@ -260,12 +260,12 @@ class DbOperate:
         res = {'state': 'fail', 'reason': "未知错误"}
         try:
             review = self.getCol('expert_project').find_one({'project_code': project_code,
-                                                             'expert_email': expert_email})
+                                                             'expert_mail': expert_email})
             if review and review['status'] == 0:
                 review['score'] = score
                 review['suggestion'] = suggestion
                 self.getCol('expert_project').update_one({'project_code': project_code,
-                                                          'expert_email': expert_email}, {'$set': review})
+                                                          'expert_mail': expert_email}, {'$set': review})
                 res['status'] = review['status']
                 res['state'] = 'success'
                 res['reason'] = ''
@@ -284,13 +284,15 @@ class DbOperate:
         res = {'state': 'fail', 'reason': "未知错误"}
         try:
             review = self.getCol('expert_project').find_one({'project_code': project_code,
-                                                             'expert_email': expert_email})
+                                                             'expert_mail': expert_email})
+
+            print("duan4")
             if review and review['status'] == 0:
                 review['score'] = score
                 review['suggestion'] = suggestion
                 review['status'] = 2
                 self.getCol('expert_project').update_one({'project_code': project_code,
-                                                          'expert_email': expert_email}, {'$set': review})
+                                                          'expert_mail': expert_email}, {'$set': review})
                 res['state'] = 'success'
                 res['status'] = review['status']
                 res['reason'] = ''
@@ -328,11 +330,11 @@ class DbOperate:
         res = {'state': 'fail', 'reason': "未知错误"}
         try:
             review = self.getCol('expert_project').find_one({'project_code': project_code,
-                                                             'expert_email': expert_email})
+                                                             'expert_mail': expert_email})
             if review and review['status'] == -1:
                 review['status'] = 0
                 self.getCol('expert_project').update_one({'project_code': project_code,
-                                                          'expert_email': expert_email}, {'$set': review})
+                                                          'expert_mail': expert_email}, {'$set': review})
                 res['state'] = 'success'
                 res['status'] = review['status']
                 res['reason'] = ''
@@ -350,11 +352,11 @@ class DbOperate:
         res = {'state': 'fail', 'reason': "未知错误"}
         try:
             review = self.getCol('expert_project').find_one({'project_code': project_code,
-                                                             'expert_email': expert_email})
+                                                             'expert_mail': expert_email})
             if review and review['status'] == -1:
                 review['status'] = 1
                 self.getCol('expert_project').update_one({'project_code': project_code,
-                                                          'expert_email': expert_email}, {'$set': review})
+                                                          'expert_mail': expert_email}, {'$set': review})
                 res['state'] = 'success'
                 res['status'] = review['status']
                 res['reason'] = ''
@@ -579,12 +581,14 @@ class DbOperate:
                 return res
             comp_name = comp["competition_name"]
             header = comp_name + "项目评审邀请"
-            accept_addr = "http://localhost:8080/#/?token=" + invitation_code + \
+            # front_ip = "http://localhost:8080"
+            front_ip = "http://114.116.189.128:8080"
+            accept_addr = front_ip + "/#/?token=" + invitation_code + \
                           "&email=" + mail + \
                           "&project_code=" + project_code + "&is_accept=" + "true"
             # accept_addr = "<a href=\"" + accept_addr + "\">" + accept_addr + "</a>"
             accept_addr = "<a href=\"" + accept_addr + "\">" + "接受评审" + "</a>"
-            refuse_addr = "http://localhost:8080/#/?token=" + invitation_code + \
+            refuse_addr = front_ip + "/#/?token=" + invitation_code + \
                           "&email=" + mail + \
                           "&project_code=" + project_code + "&is_accept=" + "false"
             # refuse_addr = "<a href=\"" + refuse_addr + "\">" + refuse_addr + "</a>"
@@ -794,6 +798,7 @@ class DbOperate:
                         'status': status
                     }
                     project_lists.append(project_list)
+
                 res['state'] = 'Success'
                 res['reason'] = 'None'
                 res['project_lists'] = project_lists
