@@ -345,10 +345,9 @@ class DbOperate:
             return res
 
     '''
-    接受评审
+    拒绝评审
     '''
-
-    def review_review(self, project_code, expert_email):
+    def refuse_review(self, project_code, expert_email):
         res = {'state': 'fail', 'reason': "未知错误"}
         try:
             review = self.getCol('expert_project').find_one({'project_code': project_code,
