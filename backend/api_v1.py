@@ -329,7 +329,7 @@ class DeleteProject(Resource):
     20.关键词keyword
 '''
 class SubmitProject(Resource):
-    def get(self):
+    def post(self):
         res = {"state": "fail"}
         try:
             data = request.get_json()
