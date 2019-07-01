@@ -557,7 +557,7 @@ class DbOperate:
     '''
     向专家发送邀请邮件
     '''
-    def invite_mail(self, mail, expert_name, project_name, project_code):
+    def invite_mail(self, mail, project_code):
         res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
         try:
             user = self.getCol('user')
@@ -565,12 +565,14 @@ class DbOperate:
             if expert is None:
                 res['reason'] = "未找到专家"
                 return res
+            expert_name = expert["username"]
             invitation_code = expert['invitation_code']
             project = self.getCol('project')
             pro = project.find_one({'project_code': project_code})
             if pro is None:
                 res['reason'] = "未找到项目"
                 return res
+            project_name = pro["project_name"]
             comp_code = pro["competition_id"]
             competition = self.getCol('competition')
             comp = competition.find_one({'_id': ObjectId(comp_code)})
