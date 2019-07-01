@@ -875,33 +875,43 @@ class DbOperate:
             return res
 
     '''
-    获取提交表数据
+    获取提交表数据以及该作品所属竞赛当前所处阶段
     '''
     def get_table_info(self, proj_id):
         res = {'state': 'fail', 'reason': '网络出错或BUG出现！'}
         try:
-            proj = self.getCol('project').find_one({'project_code': proj_id}, {'registration_form': 1})
+            proj = self.getCol('project').find_one({'project_code': proj_id}, {'registration_form': 1,
+                                                                               'competition_id': 1})
             if proj:
-                form = proj['registration_form']
-                form.pop('workCode')
-                # 将类别选项改为汉字值
-                if form['mainType'] == 'type1':
-                    form['mainType'] = '科技发明制作'
+                # 查找对应竞赛
+                competition = self.getCol('competition').find_one({'_id': ObjectId(proj['competition_id'])},
+                                                                  {'com_status': 1})
+                if competition:
+                    # 先处理作品表数据
+                    form = proj['registration_form']
+                    form.pop('workCode')
+                    # 将类别选项改为汉字值
+                    if form['mainType'] == 'type1':
+                        form['mainType'] = '科技发明制作'
+                    else:
+                        form['mainType'] = '调查报告和学术论文'
+                    # 将学历选项改为汉字值
+                    if form['education'] == 'A':
+                        form['education'] = '大专'
+                    elif form['education'] == 'B':
+                        form['education'] = '大学本科'
+                    elif form['education'] == 'C':
+                        form['education'] = '硕士研究生'
+                    else:
+                        form['education'] = '博士研究生'
+                    # 设置结果值
+                    form['com_status'] = competition['com_status']
+                    res['state'] = 'success'
+                    res['msg'] = form
                 else:
-                    form['mainType'] = '调查报告和学术论文'
-                # 将学历选项改为汉字值
-                if form['education'] == 'A':
-                    form['education'] = '大专'
-                elif form['education'] == 'B':
-                    form['education'] = '大学本科'
-                elif form['education'] == 'C':
-                    form['education'] = '硕士研究生'
-                else:
-                    form['education'] = '博士研究生'
-                res['state'] = 'success'
-                res['msg'] = form
+                    res['reason'] = '作品所属竞赛不存在'
             else:
-                res['reason'] = '该项目不存在'
+                res['reason'] = '该作品不存在'
             return res
         except:
             return res

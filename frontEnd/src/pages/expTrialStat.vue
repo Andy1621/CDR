@@ -77,16 +77,21 @@
           {
             title: '专家名称',
             key: 'username',
-            width: 140
+            width: 100
           },
           {
             title: '专家邮箱',
             key: 'mail'
           },
           {
+            title: '研究领域',
+            key: 'field',
+            width: 140
+          },
+          {
             title: '操作',
             key: 'oper',
-            width: 160,
+            width: 120,
             align: 'center',
             render: (h, params) => {
               return h('div', [
