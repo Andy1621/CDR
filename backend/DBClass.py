@@ -321,6 +321,50 @@ class DbOperate:
             pass
         finally:
             return res
+
+    '''
+    接受评审
+    '''
+    def accept_review(self, project_code, expert_email):
+        res = {'state': 'fail', 'reason': "未知错误"}
+        try:
+            review = self.getCol('expert_project').find_one({'project_code': project_code,
+                                                             'expert_email': expert_email})
+            if review and review['status'] == -1:
+                review['status'] = 0
+                self.getCol('expert_project').update_one({'project_code': project_code,
+                                                          'expert_email': expert_email}, {'$set': review})
+                res['state'] = 'success'
+                res['status'] = review['status']
+                res['reason'] = ''
+            else:
+                res['reason'] = "项目不存在或专家没有权利处理是否评审"
+        except:
+            pass
+        finally:
+            return res
+
+    '''
+    拒绝评审
+    '''
+    def refuse_review(self, project_code, expert_email):
+        res = {'state': 'fail', 'reason': "未知错误"}
+        try:
+            review = self.getCol('expert_project').find_one({'project_code': project_code,
+                                                             'expert_email': expert_email})
+            if review and review['status'] == -1:
+                review['status'] = 1
+                self.getCol('expert_project').update_one({'project_code': project_code,
+                                                          'expert_email': expert_email}, {'$set': review})
+                res['state'] = 'success'
+                res['status'] = review['status']
+                res['reason'] = ''
+            else:
+                res['reason'] = "项目不存在或专家没有权利处理是否评审"
+        except:
+            pass
+        finally:
+            return res
 ##############################################################################################
     '''
     检查邮箱是否已注册

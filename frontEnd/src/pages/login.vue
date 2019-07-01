@@ -13,7 +13,7 @@
                     <Input v-model="password" type="password" @keyup.enter.native="login" prefix="md-lock" placeholder="请输入密码" clearable size="large"></Input>
                     <Button type="primary" class="btn" size="large" shape="circle" @click="login">登录</Button>
                     <div class="box-body-foot" v-if="role==='student'">没有账号？<span style="color: #2db7f5;cursor:pointer" @click="register=!register">点击注册</span></div>
-                    <div class="box-body-foot" v-if="role==='professor'">邀请码失效？<span style="color: #2db7f5;cursor:pointer" @click="professorRegister=!professorRegister">点击注册</span></div>
+                    <div style="display: none" class="box-body-foot" v-if="role==='professor'">邀请码失效？<span style="color: #2db7f5;cursor:pointer" @click="professorRegister=!professorRegister">点击注册</span></div>
                     <Modal
                         v-model="register"
                         title="注册"
@@ -85,7 +85,7 @@
             let messageContent = ["成功接收评审", "您已经接收该作品的评审", "您已经拒绝该作品的评审", "您已经评审过该作品"];
             if(route.token)
             {
-                let url = "http://127.0.0.1:5000/api/v1/check_code";
+                let url = this.$baseURL + "/api/v1/check_code";
                 this.$http.post(url, {
                     mail: route.email,
                     invitation_code: route.token,
@@ -113,7 +113,7 @@
                         messageContent[2]+='，您可以登录或者退出'
                         this.role='professor'
                     }
-                    this.$Message.info(messageContent[res.body.old_status+1])
+                    alert(messageContent[res.body.old_status+1])
                 },function (res) {
                     console.log(res);
                 });
@@ -133,7 +133,7 @@
                     password: this.password,
                     role: this.role,
                 };
-                this.$http.post("http://127.0.0.1:5000/api/v1/login",data).then(function (res) {
+                this.$http.post(this.$baseURL + "/api/v1/login",data).then(function (res) {
                     console.log(res);
                     if (res.body.state==='success')
                     {
@@ -167,7 +167,7 @@
                     admission_year: this.admission_year,
                     phone: this.phone
                 };
-                this.$http.post("http://127.0.0.1:5000/api/v1/registerstudent", data).then(function (res) {
+                this.$http.post(this.$baseURL + "/api/v1/registerstudent", data).then(function (res) {
                     console.log(res)
                     this.$cookie.set('mail',this.email);
                     this.$cookie.set('username',this.username);
@@ -180,7 +180,7 @@
                 })
             },
             okPro(){
-                let url = 'http://127.0.0.1:5000/api/v1/expert_set_password';
+                let url = this.$baseURL + '/api/v1/expert_set_password';
                 let data = {
                     mail: this.professorEmailRegister,
                     password: this.professorPasswordRegister
