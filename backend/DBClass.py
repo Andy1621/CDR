@@ -531,11 +531,13 @@ class DbOperate:
             accept_addr = "http://localhost:8080/#/?token=" + invitation_code + \
                           "&email=" + mail + \
                           "&project_code=" + project_code + "&is_accept=" + "true"
-            accept_addr = "<a href=\"" + accept_addr + "\">" + accept_addr + "</a>"
+            # accept_addr = "<a href=\"" + accept_addr + "\">" + accept_addr + "</a>"
+            accept_addr = "<a href=\"" + accept_addr + "\">" + 接受评审 + "</a>"
             refuse_addr = "http://localhost:8080/#/?token=" + invitation_code + \
                           "&email=" + mail + \
                           "&project_code=" + project_code + "&is_accept=" + "false"
-            refuse_addr = "<a href=\"" + refuse_addr + "\">" + refuse_addr + "</a>"
+            # refuse_addr = "<a href=\"" + refuse_addr + "\">" + refuse_addr + "</a>"
+            refuse_addr = "<a href=\"" + refuse_addr + "\">" + 拒绝评审 + "</a>"
             message = "<p>如果您接受此邀请，请点击链接: " + accept_addr + " 进入竞赛系统。\n</p>" + \
                       "<p>如果您希望拒绝此邀请，请点击链接: " + refuse_addr + " 。\n</p>"
             if self.send_mail(mail, header, message) is False:
