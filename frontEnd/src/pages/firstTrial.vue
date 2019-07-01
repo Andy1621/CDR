@@ -309,9 +309,8 @@
           this.$Message.info('Save Data')
         },
         getFormMess(){
-          let domin_url = 'http://127.0.0.1:5000';
           let params = {'proj_id':this.basicInfo.id};
-          this.$http.post(domin_url + "/api/vi/get_table_info",params,{
+          this.$http.post(this.$baseURL + "/api/vi/get_table_info",params,{
             headers:{
               'Content-Type':"application/json",
             }
@@ -370,9 +369,8 @@
           });
         },
         pass(re){
-          let domin_url = 'http://127.0.0.1:5000';
           let params = {'proj_id':this.basicInfo.id,'result':re};
-          this.$http.post(domin_url + "/api/vi/first_trial_change",params,{
+          this.$http.post(this.$baseURL + "/api/vi/first_trial_change",params,{
             headers:{
               'Content-Type':"application/json",
             }
