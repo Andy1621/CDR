@@ -99,17 +99,18 @@
                         alert('抱歉，系统出现问题，请稍后再试！');
                         return
                     }
-
                     if (!res.body.registered) {
                         this.professorRegister = true;
                         this.professorEmailRegister = route.email
                         messageContent[0]+='，请注册后评审'
                         messageContent[1]+='，请注册后评审'
+                        messageContent[2]+='，您可以修改密码或者退出该页面'
                     }
                     else {
                         this.email=route.email
                         messageContent[0]+='，请登录后评审'
                         messageContent[1]+='，请登录后评审'
+                        messageContent[2]+='，您可以登录或者退出'
                         this.role='professor'
                     }
                     this.$Message.info(messageContent[res.body.old_status+1])
