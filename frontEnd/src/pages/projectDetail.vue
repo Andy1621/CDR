@@ -136,7 +136,7 @@
                     if (res.body.state === 'fail') {
                         alert(res.body.reason)
                     } else {
-                        this.$Message.info('保存成功！')
+                        alert('保存成功！');
                     }
                 }, function (res) {
                     console.log(res)
