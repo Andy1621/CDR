@@ -309,8 +309,8 @@ class DbOperate:
         res = {'state': 'fail', 'reason': "未知错误"}
         try:
             review = self.getCol('expert_project').find_one({'project_code': project_code,
-                                                             'expert_email': expert_email})
-            if review and review['status'] == 0 or review and review['status'] == 2:
+                                                             'expert_mail': expert_email})
+            if review and (review['status'] == 0 or review['status'] == 2):
                 review.pop('_id')
                 res['state'] = 'success'
                 res['reason'] = '' 

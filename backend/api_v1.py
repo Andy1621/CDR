@@ -129,7 +129,7 @@ class GetExpertReviewList(Resource):
     def post(self):
         res = {"state": "fail"}
         try:
-            data = request.form
+            data = request.get_json()
             expert_email = data.get('email')
             db_res = db.expert_review_list(expert_email)
             res['project_lists'] = db_res['project_lists']
