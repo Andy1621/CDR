@@ -261,12 +261,12 @@ class DbOperate:
         res = {'state': 'fail', 'reason': "未知错误"}
         try:
             review = self.getCol('expert_project').find_one({'project_code': project_code,
-                                                             'expert_email': expert_email})
+                                                             'expert_mail': expert_email})
             if review and review['status'] == 0:
                 review['score'] = score
                 review['suggestion'] = suggestion
                 self.getCol('expert_project').update_one({'project_code': project_code,
-                                                          'expert_email': expert_email}, {'$set': review})
+                                                          'expert_mail': expert_email}, {'$set': review})
                 res['status'] = review['status']
                 res['state'] = 'success'
                 res['reason'] = ''
@@ -285,13 +285,15 @@ class DbOperate:
         res = {'state': 'fail', 'reason': "未知错误"}
         try:
             review = self.getCol('expert_project').find_one({'project_code': project_code,
-                                                             'expert_email': expert_email})
+                                                             'expert_mail': expert_email})
+
+            print("duan4")
             if review and review['status'] == 0:
                 review['score'] = score
                 review['suggestion'] = suggestion
                 review['status'] = 2
                 self.getCol('expert_project').update_one({'project_code': project_code,
-                                                          'expert_email': expert_email}, {'$set': review})
+                                                          'expert_mail': expert_email}, {'$set': review})
                 res['state'] = 'success'
                 res['status'] = review['status']
                 res['reason'] = ''
@@ -329,11 +331,11 @@ class DbOperate:
         res = {'state': 'fail', 'reason': "未知错误"}
         try:
             review = self.getCol('expert_project').find_one({'project_code': project_code,
-                                                             'expert_email': expert_email})
+                                                             'expert_mail': expert_email})
             if review and review['status'] == -1:
                 review['status'] = 0
                 self.getCol('expert_project').update_one({'project_code': project_code,
-                                                          'expert_email': expert_email}, {'$set': review})
+                                                          'expert_mail': expert_email}, {'$set': review})
                 res['state'] = 'success'
                 res['status'] = review['status']
                 res['reason'] = ''
@@ -351,11 +353,11 @@ class DbOperate:
         res = {'state': 'fail', 'reason': "未知错误"}
         try:
             review = self.getCol('expert_project').find_one({'project_code': project_code,
-                                                             'expert_email': expert_email})
+                                                             'expert_mail': expert_email})
             if review and review['status'] == -1:
                 review['status'] = 1
                 self.getCol('expert_project').update_one({'project_code': project_code,
-                                                          'expert_email': expert_email}, {'$set': review})
+                                                          'expert_mail': expert_email}, {'$set': review})
                 res['state'] = 'success'
                 res['status'] = review['status']
                 res['reason'] = ''
@@ -796,6 +798,7 @@ class DbOperate:
                         'status': status
                     }
                     project_lists.append(project_list)
+
                 res['state'] = 'Success'
                 res['reason'] = 'None'
                 res['project_lists'] = project_lists
