@@ -169,9 +169,9 @@
                 };
                 this.$http.post(this.$baseURL + "/api/v1/registerstudent", data).then(function (res) {
                     console.log(res)
-                    this.$cookie.set('mail',this.email);
+                    this.$cookie.set('mail',this.emailRegister);
                     this.$cookie.set('username',this.username);
-                    this.$cookie.set('role',this.role);
+                    this.$cookie.set('role', 'student');
                     this.$router.push({
                         path: '/index',
                     });

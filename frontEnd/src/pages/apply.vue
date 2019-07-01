@@ -174,7 +174,7 @@
                     :on-format-error="handleFormatErrorDoc"
                     :on-exceeded-size="handleMaxSizeDoc"
                     :before-upload="handleBeforeUploadDoc"
-                    action = "http://127.0.0.1:5000/api/v1/up_file"
+                    :action = "up_url"
                     :data = type_doc
                     style="display: inline-block">
                     <Button icon="ios-document" style="width: 100px">文档上传</Button>
@@ -214,7 +214,7 @@
                     :on-exceeded-size="handleMaxSize"
                     :before-upload="handleBeforeUpload"
                     type="select"
-                    action="http://127.0.0.1:5000/api/v1/up_file"
+                    :action="up_url"
                     :data = type_photo
                     style="display: inline-block">
 <!--                    <div style="width: 96px;height:96px;line-height: 100px;">-->
@@ -247,7 +247,7 @@
                     :on-format-error="handleFormatErrorVideo"
                     :on-exceeded-size="handleMaxSizeVideo"
                     :before-upload="handleBeforeUploadVideo"
-                    action="http://127.0.0.1:5000/api/v1/up_file"
+                    :action="up_url"
                     :data = type_video
                     style="display: inline-block">
                     <Button :disabled="uploadVideoList.length>=1" icon="ios-videocam" style="width: 100px">视频上传</Button>
@@ -276,6 +276,7 @@
                 project_id: '',
                 photo_cnt: 0,
                 change_btn_click: false,
+                up_url: this.$baseURL + '/api/v1/up_file',
                 type_doc: {
                     'file_type' : 'doc',
                     'project_code' : '',
