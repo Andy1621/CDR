@@ -154,8 +154,16 @@
             </div>
             <div class="form" v-show="current == 3">
                 <h4 style="margin-bottom: 20px">相关文档（仅限PDF）</h4>
+                <div v-if="readonly">
+                    <ul>
+                        <li v-for="item in uploadDocList" @click="docView(item)">
+                            <Icon type="md-document"></Icon>{{item.name}}
+                        </li>
+                    </ul>
+                </div>
                 <Upload
                     ref="uploadDoc"
+                    v-show="!readonly"
                     :show-upload-list="true"
                     :default-file-list="defaultDocList"
                     :on-success="handleSuccessDoc"
@@ -169,7 +177,7 @@
                     action = "http://127.0.0.1:5000/api/v1/up_file"
                     :data = type_doc
                     style="display: inline-block">
-                    <Button v-show="!readonly" icon="ios-document" style="width: 100px">文档上传</Button>
+                    <Button icon="ios-document" style="width: 100px">文档上传</Button>
                 </Upload>
                 <Divider/>
                 <h4 style="margin-bottom: 20px">作品图片（{{photo_cnt}}/5）</h4>
@@ -185,8 +193,16 @@
                         <Progress style="margin-top: 20px" v-if="item.showProgress" :percent="item.percentage" hide-info></Progress>
                     </template>
                 </div>
+                <div v-if="readonly">
+                    <ul>
+                        <li v-for="item in uploadPhotoList" @click="photoView(item)">
+                            <Icon type="ios-image"></Icon>{{item.name}}
+                        </li>
+                    </ul>
+                </div>
                 <Upload
                     ref="uploadPhoto"
+                    v-show="!readonly"
                     :show-upload-list="true"
                     :default-file-list="defaultPhotoList"
                     :on-success="handleSuccess"
@@ -204,15 +220,23 @@
 <!--                    <div style="width: 96px;height:96px;line-height: 100px;">-->
 <!--                        <Icon type="ios-camera" size="30"></Icon>-->
 <!--                    </div>-->
-                    <Button :disabled="photo_cnt>=5" v-show="!readonly" icon="ios-image" style="width: 100px">图片上传</Button>
+                    <Button :disabled="photo_cnt>=5" icon="ios-image" style="width: 100px">图片上传</Button>
                 </Upload>
                 <Modal title="预览图片" draggable v-model="visible">
                     <img :src="imgUrl" v-if="visible" style="width: 100%">
                 </Modal>
                 <Divider/>
                 <h4 style="margin-bottom: 20px">作品视频（仅限 mp4 flv）</h4>
+                <div v-if="readonly">
+                    <ul>
+                        <li v-for="item in uploadVideoList" @click="videoView(item)">
+                            <Icon type="ios-film"></Icon> {{item.name}}
+                        </li>
+                    </ul>
+                </div>
                 <Upload
                     ref="uploadVideo"
+                    v-show="!readonly"
                     :show-upload-list="true"
                     :default-file-list="defaultVideoList"
                     :on-success="handleSuccessVideo"
@@ -226,7 +250,7 @@
                     action="http://127.0.0.1:5000/api/v1/up_file"
                     :data = type_video
                     style="display: inline-block">
-                    <Button :disabled="uploadVideoList.length>=1" v-show="!readonly" icon="ios-videocam" style="width: 100px">视频上传</Button>
+                    <Button :disabled="uploadVideoList.length>=1" icon="ios-videocam" style="width: 100px">视频上传</Button>
                 </Upload>
             </div>
             <Button v-show="current == 3" @click="check_table">预览表格</Button>
@@ -247,7 +271,7 @@
         },
         data(){
             return{
-                current: 3,
+                current: 0,
                 readonly: false,
                 project_id: '',
                 photo_cnt: 0,
@@ -453,6 +477,12 @@
             save_data(){
                 // save data function
                 // this.$Message.info('Save Data')
+                console.log(this.authorInfo.birth)
+                var birth = this.authorInfo.birth.toString().replace('00:00:00','08:00:00')
+                this.authorInfo.birth = new Date(birth)
+                var enter = this.authorInfo.school_date.toString().replace('00:00:00','08:00:00')
+                this.authorInfo.school_date = new Date(enter)
+
                 let params = {
                     'workCode' : this.basicInfo.workCode,
                     'mainTitle' : this.basicInfo.project,
@@ -483,19 +513,59 @@
                         console.log(detail)
                         if(detail.state == 'fail'){
                             this.$Message.error('保存失败 ' + detail.reason)
+                            return false
                         }
                         else{
                             if(!this.change_btn_click)
                                 this.$Message.success('保存成功')
                             this.change_btn_click = false;
+                            return true
                         }
                     },function (res) {
                         this.$Message.error('Failed')
                     })
             },
             submit_project(){
-                this.save_data()
-                this.$http.get(this.$baseURL + '/api/v1/submit_project',{params:{'project_code': this.project_id}})
+                this.uploadPhotoList = this.$refs.uploadPhoto.fileList
+                this.uploadVideoList = this.$refs.uploadVideo.fileList
+                this.uploadDocList = this.$refs.uploadDoc.fileList
+                // console.log(this.uploadPhotoList)
+                // console.log(this.uploadVideoList)
+                // console.log(this.uploadDocList)
+                // console.log(this.$refs.uploadPhoto.fileList)
+                // console.log(this.$refs.uploadVideo.fileList)
+                // console.log(this.$refs.uploadDoc.fileList)
+
+                var birth = this.authorInfo.birth.toString().replace('00:00:00','08:00:00')
+                this.authorInfo.birth = new Date(birth)
+                var enter = this.authorInfo.school_date.toString().replace('00:00:00','08:00:00')
+                this.authorInfo.school_date = new Date(enter)
+
+                let params = {
+                    'workCode' : this.basicInfo.workCode,
+                    'mainTitle' : this.basicInfo.project,
+                    'department' : this.basicInfo.college,
+                    'mainType' : this.basicInfo.type,
+
+                    'name' : this.authorInfo.name,
+                    'stuId' : this.authorInfo.stu_id,
+                    'birthday' : this.authorInfo.birth,
+                    'education' : this.authorInfo.edu_background,
+                    'major' : this.authorInfo.major,
+                    'enterTime' : this.authorInfo.school_date,
+                    'totalTitle' : this.authorInfo.project,
+                    'address' : this.authorInfo.address,
+                    'phone' : this.authorInfo.phone,
+                    'email' : this.authorInfo.email,
+                    'applier' : this.authorInfo.cooperators,
+
+                    'title' : this.projectInfo.project,
+                    'type' : this.projectInfo.type,
+                    'description' : this.projectInfo.introduction,
+                    'creation' : this.projectInfo.innovation,
+                    'keyword' : this.projectInfo.keyword,
+                };
+                this.$http.post(this.$baseURL + '/api/v1/submit_project',params)
                     .then(function (res) {
                         var detail = res.body
                         console.log(detail)
@@ -578,6 +648,7 @@
             //upload video
             videoView(file){
                 console.log(file)
+                window.open(file.url)
             },
             handleSuccessVideo (res, file) {
                 console.log(res);
@@ -626,6 +697,7 @@
             //upload file
             docView(file){
                 console.log(file)
+                window.open(file.url)
             },
             handleSuccessDoc (res, file) {
                 console.log(res);
@@ -685,8 +757,6 @@
                             this.readonly = detail.project.project_status !== -1;
                             var form = detail.project.registration_form;
                             console.log(form)
-                            // console.log(this.defaultPhotoList)
-                            // console.log(this.defaultDocList)
                             this.fileList = detail.project.project_files;
                             for(let item of this.fileList){
                                 switch(item.file_type){
@@ -697,15 +767,10 @@
                                         });
                                         break;
                                     case 'photo':
-                                        // console.log('front')
-                                        // console.log(this.defaultPhotoList)
                                         this.defaultPhotoList.push({
                                             'name' : item.file_name,
                                             'url' : item.file_path,
                                         });
-                                        // console.log('back')
-                                        // console.log(this.defaultPhotoList)
-                                        // console.log(this.uploadPhotoList)
                                         break;
                                     case 'video':
                                         this.defaultVideoList.push({
@@ -760,9 +825,9 @@
             },
         },
         mounted () {
-            this.uploadDocList = this.$refs.uploadDoc.fileList;
-            this.uploadPhotoList = this.$refs.uploadPhoto.fileList;
-            this.uploadVideoList = this.defaultVideoList;
+            this.uploadDocList = this.$refs.uploadDoc.fileList.length>0 ? this.$refs.uploadDoc.fileList : this.defaultDocList;
+            this.uploadPhotoList = this.$refs.uploadPhoto.fileList.length>0 ? this.$refs.uploadPhoto.fileList : this.defaultPhotoList;
+            this.uploadVideoList = this.defaultVideoList.length>0 ? this.$refs.uploadVideo.fileList : this.defaultVideoList;
             // this.uploadPhotoList = this.defaultPhotoList;
             // console.log(this.uploadPhotoList)
             //设置Message默认属性
@@ -840,5 +905,20 @@
     }
     #sidebar-nav.sidebar{
         padding-top: 0px;
+    }
+    ul{
+        list-style-type: none;
+    }
+    li{
+        cursor: default;
+        padding: 5px 10px 5px 10px;
+        margin: 1px;
+        width: fit-content;
+        border-radius: 5px;
+        color: #666666;
+    }
+    li:hover{
+        background: #eeeeee;
+        color: #2b85e4;
     }
 </style>
