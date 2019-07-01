@@ -127,7 +127,7 @@ class DownloadFiles(Resource):
 # 获取专家评审项目信息
 class GetExpertReviewList(Resource):
     def post(self):
-        res = {"state":"fail"}
+        res = {"state": "fail"}
         try:
             data = request.form
             expert_email = data.get('email')
@@ -302,7 +302,7 @@ class DeleteProject(Resource):
 '''
 提交项目报名
 参数：
-    项目编号project_code
+    项目编码project_code
 '''
 class SubmitProject(Resource):
     def get(self):
@@ -334,6 +334,25 @@ class GetProjectList(Resource):
         finally:
             return jsonify(res)
 
+
+'''
+获取评审意见
+参数：
+    项目编号project_code
+    专家邮箱expert_email
+'''
+class GetReview(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            project_code = data.get('project_code')
+            expert_email = data.get('expert_email')
+            res = db.get_review(project_code, expert_email)
+        except:
+            pass
+        finally:
+            return jsonify(res)
 
 '''
 保存评审意见
@@ -604,6 +623,7 @@ api.add_resource(DownloadFiles, '/api/v1/download_files', endpoint='downloadFile
 api.add_resource(GetExpertReviewList, '/api/v1/get_expert_review_list', endpoint='expertReviewList')
 api.add_resource(SubmitReview, '/api/v1/submit_review', endpoint='submitReview')
 api.add_resource(StoreReview, '/api/v1/store_review', endpoint='storeReview')
+api.add_resource(GetReview, '/api/v1/get_review', endpoint='getReview')
 api.add_resource(check_code, '/api/v1/check_code', endpoint='check_code')
 api.add_resource(expert_set_password, '/api/v1/expert_set_password', endpoint='expert_set_password')
 api.add_resource(invite_mail, '/api/v1/invite_mail', endpoint='invite_mail')
