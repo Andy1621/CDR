@@ -236,7 +236,6 @@ class DbOperate:
                                                      'project_status': 1})
             project_list = list()
             for p in temp_list:
-                print(p['competition_id'])
                 competition_name = self.getCol('competition').find_one({'_id': ObjectId(p['competition_id'])},
                                                                        {'competition_name': 1})
                 project_list.append({
@@ -480,7 +479,6 @@ class DbOperate:
         try:
             user = self.getCol('user')
             expert = user.find_one({'user_type': 'expert', 'mail': mail})
-            print(expert)
             if expert is None:
                 res['reason'] = "未找到专家"
                 return res
