@@ -340,7 +340,7 @@ class DbOperate:
     '''
     注册专家用户
     '''
-    def create_user_expert(self, mail, username):
+    def create_user_expert(self, mail, username, field):
         res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
         try:
             check = self.check_mail(mail)
@@ -352,8 +352,8 @@ class DbOperate:
                           'mail': mail,
                           'password': "",
                           'user_type': 'expert',
-                          'invitation_code': invitation_code
-                           }
+                          'field': field,
+                          'invitation_code': invitation_code}
             user_list = self.getCol("user")
             user_list.insert_one(new_expert)
             res['state'] = 'success'
@@ -575,7 +575,7 @@ class DbOperate:
             for item0 in list_invited:
                 res_invited.append(item0)
                 invited.append(item0['expert_mail'])
-            list_all = user.find({'user_type': 'expert'}, {"_id": 0, "mail": 1, "username": 1})
+            list_all = user.find({'user_type': 'expert'}, {"_id": 0, "mail": 1, "username": 1, 'field': 1})
             list_uninvited = []
             for item1 in list_all:
                 if item1['mail'] not in invited:
