@@ -803,10 +803,13 @@
 
                             this.authorInfo.name = form.name;
                             this.authorInfo.stu_id = form.stuId;
-                            this.authorInfo.birth = form.birthday;
+                            // console.log(form.birthday.length)
+                            var nowdate = new Date()
+                            // console.log(nowdate)
+                            this.authorInfo.birth = form.birthday.length>0 ? form.birthday: nowdate;
                             this.authorInfo.edu_background = form.education;
                             this.authorInfo.major = form.major;
-                            this.authorInfo.school_date = form.enterTime;
+                            this.authorInfo.school_date = form.enterTime.length>0 ? form.enterTime: nowdate;
                             this.authorInfo.project = form.totalTitle;
                             this.authorInfo.address = form.address;
                             this.authorInfo.phone = form.phone;
