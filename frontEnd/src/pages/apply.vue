@@ -838,7 +838,7 @@
         },
         created () {
             // console.log(this.defaultPhotoList)
-            this.get_project_detail('0001')
+            this.get_project_detail(this.$route.query.projectID?this.$route.query.projectID:'0001')
         },
     }
 </script>
