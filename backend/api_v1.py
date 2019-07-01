@@ -600,6 +600,22 @@ class ContestList(Resource):
         finally:
             return res
 
+"""
+校团委更改竞赛阶段
+"""
+class ChangeCompStat(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            proj_id = data.get('proj_id')
+            op = data.get('op')
+            res = db.change_comp_stat(proj_id, op)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
 ##############################################################################################################
 '''
 初审改变作品状态
@@ -738,6 +754,7 @@ api.add_resource(check_code, '/api/v1/check_code', endpoint='check_code')
 api.add_resource(expert_set_password, '/api/v1/expert_set_password', endpoint='expert_set_password')
 api.add_resource(invite_mail, '/api/v1/invite_mail', endpoint='invite_mail')
 api.add_resource(ContestList, '/api/v1/contestlist', endpoint='contestlist')
+api.add_resource(ChangeCompStat, '/api/v1/changeCompStat', endpoint='changeCompStat')
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", debug=True)
