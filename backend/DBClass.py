@@ -583,12 +583,14 @@ class DbOperate:
                 return res
             comp_name = comp["competition_name"]
             header = comp_name + "项目评审邀请"
-            accept_addr = "http://localhost:8080/#/?token=" + invitation_code + \
+            # front_ip = "http://localhost:8080"
+            front_ip = "http://114.116.189.128:8080"
+            accept_addr = front_ip + "/#/?token=" + invitation_code + \
                           "&email=" + mail + \
                           "&project_code=" + project_code + "&is_accept=" + "true"
             # accept_addr = "<a href=\"" + accept_addr + "\">" + accept_addr + "</a>"
             accept_addr = "<a href=\"" + accept_addr + "\">" + "接受评审" + "</a>"
-            refuse_addr = "http://localhost:8080/#/?token=" + invitation_code + \
+            refuse_addr = front_ip + "/#/?token=" + invitation_code + \
                           "&email=" + mail + \
                           "&project_code=" + project_code + "&is_accept=" + "false"
             # refuse_addr = "<a href=\"" + refuse_addr + "\">" + refuse_addr + "</a>"
