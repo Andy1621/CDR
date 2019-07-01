@@ -5,9 +5,9 @@
                 <div class="box-body-head">登录</div>
                 <div class="box-body-main">
                     <Tabs value="student" v-model="role">
-                        <TabPane label="学生" name="student"></TabPane>
-                        <TabPane label="专家" name="professor"></TabPane>
-                        <TabPane label="校团委" name="school"></TabPane>
+                        <TabPane label="学 生" name="student"></TabPane>
+                        <TabPane label="专 家" name="professor" ></TabPane>
+                        <TabPane label="校 团 委" name="school"></TabPane>
                     </Tabs>
                     <Input v-model="email" prefix="md-person" placeholder="请输入账号" clearable size="large"></Input>
                     <Input v-model="password" type="password" @keyup.enter.native="login" prefix="md-lock" placeholder="请输入密码" clearable size="large"></Input>
