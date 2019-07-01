@@ -137,7 +137,7 @@
                 top: 100,
                 duration: 1,
             });
-            this.$http.get(this.$baseURL + '/api/v1/get_project_list',{params:{'author_email':this.$cookie.get('username')}})
+            this.$http.get(this.$baseURL + '/api/v1/get_project_list',{params:{'author_email':this.$cookie.get('mail')}})
                 .then(function (res) {
                     var detail = res.body
                     console.log(detail)

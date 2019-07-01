@@ -404,8 +404,8 @@
                 // console.log(this.authorInfo.cooperators);
                 this.authorInfo.cooperators.push({
                     name: '',
-                    stu_id: '',
-                    edu: '',
+                    stuId: '',
+                    education: '',
                     phone: '',
                     email: '',
                 });
@@ -619,7 +619,7 @@
                 }
                 else{
                     this.$Message.success('成功上传')
-                    file.url = res.file_path;
+                    file.url = res.url;
                     this.photo_cnt += 1
                     // this.refresh_list()
                     console.log(this.uploadPhotoList)
