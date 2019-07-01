@@ -81,6 +81,16 @@ def replace_apply_html(form, filename):
             elif key == 'education':
                 temp_component = html.select('#' + key)
                 temp_component[0].string = educationType[form[key]]
+            elif key == 'birthday':
+                temp_component = html.select('#' + key)
+                birthday = educationType[form[key]]
+                birthday = '-'.join(birthday.split('-')[0:2])
+                temp_component[0].string = birthday
+            elif key == 'enterTime':
+                temp_component = html.select('#' + key)
+                enterTime = educationType[form[key]]
+                enterTime = '-'.join(enterTime.split('-')[0:2])
+                temp_component[0].string = enterTime
             else:
                 temp_component = html.select('#' + key)
                 temp_component[0].string = form[key]
