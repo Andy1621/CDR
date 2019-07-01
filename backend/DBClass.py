@@ -56,6 +56,7 @@ class DbOperate:
                 filename = project_code + ".html"
                 replace_apply_html(params, filename)
                 res['state'] = 'success'
+                res['reason'] = ''
             else:
                 res['reason'] = "项目编号不存在"
         except:
@@ -106,6 +107,7 @@ class DbOperate:
                 }
                 self.getCol('project').insert_one(t_project)
                 res['state'] = 'success'
+                res['reason'] = ''
                 res['project_code'] = code
                 # filename = code + ".html"
                 # replace_apply_html(t_project['registration_form'], filename)
@@ -137,6 +139,7 @@ class DbOperate:
                         })
                 project['project_files'] = temp_files
                 res['project'] = project
+                res['reason'] = ''
             else:
                 res['reason'] = "项目不存在"
         except:
@@ -157,6 +160,7 @@ class DbOperate:
                 html_url = Config.DOMAIN_NAME + "/static/export_html/" + filename
                 res['state'] = 'success'
                 res['html_url'] = html_url
+                res['reason'] = ''
             else:
                 res['reason'] = "项目不存在"
         except:
@@ -188,6 +192,7 @@ class DbOperate:
                     os.remove(html_path)
                     self.getCol('project').remove({'project_code': project_code})
                     res['state'] = 'success'
+                    res['reason'] = ''
             else:
                 res['reason'] = "项目不存在"
         except:
@@ -206,6 +211,7 @@ class DbOperate:
                 project['project_status'] = 0
                 self.getCol('project').update_one({'project_code': project_code}, {'$set': project})
                 res['state'] = 'success'
+                res['reason'] = ''
             else:
                 res['reason'] = "项目编号不存在"
         except:
@@ -237,6 +243,7 @@ class DbOperate:
                     'competition_name': competition_name['competition_name']
                 })
             res['state'] = 'success'
+            res['reason'] = ''
             res['project_list'] = project_list
         except:
             pass
@@ -258,6 +265,7 @@ class DbOperate:
                                                           'expert_email': expert_email}, {'$set': review})
                 res['status'] = review['status']
                 res['state'] = 'success'
+                res['reason'] = ''
             else:
                 res['reason'] = "项目不存在或专家没有权利评审该项目"
         except:
@@ -279,6 +287,7 @@ class DbOperate:
                 self.getCol('expert_project').update_one({'project_code': project_code,
                                                           'expert_email': expert_email}, {'$set': review})
                 res['state'] = 'success'
+                res['reason'] = ''
             else:
                 res['reason'] = "项目不存在或专家没有权利评审该项目"
         except:
@@ -297,6 +306,7 @@ class DbOperate:
             if review and review['status'] == 0 or review and review['status'] == 2:
                 review.pop('_id')
                 res['state'] = 'success'
+                res['reason'] = '' 
                 res['review'] = review
             else:
                 res['reason'] = "项目不存在或专家没有权利评审该项目"
