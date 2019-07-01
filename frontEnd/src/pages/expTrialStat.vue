@@ -116,9 +116,8 @@
                   on: {
                     click: () => {
                       this.button_able = true;
-                      let domin_url = 'http://127.0.0.1:5000';
                       let param = {mail:this.rows2[params.index].mail, project_code:this.proj_id};
-                      this.$http.post(domin_url + "/api/v1/invite_mail",param).then(function (res) {
+                      this.$http.post(this.$baseURL + "/api/v1/invite_mail",param).then(function (res) {
                         var detail = res.body.state;
                         if(detail == "fail"){
                           this.$Notice.open({title: "发送失败"});
@@ -156,9 +155,8 @@
     },
     methods:{
       getTwoList(){
-        let domin_url = 'http://127.0.0.1:5000';
         let params = {'proj_id': this.proj_id};
-        this.$http.post(domin_url + "/api/v1/getExpertInviteList",params,{
+        this.$http.post(this.$baseURL + "/api/v1/getExpertInviteList",params,{
           headers:{
             'Content-Type':"application/json",
           }

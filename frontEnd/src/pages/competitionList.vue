@@ -83,9 +83,8 @@
       },
       methods:{
         getcomList(){
-          let domin_url = 'http://127.0.0.1:5000';
           let params = {};
-          this.$http.post(domin_url + "/api/v1/contestlist",params,{
+          this.$http.post(this.$baseURL + "/api/v1/contestlist",params,{
             headers:{
               'Content-Type':"application/json",
             }
