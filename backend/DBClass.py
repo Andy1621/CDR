@@ -487,9 +487,9 @@ class DbOperate:
                 return res
             user.update_one({'user_type': 'expert', 'mail': mail}, {"$set": {'password': password}})
             res['state'] = 'success'
+            return res
         except:
             return res
-        return res
 
     '''
     判断某专家是否已被邀请参评某作品
@@ -505,6 +505,28 @@ class DbOperate:
                 return False
         except:
             return False
+
+    '''
+    校团委更改竞赛阶段
+    '''
+    def change_comp_stat(self, proj_id, op):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
+            comp_list = self.getCol('competition')
+            comp = comp_list.find_one({'_id': ObjectId(proj_id)}, {'com_status': 1})
+            if comp:
+                now_stat = comp['com_status']
+                if op == 'back':
+                    now_stat -= 1
+                else:
+                    now_stat += 1
+                comp_list.update_one({'_id': ObjectId(proj_id)}, {"$set": {'com_status': now_stat}})
+                res['state'] = 'success'
+            else:
+                res['reason'] = '该竞赛不存在'
+            return res
+        except:
+            return res
 
     '''
     校团委发送邮件
