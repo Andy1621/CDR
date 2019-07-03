@@ -928,6 +928,24 @@ class DbOperate:
             com_collection.update_one({'_id': ObjectId(competition_id)}, {'$set': {'com_status': 5}})
 
     '''
+    提交阶段看E,E的显示规则
+    '''
+    def rule_commit_E(self, E_List):
+        for index, project in enumerate(E_List):
+            E_List[index]['project_status'] = self.num2status(E_List[index]['project_status'])
+        return E_List
+
+    '''
+    其它阶段看E，E的显示规则
+    '''
+    def rule_other_E(self, E_List):
+        for index, project in enumerate(E_List):
+            if project['project_status'] >= 0:
+                E_List[index]['project_status'] = 0
+            E_List[index]['project_status'] = self.num2status(E_List[index]['project_status'])
+        return E_List
+
+    '''
     任意阶段看A或B，A或B的显示规则
     '''
     def rule_A(self, A_List):
@@ -998,25 +1016,25 @@ class DbOperate:
                     pass
                 # 当前状态是提交
                 elif com_status == 0:
-                    res['E_List'] = copy.deepcopy(projects)
+                    res['E_List'] = self.rule_commit_E(copy.deepcopy(projects))
                 # 当前状态是初审
                 elif com_status == 1:
-                    res['E_List'] = copy.deepcopy(projects)
+                    res['E_List'] = self.rule_other_E(copy.deepcopy(projects))
                     res['A_List'] = self.rule_A(copy.deepcopy(projects))
                 # 当前状态是初评
                 elif com_status == 2:
-                    res['E_List'] = copy.deepcopy(projects)
+                    res['E_List'] = self.rule_other_E(copy.deepcopy(projects))
                     res['A_List'] = self.rule_A(copy.deepcopy(projects))
                     res['B_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
                 # 当前状态是筛选并现场答辩
                 elif com_status == 3:
-                    res['E_List'] = copy.deepcopy(projects)
+                    res['E_List'] = self.rule_other_E(copy.deepcopy(projects))
                     res['A_List'] = self.rule_A(copy.deepcopy(projects))
                     res['B_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
                     res['C_List'] = self.rule_CC(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
                 # 当前状态是录入并公布最终结果
                 elif com_status == 4:
-                    res['E_List'] = copy.deepcopy(projects)
+                    res['E_List'] = self.rule_other_E(copy.deepcopy(projects))
                     res['A_List'] = self.rule_A(copy.deepcopy(projects))
                     res['B_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
                     res['C_List'] = self.rule_DC(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
