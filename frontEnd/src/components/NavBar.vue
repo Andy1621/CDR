@@ -68,7 +68,7 @@
                             </router-link>
                         </li>
 
-                        <li v-if="role==='school'">
+                        <li v-if="role==='school'||role==='student'">
                             <router-link :to="{path:'/competitionList'}" class="" exact><i
                                 class="lnr lnr-text-align-justify"></i> <span>竞赛列表</span></router-link>
                         </li>

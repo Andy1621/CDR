@@ -150,8 +150,8 @@
                     <FormItem label="关键词" prop="keyword">
                         <Input v-model="projectInfo.keyword" :disabled="readonly" type="textarea" :rows="3" :autosize="{minRows: 3,maxRows: 3}" placeholder="4-7个体现作品核心技术和问题的关键词"></Input>
                     </FormItem>
-                    <FormItem label="展示形式" v-if="basicInfo.type=='type1'">
-                        <CheckboxGroup style="row: 3;" v-model="projectInfo.show_type" :disabled="readonly">
+                    <FormItem label="展示形式" v-if="basicInfo.type=='type1'" prop="display">
+                        <CheckboxGroup style="row: 3;" v-model="projectInfo.display" :disabled="readonly">
                             <Checkbox label="display1" :disabled="readonly">
                                 <span>实物、产品</span>
                             </Checkbox>
@@ -178,8 +178,8 @@
                             </Checkbox>
                         </CheckboxGroup>
                     </FormItem>
-                    <FormItem label="调查方式" v-if="basicInfo.type=='type2'">
-                        <CheckboxGroup v-model="projectInfo.survey_type">
+                    <FormItem label="调查方式" v-if="basicInfo.type=='type2'" prop="investigation">
+                        <CheckboxGroup v-model="projectInfo.investigation">
                             <Checkbox label="investigation1" :disabled="readonly">
                                 <span>走访</span>
                             </Checkbox>
@@ -441,8 +441,8 @@
                     introduction: '',
                     innovation: '',
                     keyword: '',
-                    show_type: [],
-                    survey_type: [],
+                    display: [],
+                    investigation: [],
                 },
                 ruleProjectInfo:{
                     project: [
@@ -459,6 +459,12 @@
                     ],
                     keyword: [
                         { required: true, message: '关键词不能为空', trigger: 'blur' }
+                    ],
+                    display: [
+                        { required:true, type:'array', min: 1, message: '请选择作品展示形式', trigger:'change' }
+                    ],
+                    investigation: [
+                        { required:true, type:'array', min: 1, message: '请选择作品调查方式', trigger:'change' }
                     ]
                 },
                 // upload
@@ -563,6 +569,13 @@
                 var enter = this.authorInfo.school_date.toString().replace('00:00:00','08:00:00')
                 this.authorInfo.school_date = new Date(enter)
 
+                if(this.basicInfo.type == 'type1'){
+                    this.projectInfo.investigation = [];
+                }
+                else{
+                    this.projectInfo.display = [];
+                }
+
                 let params = {
                     'workCode' : this.basicInfo.workCode,
                     'mainTitle' : this.basicInfo.project,
@@ -586,8 +599,8 @@
                     'description' : this.projectInfo.introduction,
                     'creation' : this.projectInfo.innovation,
                     'keyword' : this.projectInfo.keyword,
-                    'display' : this.projectInfo.show_type,
-                    'investigation' : this.projectInfo.survey_type
+                    'display' : this.projectInfo.display,
+                    'investigation' : this.projectInfo.investigation
                 };
                 this.$http.post(this.$baseURL + '/api/v1/store_project',params)
                     .then(function (res) {
@@ -646,8 +659,8 @@
                     'description' : this.projectInfo.introduction,
                     'creation' : this.projectInfo.innovation,
                     'keyword' : this.projectInfo.keyword,
-                    'display' : this.projectInfo.show_type,
-                    'investigation' : this.projectInfo.survey_type
+                    'display' : this.projectInfo.display,
+                    'investigation' : this.projectInfo.investigation
                 };
                 this.$http.post(this.$baseURL + '/api/v1/submit_project',params)
                     .then(function (res) {
@@ -905,8 +918,8 @@
                             this.projectInfo.introduction = form.description;
                             this.projectInfo.innovation = form.creation;
                             this.projectInfo.keyword = form.keyword;
-                            this.projectInfo.show_type = form.display;
-                            this.projectInfo.survey_type = form.investigation;
+                            this.projectInfo.display = form.display;
+                            this.projectInfo.investigation = form.investigation;
                         }
                     },function (res) {
                         console.log('Failed')
