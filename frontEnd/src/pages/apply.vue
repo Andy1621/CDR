@@ -150,11 +150,88 @@
                     <FormItem label="关键词" prop="keyword">
                         <Input v-model="projectInfo.keyword" :disabled="readonly" type="textarea" :rows="3" :autosize="{minRows: 3,maxRows: 3}" placeholder="4-7个体现作品核心技术和问题的关键词"></Input>
                     </FormItem>
+                    <FormItem label="展示形式" v-if="basicInfo.type=='type1'">
+                        <CheckboxGroup style="row: 3;" v-model="projectInfo.show_type" :disabled="readonly">
+                            <Checkbox label="display1" :disabled="readonly">
+                                <span>实物、产品</span>
+                            </Checkbox>
+                            <Checkbox label="display2" :disabled="readonly">
+                                <span>模型</span>
+                            </Checkbox>
+                            <Checkbox label="display3" :disabled="readonly">
+                                <span>图纸</span>
+                            </Checkbox>
+                            <Checkbox label="display4" :disabled="readonly">
+                                <span>磁盘</span>
+                            </Checkbox>
+                            <Checkbox label="display5" :disabled="readonly">
+                                <span>现场演示</span>
+                            </Checkbox>
+                            <Checkbox label="display6" :disabled="readonly">
+                                <span>图片</span>
+                            </Checkbox>
+                            <Checkbox label="display7" :disabled="readonly">
+                                <span>录像</span>
+                            </Checkbox>
+                            <Checkbox label="display8" :disabled="readonly">
+                                <span>样品</span>
+                            </Checkbox>
+                        </CheckboxGroup>
+                    </FormItem>
+                    <FormItem label="调查方式" v-if="basicInfo.type=='type2'">
+                        <CheckboxGroup v-model="projectInfo.survey_type">
+                            <Checkbox label="investigation1" :disabled="readonly">
+                                <span>走访</span>
+                            </Checkbox>
+                            <Checkbox label="investigation2" :disabled="readonly">
+                                <span>问卷</span>
+                            </Checkbox>
+                            <Checkbox label="investigation3" :disabled="readonly">
+                                <span>现场采访</span>
+                            </Checkbox>
+                            <Checkbox label="investigation4" :disabled="readonly">
+                                <span>人员介绍</span>
+                            </Checkbox>
+                            <Checkbox label="investigation5" :disabled="readonly">
+                                <span>个别交谈</span>
+                            </Checkbox>
+                            <Checkbox label="investigation6" :disabled="readonly">
+                                <span>亲临实践</span>
+                            </Checkbox>
+                            <Checkbox label="investigation7" :disabled="readonly">
+                                <span>会议</span>
+                            </Checkbox>
+                            <Checkbox label="investigation8" :disabled="readonly">
+                                <span>图片、照片</span>
+                            </Checkbox>
+                            <Checkbox label="investigation9" :disabled="readonly">
+                                <span>书报刊物</span>
+                            </Checkbox>
+                            <Checkbox label="investigation10" :disabled="readonly">
+                                <span>统计报表</span>
+                            </Checkbox>
+                            <Checkbox label="investigation11" :disabled="readonly">
+                                <span>影视资料</span>
+                            </Checkbox>
+                            <Checkbox label="investigation12" :disabled="readonly">
+                                <span>文件</span>
+                            </Checkbox>
+                            <Checkbox label="investigation13" :disabled="readonly">
+                                <span>集体组织</span>
+                            </Checkbox>
+                            <Checkbox label="investigation14" :disabled="readonly">
+                                <span>自发</span>
+                            </Checkbox>
+                            <Checkbox label="investigation15" :disabled="readonly">
+                                <span>其它</span>
+                            </Checkbox>
+                        </CheckboxGroup>
+                    </FormItem>
                 </Form>
             </div>
             <div class="form" v-show="current == 3">
                 <h4 style="margin-bottom: 20px">相关文档（仅限PDF）</h4>
-                <div v-if="readonly">
+                <div v-if="readonly" class="show-upload">
                     <ul>
                         <li v-for="item in uploadDocList" @click="docView(item)">
                             <Icon type="md-document"></Icon>{{item.name}}
@@ -193,7 +270,7 @@
                         <Progress style="margin-top: 20px" v-if="item.showProgress" :percent="item.percentage" hide-info></Progress>
                     </template>
                 </div>
-                <div v-if="readonly">
+                <div v-if="readonly" class="show-upload">
                     <ul>
                         <li v-for="item in uploadPhotoList" @click="photoView(item)">
                             <Icon type="ios-image"></Icon>{{item.name}}
@@ -227,7 +304,7 @@
                 </Modal>
                 <Divider/>
                 <h4 style="margin-bottom: 20px">作品视频（仅限 mp4 flv）</h4>
-                <div v-if="readonly">
+                <div v-if="readonly" class="show-upload">
                     <ul>
                         <li v-for="item in uploadVideoList" @click="videoView(item)">
                             <Icon type="ios-film"></Icon> {{item.name}}
@@ -253,7 +330,7 @@
                     <Button :disabled="uploadVideoList.length>=1" icon="ios-videocam" style="width: 100px">视频上传</Button>
                 </Upload>
             </div>
-            <Button v-show="current == 3" @click="check_table">预览表格</Button>
+            <Button @click="check_table" style="margin-right: 20px;">预览表格</Button>
             <Button type="primary" :disabled="current == 0" @click="pre_step">上一步</Button>
             <Button type="primary" :disabled="current == 3" @click="next_step">下一步</Button>
             <Button type="primary" v-show="!readonly" @click="save_data" style="margin-left: 20px">保存到草稿箱</Button>
@@ -364,6 +441,8 @@
                     introduction: '',
                     innovation: '',
                     keyword: '',
+                    show_type: [],
+                    survey_type: [],
                 },
                 ruleProjectInfo:{
                     project: [
@@ -507,6 +586,8 @@
                     'description' : this.projectInfo.introduction,
                     'creation' : this.projectInfo.innovation,
                     'keyword' : this.projectInfo.keyword,
+                    'display' : this.projectInfo.show_type,
+                    'investigation' : this.projectInfo.survey_type
                 };
                 this.$http.post(this.$baseURL + '/api/v1/store_project',params)
                     .then(function (res) {
@@ -565,6 +646,8 @@
                     'description' : this.projectInfo.introduction,
                     'creation' : this.projectInfo.innovation,
                     'keyword' : this.projectInfo.keyword,
+                    'display' : this.projectInfo.show_type,
+                    'investigation' : this.projectInfo.survey_type
                 };
                 this.$http.post(this.$baseURL + '/api/v1/submit_project',params)
                     .then(function (res) {
@@ -822,6 +905,8 @@
                             this.projectInfo.introduction = form.description;
                             this.projectInfo.innovation = form.creation;
                             this.projectInfo.keyword = form.keyword;
+                            this.projectInfo.show_type = form.display;
+                            this.projectInfo.survey_type = form.investigation;
                         }
                     },function (res) {
                         console.log('Failed')
@@ -910,10 +995,10 @@
     #sidebar-nav.sidebar{
         padding-top: 0px;
     }
-    ul{
+    .show-upload ul{
         list-style-type: none;
     }
-    li{
+    .show-upload li{
         cursor: default;
         padding: 5px 10px 5px 10px;
         margin: 1px;
@@ -921,7 +1006,7 @@
         border-radius: 5px;
         color: #666666;
     }
-    li:hover{
+    .show-upload li:hover{
         background: #eeeeee;
         color: #2b85e4;
     }

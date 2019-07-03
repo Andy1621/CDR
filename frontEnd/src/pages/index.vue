@@ -41,14 +41,14 @@
                     <Card :dis-hover="false">
                         <p slot="title">
                             <Icon type="ios-chatboxes"></Icon>
-                            其他消息
+                            竞赛列表
                         </p>
-                        <a href="#" slot="extra" @click.prevent="more_news('else')">
+                        <a href="#" slot="extra" @click.prevent="more_news('competition')">
                             <Icon type="ios-list"></Icon>
                             更多消息
                         </a>
                         <ul>
-                            <li v-for="(item,index) in else_news.slice(0,5)" :key="index" @click="show_detail('else',index)">
+                            <li v-for="(item,index) in competition_news.slice(0,5)" :key="index" @click="show_detail('competition',index)">
 <!--                                <a :href="item.url" target="_blank">-->
                                     <Row>
                                         <Col span="18">
@@ -141,7 +141,7 @@
                 pageSize: 20,
                 show_news:[],
                 latest_news:[],
-                else_news:[],
+                competition_news:[],
                 carousel_pic:[
                     {
                         'name': 'pic1',
@@ -192,7 +192,7 @@
                     var detail = res.body
                     console.log(detail)
                     if(detail.state == 'success'){
-                        this.else_news = detail.data.news
+                        this.competition_news = detail.data.news
                     }
                 },function (res) {
                     // var detail = JSON.parse(res.body)
@@ -205,9 +205,9 @@
                     this.newsType = '最新公告';
                     this.show_news = this.latest_news;
                 }
-                else if(type == 'else'){
-                    this.newsType = '其他消息';
-                    this.show_news = this.else_news;
+                else if(type == 'competition'){
+                    this.newsType = '竞赛列表';
+                    this.show_news = this.competition_news;
                 }
                 this.isMoreNews = true
                 this.pageNum = 1
@@ -231,8 +231,8 @@
                 if(type == 'latest'){
                     this.msgDetail = this.latest_news[index];
                 }
-                else if(type == 'else'){
-                    this.msgDetail = this.else_news[index];
+                else if(type == 'competition'){
+                    this.msgDetail = this.competition_news[index];
                 }
                 else{
                     this.msgDetail = this.show_news[index];
