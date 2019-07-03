@@ -78,6 +78,12 @@ def replace_apply_html(form, filename):
             elif key == 'mainType':
                 temp_component = html.select('#' + form[key])
                 temp_component[0]['class'] = "glyphicon glyphicon-check"
+                if form[key] == 'type1':
+                    temp_component = html.select('#investigation')
+                    temp_component[0]['style'] = "display: none"
+                elif form[key] == 'type2':
+                    temp_component = html.select('#display')
+                    temp_component[0]['style'] = "display: none"
             elif key == 'education':
                 temp_component = html.select('#' + key)
                 temp_component[0].string = educationType[form[key]]
@@ -91,6 +97,15 @@ def replace_apply_html(form, filename):
                 enterTime = form[key]
                 enterTime = '-'.join(enterTime.split('-')[0:2])
                 temp_component[0].string = enterTime
+            elif key == 'display' or key == 'investigation':
+                for c_key in form[key]:
+                    temp_component = html.select('#' + c_key)
+                    temp_component[0]['class'] = "glyphicon glyphicon-check"
+            elif key == 'description':
+                temp_component = html.select('#' + key)
+                t_string = form[key]
+                string = t_string.replace("\n", "<br>")
+                temp_component[0].string = string
             else:
                 temp_component = html.select('#' + key)
                 temp_component[0].string = form[key]
@@ -113,7 +128,7 @@ def make_zip(source_dir_list, output_filename):
     for f in source_dir_list:
         pathfile = f['file_path']
         arcname = pathfile.split('/')[-1]
-        zipf.write(pathfile,arcname)
+        zipf.write(pathfile, arcname)
     zipf.close()
 
 
@@ -142,9 +157,12 @@ if __name__ == '__main__':
                          'email': '1234567@qq.com'}],
             'title': '基于LSTM的QQ说说情感分析',
             'type': 'A',
-            'description': "word2vec是通过学习文本来用词向量的方式表征词的语义信息，即通过一个嵌入空间使得语义上相似的单词在该空间内距离很近。Embedding其实就是一个映射，将单词从原先所属的空间映射到新的多维空间中，也就是把原先词所在空间嵌入到一个新的空间中去。它的基本思路是，为每一个词汇设置一个初始向量（在这里我设置成了200维），然后根据每个词对应的词向量去预测该词的周边词汇，通过反向传播修改词向量，使词向量的预测结果越来越接近目标词汇。因为语义相似的词汇有着相似的语境，在直观上会表现为词向量在高维空间内距离越来越近。常用的训练模型有两种：Skip-gram模型和cbow模型。CBOW模型是多个周边词对一词的预测，Skip-gram模型是由一个词汇对多个周边词的预测。在训练时，可以直接使用python的gensim工具包。训练语料可以采用中文维基数据或者搜狗实验室的语料。",
+            'description': "word2vec是通过学习文本来用词向量的方式表征词的语义信息，即通过一个嵌入空间使得语义上相似的单词在该空间内距离很近。\n"
+                           "Embedding其实就是一个映射，将单词从原先所属的空间映射到新的多维空间中，也就是把原先词所在空间嵌入到一个新的空间中去。\n"
+                           "它的基本思路是，为每一个词汇设置一个初始向量（在这里我设置成了200维），然后根据每个词对应的词向量去预测该词的周边词汇，通过反向传播修改词向量，使词向量的预测结果越来越接近目标词汇。\n因为语义相似的词汇有着相似的语境，在直观上会表现为词向量在高维空间内距离越来越近。常用的训练模型有两种：Skip-gram模型和cbow模型。CBOW模型是多个周边词对一词的预测，Skip-gram模型是由一个词汇对多个周边词的预测。在训练时，可以直接使用python的gensim工具包。训练语料可以采用中文维基数据或者搜狗实验室的语料。",
             'creation': '就是非常牛逼',
-            'keyword': 'lstm'}
+            'keyword': 'lstm',
+            'display': ['display1', 'display3', 'display5']}
     filename = form["workCode"] + ".html"
     replace_apply_html(form, filename)
     print("ok")
