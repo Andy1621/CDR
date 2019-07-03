@@ -839,7 +839,7 @@ class DbOperate:
     '''
     def num2status(self,num):
         num_map = {
-            -2: '出身未通过',
+            -2: '初审未通过',
             -1: '编辑中',
             0: '已提交',
             1: '通过初审',
