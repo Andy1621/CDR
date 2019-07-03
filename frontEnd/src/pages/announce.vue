@@ -98,6 +98,9 @@
                         var detail = res.body
                         if(detail.state == 'success'){
                             this.$Message.success('发布成功')
+                            this.$router.push({
+                                path: '/index'
+                            })
                         }
                         else{
                             this.$Message.error('发布失败，请稍后再试')

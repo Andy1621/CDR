@@ -14,6 +14,7 @@ import projectDetail from '@/pages/projectDetail'
 import stageProList from '@/pages/stageProList'
 import expTrialStat from '@/pages/expTrialStat'
 import messageDetail from '@/pages/messageDetail'
+import newsList from "@/pages/newsList";
 Vue.use(Router);
 
 export default new Router({
@@ -88,6 +89,11 @@ export default new Router({
           path: '/messageDetail',
           name: 'messageDetail',
           component: messageDetail,
+        },
+        {
+          path: '/newsList',
+          name: 'newsList',
+          component: newsList,
         },
   ]
 })
