@@ -4,7 +4,7 @@
         <div class="body">
             <Button primary style="position: absolute; right: 10px; top: 10px" @click="$router.go(-1)">返回</Button>
             <h1 style="margin: 20px 0 30px 40%">作品详情</h1>
-            <Steps :current="current" style="margin-left: 12%">
+            <Steps :current="current" style="margin-left: 12%;cursor: default">
                 <Step title="项目基本信息" content="分类、创新、关键词、总体说明" icon="ios-information-circle-outline"
                       @click.native="current = 0"></Step>
                 <Step title="项目相关文件" content="文档、视频、图片" icon="ios-camera" @click.native="current = 1"></Step>
@@ -36,7 +36,7 @@
                     <template v-if="item.file_type === 'photo'">
                         <img :src="item.file_path">
                         <div class="demo-upload-list-cover">
-                            <Icon type="ios-eye-outline" @click.native="handleView(item.file_path)"></Icon>
+                            <Icon type="ios-eye-outline" @click.native="handleView(item.file_path, item.file_name)"></Icon>
                         </div>
                     </template>
                 </div>
@@ -50,13 +50,13 @@
                 <h4 style="margin: 10px">项目文档：</h4>
                 <div>
                     <ul>
-                        <li v-for="item in docList" style="" @click="viewDoc(item.file_path)">
+                        <li v-for="item in docList" style="" @click="viewDoc(item.file_path, item.file_name)">
                             <Icon type="md-document"></Icon>
                             {{item.file_name}}
                         </li>
                     </ul>
                 </div>
-                <Modal title="View Image" v-model="visible">
+                <Modal :title="photoViewName" v-model="visible">
                     <img :src="photoViewUrl" v-if="visible" style="width: 100%">
                 </Modal>
             </div>
@@ -106,6 +106,7 @@
                 docList: [],
                 videoList: [],
                 photoViewUrl: '',
+                photoViewName: '',
                 visible: false,
                 playerOptions: {
                     playbackRates: [0.7, 1.0, 1.5, 2.0], //播放速度
@@ -194,8 +195,9 @@
             viewDoc(url) {
                 window.open(url);
             },
-            handleView(url) {
+            handleView(url, name) {
                 this.photoViewUrl = url;
+                this.photoViewName = name;
                 this.visible = true;
             },
             saveReview() {
