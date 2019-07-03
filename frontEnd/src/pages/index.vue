@@ -2,7 +2,7 @@
     <div>
         <NavBar></NavBar>
         <div class="body">
-            <div v-if="!isMoreNews&&!isDetail">
+            <div v-if="!isMoreNews">
             <h3>雨我无瓜科技竞赛</h3>
             <Divider style="margin: 3px"/>
             <Carousel autoplay :autoplay-speed="3000" :height="250" v-model="value2" loop>
@@ -22,14 +22,14 @@
                             更多消息
                         </a>
                         <ul>
-                            <li v-for="(item,index) in latest_news.slice(0,5)" :key="index" @click="show_detail('latest',index)">
+                            <li v-for="(item,index) in latest_news.slice(0,5)" :key="index" @click="show_detail(item.news_id)">
 <!--                                <a :href="item.url" target="_blank">-->
                                     <Row>
                                         <Col span="18">
                                             <div class="span-title">{{item.title}}</div>
                                         </Col>
                                         <Col span="6">
-                                            <span style="float: right; color: #8391a5;">{{item.date}}</span>
+                                            <span style="float: right; color: #8391a5;">{{item.time}}</span>
                                         </Col>
                                     </Row>
 <!--                                </a>-->
@@ -41,21 +41,21 @@
                     <Card :dis-hover="false">
                         <p slot="title">
                             <Icon type="ios-chatboxes"></Icon>
-                            其他消息
+                            竞赛列表
                         </p>
-                        <a href="#" slot="extra" @click.prevent="more_news('else')">
+                        <router-link :to="{path:'/competitionList'}" slot="extra">
                             <Icon type="ios-list"></Icon>
-                            更多消息
-                        </a>
+                            更多竞赛
+                        </router-link>
                         <ul>
-                            <li v-for="(item,index) in else_news.slice(0,5)" :key="index" @click="show_detail('else',index)">
+                            <li v-for="(item,index) in contest_list.slice(0,5)" :key="index" @click="to_competition(item.competition_id)">
 <!--                                <a :href="item.url" target="_blank">-->
                                     <Row>
                                         <Col span="18">
-                                            <div class="span-title">{{item.title}}</div>
+                                            <div class="span-title">{{item.competition_name}}</div>
                                         </Col>
                                         <Col span="6">
-                                            <span style="float: right; color: #8391a5;">{{item.date}}</span>
+                                            <span style="float: right; color: #8391a5;">{{item.com_status}}</span>
                                         </Col>
                                     </Row>
 <!--                                </a>-->
@@ -65,17 +65,15 @@
                 </Col>
             </Row>
             </div>
-            <div v-if="isMoreNews||isDetail">
+            <div v-if="isMoreNews">
                 <Breadcrumb style="font-size: 16px">
                     <BreadcrumbItem class="breadcrumb-item" @click.native="back_to_index">首页</BreadcrumbItem>
                     <BreadcrumbItem class="breadcrumb-item" @click.native="back_to_list" v-if="isMoreNews">{{newsType}}</BreadcrumbItem>
-                    <BreadcrumbItem class="breadcrumb-item" v-if="isDetail">信息详情</BreadcrumbItem>
                 </Breadcrumb>
                 <Divider/>
-                <div v-if="!isDetail">
                     <div class="news-list">
                         <ul style="list-style-type:none">
-                            <li v-for="(item,index) in show_news.slice((pageNum-1)*pageSize, pageNum*pageSize)" :key="index" @click="show_detail('default',index)">
+                            <li v-for="(item,index) in show_news.slice((pageNum-1)*pageSize, pageNum*pageSize)" :key="index" @click="show_detail(item.news_id)">
                                 <div class="paper-detail">
 <!--                                    <a :href="item.url" target="_blank">-->
                                         <Row>
@@ -83,7 +81,7 @@
                                                 <div class="span-title">{{item.title}}</div>
                                             </Col>
                                             <Col span="6">
-                                                <span style="float: right; color: #8391a5;">{{item.date}}</span>
+                                                <span style="float: right; color: #8391a5;">{{item.time}}</span>
                                             </Col>
                                         </Row>
 <!--                                    </a>-->
@@ -92,33 +90,6 @@
                         </ul>
                     </div>
                     <Page :current="pageNum" :total="show_news.length" :page-size="pageSize" @on-change="change_page" simple style="text-align: center; margin-bottom: 20px"/>
-                </div>
-                <div v-show="isDetail">
-                    <div class="news-list">
-                        <h2 style="text-align: center">{{msgDetail.title}}</h2>
-                        <Divider dashed/>
-                        <Row style="color: #8391a5; font-size: 18px">
-                            <Col span="10" style="text-align: left">
-                                <p>发布者：校团委</p>
-                            </Col>
-                            <Col span="10" offset="4" style="text-align: right">
-                                <p>发布时间：{{msgDetail.date}}</p>
-                            </Col>
-                        </Row>
-                        <p style="font-size: 16px; margin: 20px;">{{msgDetail.text}}</p>
-                        <Divider style="margin: 10px 0 20px 0;"/>
-                        <div v-if="msgDetail.download!=''">
-                            <p style="margin-left: 40px; font-size: 16px">附件下载：</p>
-                            <p style="margin-left: 60px">
-                                <Icon type="ios-cloud-download" style="margin-right: 10px"></Icon>
-                                {{msgDetail.filename}}
-                                <a :href="msgDetail.download" :download="msgDetail.filename">
-                                    <Button type="info" shape="circle" style="margin-left: 20px;" ghost>点击下载</Button>
-                                </a>
-                            </p>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -135,13 +106,13 @@
             return {
                 value2: 0,
                 isMoreNews: false,
-                isDetail: false,
                 newsType: '',
                 pageNum: 1,
                 pageSize: 20,
-                show_news:[],
-                latest_news:[],
-                else_news:[],
+                show_news: [],
+                latest_news: [],
+                contest_list: [],
+                competition_news: [],
                 carousel_pic:[
                     {
                         'name': 'pic1',
@@ -176,28 +147,59 @@
         },
         methods:{
             get_news(){
-                this.$http.get('https://www.easy-mock.com/mock/5ce254757c25615cbf8ae1ae/example/latest_news',{params: {'user_id':'12138'}})
-                .then(function (res) {
-                    var detail = res.body
-                    console.log(detail)
-                    if(detail.state == 'success'){
-                        this.latest_news = detail.data.news
-                    }
-                },function (res) {
-                    // var detail = JSON.parse(res.body)
-                    console.log("Failed")
-                })
-                this.$http.get('https://www.easy-mock.com/mock/5ce254757c25615cbf8ae1ae/example/latest_news',{params: {'user_id':'12138'}})
-                .then(function (res) {
-                    var detail = res.body
-                    console.log(detail)
-                    if(detail.state == 'success'){
-                        this.else_news = detail.data.news
-                    }
-                },function (res) {
-                    // var detail = JSON.parse(res.body)
-                    console.log("Failed")
-                })
+                this.$http.get(this.$baseURL + '/api/v1/get_news',{params:{}})
+                    .then(function (res) {
+                        console.log(res)
+                        var detail = res.body
+                        if(detail.state == 'success'){
+                            var list = detail.news_list
+                            for(var item of list){
+                                item.time = item.time.split(' ')[0]
+                            }
+                            this.latest_news = list.reverse()//倒置数组 目的是按照时间从新到旧顺序显示
+                        }
+                        else{
+                            this.$Message.error('获取公告列表失败 ' + detail.reason)
+                        }
+                    })
+
+                let params={}
+                this.$http.post(this.$baseURL + '/api/v1/contestlist',params)
+                    .then(function (res) {
+                        console.log(res)
+                        var detail = res.body
+                        if(detail.state == 'success'){
+                            this.contest_list = detail.contests.reverse();
+                            // console.log(this.contest_list)
+                            for(let item of this.contest_list){
+                                switch(item.com_status){
+                                    case 0:
+                                        item.com_status = '报名中'
+                                        break;
+                                    case 1:
+                                        item.com_status = '校团委初审'
+                                        break;
+                                    case 2:
+                                        item.com_status = '专家评审中'
+                                        break;
+                                    case 3:
+                                        item.com_status = '进行现场赛'
+                                        break;
+                                    case 4:
+                                        item.com_status = '结果公布中'
+                                        break;
+                                    case 5:
+                                        item.com_status = '已结束'
+                                        break;
+                                }
+                            }
+                        }
+                        else{
+                            this.$Message.error('获取竞赛列表失败 '+detail.reason)
+                        }
+                    },function (res) {
+                        this.$Message.error('Failed')
+                    })
             },
             more_news(type){
                 // this.$Message.info('moreNews')
@@ -205,12 +207,15 @@
                     this.newsType = '最新公告';
                     this.show_news = this.latest_news;
                 }
-                else if(type == 'else'){
-                    this.newsType = '其他消息';
-                    this.show_news = this.else_news;
+                else if(type == 'competition'){
+                    this.newsType = '竞赛列表';
+                    this.show_news = this.competition_news;
                 }
                 this.isMoreNews = true
                 this.pageNum = 1
+                this.$router.push({
+                    path: '/newsList',
+                })
             },
             change_page(value){
                 this.pageNum = value;
@@ -220,28 +225,27 @@
             },
             back_to_index(){
                 this.isMoreNews = false;
-                this.isDetail = false;
-                this.msgDetail = {};
             },
-            back_to_list(){
-                this.isDetail = false;
+            show_detail(news_id){
+                this.$router.push({
+                    path: '/messageDetail',
+                    query:{
+                        'type': 'news',
+                        'from': this.isMoreNews?'list':'index',
+                        'newsID': news_id,
+                    }
+                })
             },
-            show_detail(type,index){
-                console.log(type + index)
-                if(type == 'latest'){
-                    this.msgDetail = this.latest_news[index];
-                }
-                else if(type == 'else'){
-                    this.msgDetail = this.else_news[index];
-                }
-                else{
-                    this.msgDetail = this.show_news[index];
-                }
-                this.isDetail = true
-            },
-            // download(url){
-            //     window.open("http://sqdownb.onlinedown.net/down/HA-BaoLiMotor2002-UpDate.rar")
-            // }
+            to_competition(competition_id){
+                this.$router.push({
+                    path : '/messageDetail',
+                    query: {
+                        type: 'competition',
+                        from: 'index',
+                        competitionID: competition_id,
+                    }
+                })
+            }
         },
         created() {
             this.get_news();

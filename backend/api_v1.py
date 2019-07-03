@@ -14,6 +14,7 @@ from flask_cors import *
 from DBClass import DbOperate
 import Config
 from utils import encode, make_zip
+import time
 
 app = Flask(__name__)
 CORS(app, resources=r'/*')
@@ -97,6 +98,49 @@ class DeleteFile(Resource):
             return jsonify(res)
 
 
+# 上传公告附件
+class UpAnnounceFile(Resource):
+    def post(self):
+        res = {"state": "fail", 'reason': '网络错误或未知原因'}
+        try:
+            file = request.files.get('file')
+            basedir = os.path.abspath(os.path.dirname(__file__))
+            path = basedir + '/static/announce_file/'
+            timestamp = int(round(time.time()))
+            # 存文件到文件夹
+            file_name = str(timestamp) + '_' + file.filename
+            file_path = path + file_name
+            file.save(file_path)
+            res['state'] = "success"
+            res['url'] = Config.DOMAIN_NAME + '/static/announce_file/' + file_name
+            res['file_name'] = file.filename
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+
+# 删除附件
+class DeleteAnnounceFile(Resource):
+    def post(self):
+        res = {"state": "fail", 'reason': '网络错误或未知原因'}
+        try:
+            data = request.get_json()
+            file_path = data.get('file_path')
+            basedir = os.path.abspath(os.path.dirname(__file__))
+            path = basedir + "/static/announce_file/"
+            file_path = path + file_path.split('/')[-1]
+            if not os.path.exists(file_path):
+                res['reason'] = 'The file does not exists'
+                raise FError("Error")
+            os.remove(file_path)
+            res['state'] = 'success'
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+
 # 打包下载附件
 class DownloadFiles(Resource):
     def get(self):
@@ -163,6 +207,8 @@ class GetExpertReviewList(Resource):
     18.作品总体情况说明description
     19.创新点creation
     20.关键词keyword
+    21.作品可展示形式display
+    22.作品调查方式investigation
 '''
 class StoreProject(Resource):
     def post(self):
@@ -174,7 +220,7 @@ class StoreProject(Resource):
                       'education': '', 'major': '', 'enterTime': '',
                       'totalTitle': '', 'address': '', 'phone': '', 'email': '',
                       'applier': list(), 'title': '', 'type': '', 'description': '',
-                      'creation': '', 'keyword': ''}
+                      'creation': '', 'keyword': '', 'display': list(), 'investigation': list()}
             if data.get('mainTitle'):
                 params['mainTitle'] = data.get('mainTitle')
             if data.get('department'):
@@ -213,6 +259,10 @@ class StoreProject(Resource):
                 params['creation'] = data.get('creation')
             if data.get('keyword'):
                 params['keyword'] = data.get('keyword')
+            if data.get('display'):
+                params['display'] = data.get('display')
+            if data.get('investigation'):
+                params['investigation'] = data.get('investigation')
             res = db.store_project(params)
         except:
             pass
@@ -232,6 +282,8 @@ class AddProject(Resource):
         try:
             data = request.get_json()
             competition_id = data.get('competition_id')
+            db = DbOperate()
+            db.update_com_status(competition_id)
             email = data.get('email')
             name = data.get('name')
             res = db.add_project(competition_id, email, name)
@@ -322,6 +374,8 @@ class DeleteProject(Resource):
     18.作品总体情况说明description
     19.创新点creation
     20.关键词keyword
+    21.作品可展示形式display
+    22.作品调查方式investigation
 '''
 class SubmitProject(Resource):
     def post(self):
@@ -333,7 +387,7 @@ class SubmitProject(Resource):
                       'education': '', 'major': '', 'enterTime': '',
                       'totalTitle': '', 'address': '', 'phone': '', 'email': '',
                       'applier': list(), 'title': '', 'type': '', 'description': '',
-                      'creation': '', 'keyword': ''}
+                      'creation': '', 'keyword': '', 'display': list(), 'investigation': list()}
             if data.get('mainTitle'):
                 params['mainTitle'] = data.get('mainTitle')
             if data.get('department'):
@@ -372,6 +426,10 @@ class SubmitProject(Resource):
                 params['creation'] = data.get('creation')
             if data.get('keyword'):
                 params['keyword'] = data.get('keyword')
+            if data.get('display'):
+                params['display'] = data.get('display')
+            if data.get('investigation'):
+                params['investigation'] = data.get('investigation')
             res = db.submit_project(params)
         except:
             pass
@@ -506,6 +564,78 @@ class RefuseReview(Resource):
         finally:
             return jsonify(res)
 
+'''
+新增公告
+参数：
+    1.题目title
+    2.时间time
+    3.内容content
+    4.附件files
+'''
+class AddNews(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            title = data.get('title')
+            time = data.get('time')
+            content = data.get('content')
+            files = list()
+            if data.get('files'):
+                files = data.get('files')
+            res = db.add_news(title, time, content, files)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+
+'''
+获取公告列表
+'''
+class GetNews(Resource):
+    def get(self):
+        res = {"state": "fail"}
+        try:
+            res = db.get_news()
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+
+'''
+获取公告详情
+'''
+class GetNewsDetail(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            news_id = data.get('news_id')
+            res = db.get_news_detail(news_id)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+
+'''
+删除公告
+参数：
+    公告ID
+'''
+class DeleteNews(Resource):
+    def get(self):
+        res = {"state": "fail"}
+        try:
+            data = request.args
+            news_id = data.get('news_id')
+            res = db.delete_news(news_id)
+        except:
+            pass
+        finally:
+            return jsonify(res)
 #######################################################################################################################
 """
 登录
@@ -575,9 +705,11 @@ class StageProList(Resource):
         try:
             data = request.get_json()
             competition_id = data.get('competition_id')
-            print(competition_id)
+            db = DbOperate()
+            db.update_com_status(competition_id)
             res = db.get_contest_projects(competition_id)
-        except:
+        except Exception as e:
+            print(str(e))
             pass
         finally:
             return jsonify(res)
@@ -621,9 +753,8 @@ class FirstTrialChange(Resource):
         res = {"state": "fail"}
         try:
             data = request.get_json()
-            proj_id = data.get('proj_id')
-            result = data.get('result')
-            res = db.first_trial_change(proj_id, result)
+            projlst = data.get('projlst')
+            res = db.first_trial_change(projlst)
         except:
             pass
         finally:
@@ -806,6 +937,12 @@ api.add_resource(InviteMail, '/api/v1/invite_mail', endpoint='invite_mail')
 api.add_resource(ContestList, '/api/v1/contestlist', endpoint='contestlist')
 api.add_resource(ChangeCompStat, '/api/v1/changeCompStat', endpoint='changeCompStat')
 api.add_resource(GetUserInfo, '/api/v1/get_user_info', endpoint='getUserInfo')
+api.add_resource(GetNews, '/api/v1/get_news', endpoint='getNews')
+api.add_resource(GetNewsDetail, '/api/v1/get_news_detail', endpoint='getNewsDetail')
+api.add_resource(DeleteNews, '/api/v1/delete_news', endpoint='seleteNews')
+api.add_resource(AddNews, '/api/v1/add_news', endpoint='addNews')
+api.add_resource(UpAnnounceFile, '/api/v1/up_announce_file', endpoint='upAnnounceFile')
+api.add_resource(DeleteAnnounceFile, "/api/v1/delete_announce_file", endpoint="deleteAnnounceFile")
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", debug=True)

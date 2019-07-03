@@ -369,7 +369,7 @@
           });
         },
         pass(re){
-          let params = {'proj_id':this.basicInfo.id,'result':re};
+          let params = {'projlst':[{'proj_id':this.basicInfo.id,'result':re}]};
           this.$http.post(this.$baseURL + "/api/vi/first_trial_change",params,{
             headers:{
               'Content-Type':"application/json",

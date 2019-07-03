@@ -8,7 +8,6 @@
 @desc:
 '''
 import copy
-
 from pymongo import MongoClient
 from utils import replace_apply_html
 from bson.objectid import ObjectId
@@ -18,7 +17,8 @@ from email.header import Header
 import smtplib
 import random
 import os
-
+import threading
+import datetime
 
 
 class DbOperate:
@@ -102,7 +102,8 @@ class DbOperate:
                                           'address': '', 'phone': '', 'email': '',
                                           'applier': list(), 'title': '',
                                           'type': '', 'description': '',
-                                          'creation': '', 'keyword': ''},
+                                          'creation': '', 'keyword': '',
+                                          'display': list(), 'investigation': list()},
                     'project_files': list()
                 }
                 self.getCol('project').insert_one(t_project)
@@ -189,8 +190,7 @@ class DbOperate:
                     os.remove(file_path)
                 if flag:
                     html_path = basedir + "/static/export_html/" + project_code + '.html'
-                    if os.path.exists(html_path):
-                        os.remove(html_path)
+                    os.remove(html_path)
                     self.getCol('project').remove({'project_code': project_code})
                     res['state'] = 'success'
                     res['reason'] = ''
@@ -276,7 +276,6 @@ class DbOperate:
             pass
         finally:
             return res
-
 
     '''
     提交评审意见
@@ -367,6 +366,101 @@ class DbOperate:
             pass
         finally:
             return res
+
+    '''
+    发布公告
+    '''
+    def add_news(self, title, time, content, files):
+        res = {'state': 'fail', 'reason': "未知错误"}
+        try:
+            news = {
+                'title': title,
+                'time': time,
+                'content': content,
+                'files': files
+            }
+            result = self.getCol('news').insert_one(news)
+            res['state'] = 'success'
+            res['reason'] = None
+            res['news_id'] = str(result.inserted_id)
+        except:
+            pass
+        finally:
+            return res
+
+    '''
+    删除公告
+    '''
+    def delete_news(self, news_id):
+        res = {'state': 'fail', 'reason': "未知错误"}
+        try:
+            news = self.getCol('news').find_one({'_id': ObjectId(news_id)})
+            if news:
+                files = self.getCol('news').find_one({'_id': ObjectId(news_id)}, {'files': 1})
+                news_files = files['files']
+                flag = True
+                basedir = os.path.abspath(os.path.dirname(__file__))
+                for pf in news_files:
+                    file_path = basedir + "/static/" + pf['file_type'] + "/" + pf["file_path"]
+                    if not os.path.exists(file_path):
+                        res['reason'] = '附件不存在，请联系管理员'
+                        flag = False
+                        break
+                    os.remove(file_path)
+                if flag:
+                    self.getCol('news').remove({'_id': ObjectId(news_id)})
+                    res['state'] = 'success'
+                    res['reason'] = ''
+            else:
+                res['reason'] = "公告不存在"
+        except:
+            pass
+        finally:
+            return res
+
+    '''
+    获取公告列表
+    '''
+    def get_news(self):
+        res = {'state': 'fail', 'reason': "未知错误"}
+        try:
+            origin_news = self.getCol('news').find()
+            news_list = list()
+            for news in origin_news:
+                news['news_id'] = str(news['_id'])
+                news.pop('content')
+                news.pop('files')
+                news.pop('_id')
+                news_list.append(news)
+            res['state'] = 'success'
+            res['reason'] = None
+            res['news_list'] = news_list
+        except:
+            pass
+        finally:
+            return res
+
+    '''
+    获取公告详情
+    '''
+
+    def get_news_detail(self, news_id):
+        res = {'state': 'fail', 'reason': "未知错误"}
+        try:
+            news_list = self.getCol('news')
+            news_detail = news_list.find_one({'_id': ObjectId(news_id)})
+            if news_detail:
+                news_detail['_id'] = str(news_detail['_id'])
+                res['state'] = 'success'
+                res['reason'] = None
+                res['news_detail'] = news_detail
+            else:
+                res['reason'] = '未找到该消息'
+        except:
+            pass
+        finally:
+            return res
+
 ##############################################################################################
     '''
     检查邮箱是否已注册
@@ -772,6 +866,16 @@ class DbOperate:
             return res
         return res
 
+    # 计算当前时间到明日某时间的秒数差
+    def get_interval_secs(self):
+        tomorrow = (datetime.date.today() + datetime.timedelta(days=1)).strftime('%Y%m%d')
+        tomorrow_time = tomorrow + "-09:00:00"
+        tomorrow_time_date = datetime.datetime.strptime(tomorrow_time, '%Y%m%d-%H:%M:%S')
+        now = datetime.datetime.now()
+        interval = tomorrow_time_date - now
+        secs = interval.total_seconds()
+        return secs
+
 ##############################################################################################
     '''
     插入附件信息
@@ -912,6 +1016,7 @@ class DbOperate:
     '''
     def num2status(self,num):
         num_map = {
+            -2: '初审未通过',
             -1: '编辑中',
             0: '已提交',
             1: '通过初审',
@@ -923,6 +1028,88 @@ class DbOperate:
             7: '一等奖',
         }
         return num_map[num]
+
+    '''
+    字符串转化成datetime
+    '''
+    def str2datetime(self, str):
+        return datetime.datetime.strptime(str, "%Y-%m-%d %H:%M:%S")
+
+    '''
+    比较两个datetime类型的时间
+    return time1>time2 ? 1:0
+    '''
+    def compare_time(self, time1, time2):
+        diff = time1 - time2
+        if diff.days > 0:
+            return True
+        elif diff.days == 0:
+            return diff.seconds > 0
+        else:
+            return False
+
+    '''
+    比对当前时间和竞赛的时间节点，
+    更新数据库竞赛状态
+    '''
+    def update_com_status(self, competition_id):
+        com_collection = self.getCol('competition')
+        now_time = datetime.datetime.now()
+        this_competition = com_collection.find_one({'_id': ObjectId(competition_id)})
+        try:
+            begin_time = self.str2datetime(this_competition['begin_time'])
+            submission_ddl = self.str2datetime(this_competition['submission_ddl'])
+            first_review_ddl = self.str2datetime(this_competition['first_review_ddl'])
+            expert_comments_ddl = self.str2datetime(this_competition['expert_comments_ddl'])
+            live_selection_ddl = self.str2datetime(this_competition['live_selection_ddl'])
+            end_time = self.str2datetime(this_competition['end_time'])
+        except:
+            begin_time = self.str2datetime('2000-1-1 0:0:0')
+            submission_ddl = self.str2datetime('2000-1-1 0:0:0')
+            first_review_ddl = self.str2datetime('2000-1-1 0:0:0')
+            expert_comments_ddl = self.str2datetime('2000-1-1 0:0:0')
+            live_selection_ddl = self.str2datetime('2000-1-1 0:0:0')
+            end_time = self.str2datetime('2000-1-1 0:0:0')
+
+        # 未开始
+        if self.compare_time(begin_time, now_time):
+            com_collection.update_one({'_id': ObjectId(competition_id)}, {'$set': {'com_status': -1}})
+        # 提交阶段
+        elif self.compare_time(submission_ddl, now_time):
+            com_collection.update_one({'_id': ObjectId(competition_id)}, {'$set': {'com_status': 0}})
+        # 初审阶段
+        elif self.compare_time(first_review_ddl, now_time):
+            com_collection.update_one({'_id': ObjectId(competition_id)}, {'$set': {'com_status': 1}})
+        # 专家初评阶段
+        elif self.compare_time(expert_comments_ddl, now_time):
+            com_collection.update_one({'_id': ObjectId(competition_id)}, {'$set': {'com_status': 2}})
+        # 现场答辩阶段
+        elif self.compare_time(live_selection_ddl, now_time):
+            com_collection.update_one({'_id': ObjectId(competition_id)}, {'$set': {'com_status': 3}})
+        # 结果录入阶段
+        elif self.compare_time(end_time, now_time):
+            com_collection.update_one({'_id': ObjectId(competition_id)}, {'$set': {'com_status': 4}})
+        # 比赛结束
+        else:
+            com_collection.update_one({'_id': ObjectId(competition_id)}, {'$set': {'com_status': 5}})
+
+    '''
+    提交阶段看E,E的显示规则
+    '''
+    def rule_commit_E(self, E_List):
+        for index, project in enumerate(E_List):
+            E_List[index]['project_status'] = self.num2status(E_List[index]['project_status'])
+        return E_List
+
+    '''
+    其它阶段看E，E的显示规则
+    '''
+    def rule_other_E(self, E_List):
+        for index, project in enumerate(E_List):
+            if project['project_status'] >= 0:
+                E_List[index]['project_status'] = 0
+            E_List[index]['project_status'] = self.num2status(E_List[index]['project_status'])
+        return E_List
 
     '''
     任意阶段看A或B，A或B的显示规则
@@ -969,6 +1156,7 @@ class DbOperate:
         res = {
             'state': 'fail',
             'reason': '网络出错或BUG出现！',
+            'E_List': [],
             'A_List': [],
             'B_List': [],
             'C_List': [],
@@ -989,20 +1177,30 @@ class DbOperate:
             if len(projects) > 0:
                 res['state'] = 'success'
                 res['reason'] = '成功获取竞赛作品列表'
+                # 当前状态是未开始
+                if com_status == -1:
+                    pass
+                # 当前状态是提交
+                elif com_status == 0:
+                    res['E_List'] = self.rule_commit_E(copy.deepcopy(projects))
                 # 当前状态是初审
-                if com_status == 1:
+                elif com_status == 1:
+                    res['E_List'] = self.rule_other_E(copy.deepcopy(projects))
                     res['A_List'] = self.rule_A(copy.deepcopy(projects))
                 # 当前状态是初评
                 elif com_status == 2:
+                    res['E_List'] = self.rule_other_E(copy.deepcopy(projects))
                     res['A_List'] = self.rule_A(copy.deepcopy(projects))
                     res['B_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
                 # 当前状态是筛选并现场答辩
                 elif com_status == 3:
+                    res['E_List'] = self.rule_other_E(copy.deepcopy(projects))
                     res['A_List'] = self.rule_A(copy.deepcopy(projects))
                     res['B_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
                     res['C_List'] = self.rule_CC(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
                 # 当前状态是录入并公布最终结果
                 elif com_status == 4:
+                    res['E_List'] = self.rule_other_E(copy.deepcopy(projects))
                     res['A_List'] = self.rule_A(copy.deepcopy(projects))
                     res['B_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
                     res['C_List'] = self.rule_DC(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
@@ -1044,23 +1242,30 @@ class DbOperate:
     初审改变作品状态
     proj_id:项目id（字符串）   result:初审结果（字符串 'True' 'False'）
     '''
-    def first_trial_change(self, proj_id, result):
+    def first_trial_change(self, projlst):
         res = {'state': 'fail', 'reason': '网络出错或BUG出现！'}
         try:
             proj_list = self.getCol('project')
-            find_proj = proj_list.find_one({'project_code': proj_id}, {'_id': 1})
-            # 成功搜索到该项目
-            if find_proj:
-                if result == 'True':
-                    now_stat = 1
+            flag = True
+            for item in projlst:
+                proj_id = item['proj_id']
+                result = item['re']
+                find_proj = proj_list.find_one({'project_code': proj_id}, {'_id': 1})
+                # 成功搜索到该项目
+                if find_proj:
+                    if result == 'True':
+                        now_stat = 1
+                    else:
+                        now_stat = -1
+                    proj_list.update_one({"project_code": proj_id},
+                                         {"$set": {"project_status": now_stat}})
+                # 未搜索到该项目
                 else:
-                    now_stat = -1
-                proj_list.update_one({"project_code": proj_id},
-                                     {"$set": {"project_status": now_stat}})
+                    flag = False
+            if flag:
                 res['state'] = 'success'
-            # 未搜索到该项目
             else:
-                res['reason'] = '该项目不存在'
+                res['reason'] = '选择的项目列表有的不存在'
             return res
         except:
             return res

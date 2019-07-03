@@ -3,7 +3,7 @@
         <NavBar></NavBar>
         <div class="body">
             <h2>我的项目</h2>
-            <Button style="margin: 10px" icon="md-add-circle" @click="apply_new">申请项目</Button>
+<!--            <Button style="margin: 10px" icon="md-add-circle" @click="apply_new">申请项目</Button>-->
             <Table stripe border :columns="columns" :data="rows" ref="table" ></Table>
         </div>
     </div>
