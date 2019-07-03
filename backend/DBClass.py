@@ -189,8 +189,7 @@ class DbOperate:
                     os.remove(file_path)
                 if flag:
                     html_path = basedir + "/static/export_html/" + project_code + '.html'
-                    if os.path.exists(html_path):
-                        os.remove(html_path)
+                    os.remove(html_path)
                     self.getCol('project').remove({'project_code': project_code})
                     res['state'] = 'success'
                     res['reason'] = ''
@@ -840,6 +839,7 @@ class DbOperate:
     '''
     def num2status(self,num):
         num_map = {
+            -2: '出身未通过',
             -1: '编辑中',
             0: '已提交',
             1: '通过初审',
