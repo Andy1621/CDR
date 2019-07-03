@@ -8,6 +8,10 @@ import 'iview/dist/styles/iview.css';
 // import '../static/css/iview/styles/iview.css';
 import VueResource from 'vue-resource';
 import cookie from 'js-cookie'
+import VideoPlayer from 'vue-video-player'
+import 'video.js/dist/video-js.css'
+
+
 
 import '../static/css/bootstrap.min.css'
 import '../static/css/style.css'
@@ -17,7 +21,8 @@ import $ from 'jquery/dist/jquery.min'
 import $$ from 'bootstrap/dist/js/bootstrap.min.js'
 
 Vue.use(iView);
-Vue.use(VueResource)
+Vue.use(VueResource);
+Vue.use(VideoPlayer);
 
 Vue.config.productionTip = false;
 
