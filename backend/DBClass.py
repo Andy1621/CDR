@@ -8,7 +8,6 @@
 @desc:
 '''
 import copy
-
 from pymongo import MongoClient
 from utils import replace_apply_html
 from bson.objectid import ObjectId
@@ -18,7 +17,8 @@ from email.header import Header
 import smtplib
 import random
 import os
-
+import threading
+import datetime
 
 
 class DbOperate:
@@ -698,6 +698,16 @@ class DbOperate:
         except:
             return res
         return res
+
+    # 计算当前时间到明日某时间的秒数差
+    def get_interval_secs(self):
+        tomorrow = (datetime.date.today() + datetime.timedelta(days=1)).strftime('%Y%m%d')
+        tomorrow_time = tomorrow + "-09:00:00"
+        tomorrow_time_date = datetime.datetime.strptime(tomorrow_time, '%Y%m%d-%H:%M:%S')
+        now = datetime.datetime.now()
+        interval = tomorrow_time_date - now
+        secs = interval.total_seconds()
+        return secs
 
 ##############################################################################################
     '''
