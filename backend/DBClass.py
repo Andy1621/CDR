@@ -8,7 +8,6 @@
 @desc:
 '''
 import copy
-
 from pymongo import MongoClient
 from utils import replace_apply_html
 from bson.objectid import ObjectId
@@ -18,7 +17,8 @@ from email.header import Header
 import smtplib
 import random
 import os
-
+import threading
+import datetime
 
 
 class DbOperate:
@@ -102,7 +102,8 @@ class DbOperate:
                                           'address': '', 'phone': '', 'email': '',
                                           'applier': list(), 'title': '',
                                           'type': '', 'description': '',
-                                          'creation': '', 'keyword': ''},
+                                          'creation': '', 'keyword': '',
+                                          'display': list(), 'investigation': list()},
                     'project_files': list()
                 }
                 self.getCol('project').insert_one(t_project)
@@ -189,8 +190,7 @@ class DbOperate:
                     os.remove(file_path)
                 if flag:
                     html_path = basedir + "/static/export_html/" + project_code + '.html'
-                    if os.path.exists(html_path):
-                        os.remove(html_path)
+                    os.remove(html_path)
                     self.getCol('project').remove({'project_code': project_code})
                     res['state'] = 'success'
                     res['reason'] = ''
@@ -700,6 +700,16 @@ class DbOperate:
             return res
         return res
 
+    # 计算当前时间到明日某时间的秒数差
+    def get_interval_secs(self):
+        tomorrow = (datetime.date.today() + datetime.timedelta(days=1)).strftime('%Y%m%d')
+        tomorrow_time = tomorrow + "-09:00:00"
+        tomorrow_time_date = datetime.datetime.strptime(tomorrow_time, '%Y%m%d-%H:%M:%S')
+        now = datetime.datetime.now()
+        interval = tomorrow_time_date - now
+        secs = interval.total_seconds()
+        return secs
+
 ##############################################################################################
     '''
     插入附件信息
@@ -840,6 +850,7 @@ class DbOperate:
     '''
     def num2status(self,num):
         num_map = {
+            -2: '初审未通过',
             -1: '编辑中',
             0: '已提交',
             1: '通过初审',

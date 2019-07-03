@@ -163,6 +163,8 @@ class GetExpertReviewList(Resource):
     18.作品总体情况说明description
     19.创新点creation
     20.关键词keyword
+    21.作品可展示形式display
+    22.作品调查方式investigation
 '''
 class StoreProject(Resource):
     def post(self):
@@ -174,7 +176,7 @@ class StoreProject(Resource):
                       'education': '', 'major': '', 'enterTime': '',
                       'totalTitle': '', 'address': '', 'phone': '', 'email': '',
                       'applier': list(), 'title': '', 'type': '', 'description': '',
-                      'creation': '', 'keyword': ''}
+                      'creation': '', 'keyword': '', 'display': list(), 'investigation': list()}
             if data.get('mainTitle'):
                 params['mainTitle'] = data.get('mainTitle')
             if data.get('department'):
@@ -213,6 +215,10 @@ class StoreProject(Resource):
                 params['creation'] = data.get('creation')
             if data.get('keyword'):
                 params['keyword'] = data.get('keyword')
+            if data.get('display'):
+                params['display'] = data.get('display')
+            if data.get('investigation'):
+                params['investigation'] = data.get('investigation')
             res = db.store_project(params)
         except:
             pass
@@ -322,6 +328,8 @@ class DeleteProject(Resource):
     18.作品总体情况说明description
     19.创新点creation
     20.关键词keyword
+    21.作品可展示形式display
+    22.作品调查方式investigation
 '''
 class SubmitProject(Resource):
     def post(self):
@@ -333,7 +341,7 @@ class SubmitProject(Resource):
                       'education': '', 'major': '', 'enterTime': '',
                       'totalTitle': '', 'address': '', 'phone': '', 'email': '',
                       'applier': list(), 'title': '', 'type': '', 'description': '',
-                      'creation': '', 'keyword': ''}
+                      'creation': '', 'keyword': '', 'display': list(), 'investigation': list()}
             if data.get('mainTitle'):
                 params['mainTitle'] = data.get('mainTitle')
             if data.get('department'):
@@ -372,6 +380,10 @@ class SubmitProject(Resource):
                 params['creation'] = data.get('creation')
             if data.get('keyword'):
                 params['keyword'] = data.get('keyword')
+            if data.get('display'):
+                params['display'] = data.get('display')
+            if data.get('investigation'):
+                params['investigation'] = data.get('investigation')
             res = db.submit_project(params)
         except:
             pass
