@@ -3,7 +3,7 @@
         <NavBar></NavBar>
         <div class="body">
             <h2>竞赛列表</h2>
-            <Table stripe border :columns="columns" :data="rows" ref="table" ></Table>
+            <Table stripe border :columns="columns" :data="rows" ref="table" style="width:100%"></Table>
         </div>
         <router-view v-if="isRouterAlive"></router-view>
     </div>
@@ -23,17 +23,17 @@
                     {
                         title: '竞赛名称',
                         key: 'competition_name',
-                        width: 280
+                        width: 210
                     },
                     {
                         title: '开始时间',
                         key: 'begin_time',
-                        width: 130
+                        width: 90
                     },
                     {
                         title: '结束时间',
                         key: 'end_time',
-                        width: 130
+                        width: 90
                     },
                     {
                         title: '参赛作品总数',
@@ -168,7 +168,7 @@
                     item.com_status = "专家初评";
                     break;
                   case 3:
-                    item.com_status = "筛选作品及现场答辩";
+                    item.com_status = "进入答辩";
                     break;
                   case 4:
                     item.com_status = "已结束";

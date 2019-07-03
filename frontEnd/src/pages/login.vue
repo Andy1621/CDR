@@ -158,7 +158,7 @@
                     return;
                 }
                 let data = {
-                    mail: this.emailRegister,
+                    mail: this.emailRegister.trim(),
                     password: this.passwordRegister,
                     ID: this.ID,
                     username: this.username,
@@ -169,6 +169,10 @@
                 };
                 this.$http.post(this.$baseURL + "/api/v1/registerstudent", data).then(function (res) {
                     console.log(res)
+                    if (res.body.state === 'fail') {
+                      alert(res.body.reason)
+                      return
+                    }
                     this.$cookie.set('mail',this.emailRegister);
                     this.$cookie.set('username',this.username);
                     this.$cookie.set('role', 'student');
