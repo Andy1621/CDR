@@ -3,40 +3,40 @@
         <NavBar></NavBar>
         <div class="body">
             <Breadcrumb style="font-size: 16px">
-                <BreadcrumbItem class="breadcrumb-item" @click.native="back_to_index">首页</BreadcrumbItem>
-                <BreadcrumbItem class="breadcrumb-item" @click.native="back_to_list" v-if="isFromList">{{listName}}
+                <BreadcrumbItem @click.native="back_to_index" class="breadcrumb-item">首页</BreadcrumbItem>
+                <BreadcrumbItem @click.native="back_to_list" class="breadcrumb-item" v-if="isFromList">{{listName}}
                 </BreadcrumbItem>
-                <BreadcrumbItem class="breadcrumb-item" v-if="competitionDetail||newsDetail">{{detailType}}详情
+                <BreadcrumbItem class="breadcrumb-item" v-if="isCompetition||isNews">{{detailType}}详情
                 </BreadcrumbItem>
             </Breadcrumb>
             <Divider/>
-            <div v-if="competitionDetail">
+            <div v-if="isCompetition">
                 <div class="news-list">
-                    <h2 style="text-align: center">{{msgDetail.title}}</h2>
+                    <h2 style="text-align: center">{{competitionDetail.title}}</h2>
                     <Divider dashed/>
                     <Row style="color: #8391a5; font-size: 18px">
                         <Col span="10" style="text-align: left">
                             <p>发布者：校团委</p>
                         </Col>
-                        <Col span="10" offset="4" style="text-align: right">
-                            <p>发布时间：{{msgDetail.date}}</p>
+                        <Col offset="4" span="10" style="text-align: right">
+                            <p>发布时间：{{competitionDetail.date}}</p>
                         </Col>
                     </Row>
-                    <p style="font-size: 16px; margin: 20px;">{{msgDetail.text}}</p>
+                    <p style="font-size: 16px; margin: 20px;">{{competitionDetail.text}}</p>
                     <Divider style="margin: 10px 0 20px 0;"/>
-                    <div v-if="msgDetail.download!=''">
+                    <div v-if="competitionDetail.download!=''">
                         <p style="margin-left: 40px; font-size: 16px">附件下载：</p>
                         <p style="margin-left: 60px">
-                            <Icon type="ios-cloud-download" style="margin-right: 10px"></Icon>
-                            {{msgDetail.filename}}
-                            <a :href="msgDetail.download" :download="msgDetail.filename">
-                                <Button type="info" shape="circle" style="margin-left: 20px;" ghost>点击下载</Button>
+                            <Icon style="margin-right: 10px" type="ios-cloud-download"></Icon>
+                            {{competitionDetail.filename}}
+                            <a :download="competitionDetail.filename" :href="competitionDetail.download">
+                                <Button ghost shape="circle" style="margin-left: 20px;" type="info">点击下载</Button>
                             </a>
                         </p>
                     </div>
                 </div>
             </div>
-            <div v-if="newsDetail">
+            <div v-if="isNews">
                 <div class="news-list">
                     <h2 style="text-align: center">{{newsDetail.title}}</h2>
                     <Divider dashed/>
@@ -44,7 +44,7 @@
                         <Col span="10" style="text-align: left">
                             <p>发布者：校团委</p>
                         </Col>
-                        <Col span="10" offset="4" style="text-align: right">
+                        <Col offset="4" span="10" style="text-align: right">
                             <p>发布时间：{{newsDetail.time}}</p>
                         </Col>
                     </Row>
@@ -54,13 +54,11 @@
                         <p style="margin-left: 40px; font-size: 16px">附件下载：</p>
                         <div v-for="item in newsDetail.files">
                             <p style="margin-left: 60px">
-                                <Icon type="ios-cloud-download" style="margin-right: 10px"></Icon>
+                                <Icon style="margin-right: 10px" type="ios-cloud-download"></Icon>
                                 {{item.name}}
-                                <!--                                    <a :href="item.url" target="_blank">-->
-                                <Button type="info" shape="circle" style="margin-left: 20px;"
-                                        @click="download(item.url)" ghost>点击下载
+                                <Button @click="download(item.url)" ghost shape="circle"
+                                        style="margin-left: 20px;" type="info">点击下载
                                 </Button>
-                                <!--                                    </a>-->
                             </p>
                         </div>
                     </div>
@@ -82,41 +80,19 @@
             return {
                 value2: 0,
                 isFromList: false,
-                competitionDetail: false,
+                isCompetition: false,
+                isNews: false,
                 listName: '',
                 detailType: '',
-                show_news: [],
-                latest_news: [],
-                competition_news: [],
-                msgDetail: {
-                    'title': '',
-                    'date': '',
-                    'url': '',
-                    'text': '',
-                    'download': '',
-                    'filename': '',
-                },
+                competitionDetail: {},
                 newsDetail: {},
             }
         },
         methods: {
-            more_news(type) {
-                // this.$Message.info('moreNews')
-                if (type == 'latest') {
-                    this.listName = '最新公告';
-                    this.show_news = this.latest_news;
-                } else if (type == 'competition') {
-                    this.listName = '竞赛列表';
-                    this.show_news = this.competition_news;
-                }
-                this.isFromList = true
-                this.pageNum = 1
-            },
             back_to_index() {
                 this.isFromList = false;
-                this.competitionDetail = false;
-                this.newsDetail = false;
-                this.msgDetail = {};
+                this.isCompetition = false;
+                this.isNews = false;
                 this.$router.push({
                     path: '/index',
                 })
@@ -133,17 +109,6 @@
                     })
                 }
             },
-            show_detail(type, index) {
-                console.log(type + index)
-                if (type == 'latest') {
-                    this.msgDetail = this.latest_news[index];
-                } else if (type == 'competition') {
-                    this.msgDetail = this.competition_news[index];
-                } else {
-                    this.msgDetail = this.show_news[index];
-                }
-                this.competitionDetail = true
-            },
             download(url) {
                 window.open(url)
             },
@@ -152,7 +117,7 @@
             let query = this.$route.query
             if (query.type == 'competition') {
                 console.log(this.$route.query.competitionID)
-                this.competitionDetail = true
+                this.isCompetition = true
                 this.detailType = '竞赛'
                 if (query.from == 'list') {
                     this.listName = '竞赛列表'
@@ -161,7 +126,7 @@
                 //this.$http.get(this.$baseURL + '',{params:{'competition_id': query.competitionID}}
             } else {
                 console.log(this.$route.query.newsID)
-                this.newsDetail = true
+                this.isNews = true
                 this.detailType = '公告'
                 if (query.from == 'list') {
                     this.listName = '最新公告'
@@ -195,9 +160,6 @@
         margin-bottom: 50px;
         position: relative;
         top: 100px;
-        /*border: 1px dashed black;*/
-        /*border-radius: 20px;*/
-        /*margin: 100px 0px 50px 30%;*/
         padding: 10px;
         width: 77%;
         /*text-align: center;*/
