@@ -161,6 +161,12 @@
             else{
               for (let item of detail.contests) {
                 switch (item.com_status) {
+                  case -1:
+                    item.com_status = "未开始";
+                    break;
+                  case 0:
+                    item.com_status = "报名提交";
+                    break;
                   case 1:
                     item.com_status = "校团委初审";
                     break;
@@ -168,9 +174,12 @@
                     item.com_status = "专家初评";
                     break;
                   case 3:
-                    item.com_status = "进入答辩";
+                    item.com_status = "现场答辩";
                     break;
                   case 4:
+                    item.com_status = "最终结果报名";
+                    break;
+                  case 5:
                     item.com_status = "已结束";
                     break;
                 }
