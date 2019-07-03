@@ -16,6 +16,7 @@ import expTrialStat from '@/pages/expTrialStat'
 import personalInformation from '@/pages/personalInformation'
 import messageDetail from '@/pages/messageDetail'
 import newsList from "@/pages/newsList";
+import inviteProfessor from "@/pages/inviteProfessor";
 Vue.use(Router);
 
 export default new Router({
@@ -100,6 +101,11 @@ export default new Router({
             path: '/newsList',
             name: 'newsList',
             component: newsList,
+        },
+        {
+            path: '/inviteProfessor',
+            name: 'inviteProfessor',
+            component: inviteProfessor,
         },
     ]
 })

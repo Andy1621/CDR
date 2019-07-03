@@ -1227,6 +1227,7 @@ class DbOperate:
                 res['state'] = 'success'
                 res['reason'] = '查询成功'
                 for com in com_collection.find():
+                    self.update_com_status(str(com['_id']))
                     com['count'] = project_collection.find({'competition_id': str(com['_id'])}).count()
                     com['competition_id'] = str(com['_id'])
                     com.pop('_id')
