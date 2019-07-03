@@ -15,31 +15,9 @@
             margin-top: 3.5cm;
         }
 
-        h1 {
-            page-break-before: always;
-        }
-
-        h1, h2, h3, h4, h5, h6, thead, tfoot, tr, th, td,
-        li {
-            page-break-inside: avoid;
-        }
-
-        body {
-            background-color: white;
-            color: black;
-        }
-
-        nav,
-        aside {
-            display: none;
-        }
-
-        thead,
-        tfoot {
-            display: table-row-group;
-        }
-
-        .Noprn{ display:none;}
+       #my_table{
+           border: none
+       } 
     }
 </style>
 
@@ -214,11 +192,11 @@
                     <tbody>
                         <tr>
                             <td style="width: 20%; vertical-align:middle; text-align:center; height: 100px;">作品名称</td>
-                            <td style="width: 80%; vertical-align:middle; text-align:center;" id="title"></td>
+                            <td style="width: 80%; vertical-align:middle; text-align:center;" id="title">Two-Stream Convolutional Networks for Action Recognition in Videos</td>
                         </tr>
                         <tr>
                             <td style="width: 20%; vertical-align:middle; text-align:center; height: 100px;">作品分类</td>
-                            <td style="width: 80%; vertical-align:middle; text-align:center;" id="type"></td>
+                            <td style="width: 80%; vertical-align:middle; text-align:center;" id="type">机械与控制（包括机械、仪器仪表、自动化控制、工程、交通、建筑等）</td>
                         </tr>
                         <tr>
                             <td style="width: 20%; vertical-align:middle; text-align:center; height: 400px;">
@@ -226,12 +204,108 @@
                             <td style="width: 80%; vertical-align:middle;" id="description"></td>
                         </tr>
                         <tr>
-                            <td style="width: 20%; vertical-align:middle; text-align:center; height: 100px;">创新点</td>
-                            <td style="width: 80%; vertical-align:middle; text-align:center;" id="creation"></td>
-                        </tr>
+                            <td style="width: 20%; vertical-align:middle; text-align:center; height: 200px;">创新点</td>
+                            <td style="width: 80%; vertical-align:middle;" id="creation"></tr>
                         <tr>
                             <td style="width: 20%; vertical-align:middle; text-align:center; height: 100px;">关键词</td>
                             <td style="width: 80%; vertical-align:middle; text-align:center;" id="keyword"></td>
+                        </tr>
+                        <tr id="display">
+                            <td style="width: 20%; vertical-align:middle; text-align:center; height: 100px;">作品可展示的形式</td>
+                            <td style="width: 80%; vertical-align:middle;">
+                            <div style="margin-left: 20px">
+                                    <div style="float: left; width: 20%">
+                                        <span class="glyphicon glyphicon-unchecked" style="margin-top: 8px" id="display1"></span>实物、产品
+                                    </div>
+                                    <div style="float: left; width: 20%">
+                                        <span class="glyphicon glyphicon-unchecked" style="margin-top: 8px" id="display2"></span>模型
+                                    </div>
+                                    <div style="float: left; width: 20%">
+                                        <span class="glyphicon glyphicon-unchecked" style="margin-top: 8px" id="display3"></span>图纸
+                                    </div>
+                                    <div style="float: left; width: 20%">
+                                        <span class="glyphicon glyphicon-unchecked" style="margin-top: 8px" id="display4"></span>磁盘
+                                    </div>
+                                    <div style="clear: both;"></div>
+                                </div>
+                                <div style="margin-left: 20px">
+                                    <div style="float: left; width: 20%;">
+                                        <span class="glyphicon glyphicon-unchecked" style="margin-top: 8px" id="display5"></span>现场展示
+                                    </div>
+                                    <div style="float: left; width: 20%">
+                                        <span class="glyphicon glyphicon-unchecked" style="margin-top: 8px" id="display6"></span>图片
+                                    </div>
+                                    <div style="float: left; width: 20%">
+                                        <span class="glyphicon glyphicon-unchecked" style="margin-top: 8px" id="display7"></span>录像
+                                    </div>
+                                    <div style="float: left;">
+                                        <span class="glyphicon glyphicon-unchecked" style="margin-top: 8px" id="display8"></span>样品
+                                    </div>
+                                    <div style="clear: both;"></div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr id="investigation">
+                            <td style="width: 20%; vertical-align:middle; text-align:center; height: 150px;">作品调查方式</td>
+                            <td style="width: 80%; vertical-align:middle;">
+                                <div style="margin-left: 20px">
+                                    <div style="float: left; width: 20%">
+                                        <span class="glyphicon glyphicon-unchecked" style="margin-top: 8px" id="investigation1"></span>走访
+                                    </div>
+                                    <div style="float: left; width: 20%">
+                                        <span class="glyphicon glyphicon-unchecked" style="margin-top: 8px" id="investigation2"></span>问卷
+                                    </div>
+                                    <div style="float: left; width: 20%">
+                                        <span class="glyphicon glyphicon-unchecked" style="margin-top: 8px" id="investigation3"></span>现场采访
+                                    </div>
+                                    <div style="float: left;">
+                                        <span class="glyphicon glyphicon-unchecked" style="margin-top: 8px" id="investigation4"></span>人员介绍
+                                    </div>
+                                    <div style="clear: both;"></div>
+                                </div>
+                                <div style="margin-left: 20px">
+                                    <div style="float: left; width: 20%;">
+                                        <span class="glyphicon glyphicon-unchecked" style="margin-top: 8px" id="investigation5"></span>个别交谈
+                                    </div>
+                                    <div style="float: left; width: 20%">
+                                        <span class="glyphicon glyphicon-unchecked" style="margin-top: 8px" id="investigation6"></span>亲临实践
+                                    </div>
+                                    <div style="float: left; width: 20%">
+                                        <span class="glyphicon glyphicon-unchecked" style="margin-top: 8px" id="investigation7"></span>会议
+                                    </div>
+                                    <div style="float: left;">
+                                        <span class="glyphicon glyphicon-unchecked" style="margin-top: 8px" id="investigation8"></span>图片、照片
+                                    </div>
+                                    <div style="clear: both;"></div>
+                                </div>
+                                <div style="margin-left: 20px">
+                                    <div style="float: left; width: 20%;">
+                                        <span class="glyphicon glyphicon-unchecked" style="margin-top: 8px" id="investigation9"></span>书报刊物
+                                    </div>
+                                    <div style="float: left; width: 20%">
+                                        <span class="glyphicon glyphicon-unchecked" style="margin-top: 8px" id="investigation10"></span>统计报表
+                                    </div>
+                                    <div style="float: left; width: 20%">
+                                        <span class="glyphicon glyphicon-unchecked" style="margin-top: 8px" id="investigation11"></span>影视资料
+                                    </div>
+                                    <div style="float: left;">
+                                        <span class="glyphicon glyphicon-unchecked" style="margin-top: 8px" id="investigation12"></span>文件
+                                    </div>
+                                    <div style="clear: both;"></div>
+                                </div>
+                                <div style="margin-left: 20px">
+                                    <div style="float: left; width: 20%;">
+                                        <span class="glyphicon glyphicon-unchecked" style="margin-top: 8px" id="investigation13"></span>集体组织
+                                    </div>
+                                    <div style="float: left; width: 20%">
+                                        <span class="glyphicon glyphicon-unchecked" style="margin-top: 8px" id="investigation14"></span>自发
+                                    </div>
+                                    <div style="float: left;">
+                                        <span class="glyphicon glyphicon-unchecked" style="margin-top: 8px" id="investigation15"></span>其他
+                                    </div>
+                                    <div style="clear: both;"></div>
+                                </div>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -241,8 +315,9 @@
     </div>
     <script>
         window.onload = function () {
-            window.print()
-        }
+            window.print();
+        };
+        document.getElementById("description").innerHTML = document.getElementById("description").innerText;
     </script>
     <script type="text/javascript" src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
     <script type="text/javascript" src="./bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>

@@ -91,7 +91,21 @@
                                     on: {
                                         click: () => {
                                             if (params.row.status !== '待回应') {
-                                                alert('下载')
+                                                this.$http.get(this.$baseURL + '/api/v1/download_files', {
+                                                    params: {
+                                                        project_code: params.row.project_id
+                                                    }
+                                                }).then(function (res) {
+                                                    console.log(res);
+                                                    if (res.body.state === 'Success') {
+                                                        window.open(res.body.url)
+                                                    }
+                                                    else {
+                                                        this.$Message.warn(res.body.reason)
+                                                    }
+                                                }, function (res) {
+                                                    console.log(res)
+                                                })
                                             } else {
                                                 this.$http.get(this.$baseURL + '/api/v1/accept_review', {
                                                     params: {
@@ -103,8 +117,7 @@
                                                     if (res.body.state === 'success') {
                                                         params.row.status = '评审中';
                                                         alert("成功接收该项目的评审")
-                                                    }
-                                                    else {
+                                                    } else {
                                                         alert("操作失败")
                                                     }
                                                 }, function (res) {

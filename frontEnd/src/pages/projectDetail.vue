@@ -2,14 +2,15 @@
     <div>
         <NavBar></NavBar>
         <div class="body">
-            <Button primary style="position: fixed; right: 20%; top: 115px" @click="$router.go(-1)">返回</Button>
-            <h3 style="margin: 20px 0 30px 47%">作品详情</h3>
-            <Steps :current="current" style="margin-left: 12%">
+            <Button primary style="position: absolute; right: 10px; top: 10px" @click="$router.go(-1)">返回</Button>
+            <h1 style="margin: 20px 0 30px 40%">作品详情</h1>
+            <Steps :current="current" style="margin-left: 12%;cursor: default">
                 <Step title="项目基本信息" content="分类、创新、关键词、总体说明" icon="ios-information-circle-outline"
                       @click.native="current = 0"></Step>
                 <Step title="项目相关文件" content="文档、视频、图片" icon="ios-camera" @click.native="current = 1"></Step>
                 <Step title="评审打分" content="给出评价和分数" icon="ios-chatboxes" @click.native="current = 2"></Step>
             </Steps>
+            <Divider/>
             <div class="form" v-show="current == 0">
                 <Form ref="basicInfo" :model="basicInfo" :label-width="80">
                     <FormItem label="作品全称">
@@ -29,8 +30,35 @@
                     </FormItem>
                 </Form>
             </div>
-            <div v-show="current==1">
-                图片视频
+            <div v-show="current==1" style="margin: 10px">
+                <h4 style="margin: 10px">项目图片：</h4>
+                <div class="demo-upload-list" v-for="item in photoList">
+                    <template v-if="item.file_type === 'photo'">
+                        <img :src="item.file_path">
+                        <div class="demo-upload-list-cover">
+                            <Icon type="ios-eye-outline" @click.native="handleView(item.file_path, item.file_name)"></Icon>
+                        </div>
+                    </template>
+                </div>
+                <Divider/>
+                <h4 style="margin: 10px">项目视频：</h4>
+                <video-player class="video-player vjs-custom-skin"
+                              ref="videoPlayer"
+                              :playsinline="true"
+                              :options="playerOptions"></video-player>
+                <Divider/>
+                <h4 style="margin: 10px">项目文档：</h4>
+                <div>
+                    <ul>
+                        <li v-for="item in docList" style="" @click="viewDoc(item.file_path, item.file_name)">
+                            <Icon type="md-document"></Icon>
+                            {{item.file_name}}
+                        </li>
+                    </ul>
+                </div>
+                <Modal :title="photoViewName" v-model="visible">
+                    <img :src="photoViewUrl" v-if="visible" style="width: 100%">
+                </Modal>
             </div>
             <div v-show="current==2">
                 <Form ref="reviewInfo" :model="reviewInfo" :label-width="80">
@@ -68,11 +96,40 @@
         data() {
             return {
                 disable: false,
-                current: 2,
+                current: 1,
                 basicInfo: {},
                 reviewInfo: {
                     marks: '',
                     comment: ''
+                },
+                photoList: [],
+                docList: [],
+                videoList: [],
+                photoViewUrl: '',
+                photoViewName: '',
+                visible: false,
+                playerOptions: {
+                    playbackRates: [0.7, 1.0, 1.5, 2.0], //播放速度
+                    autoplay: false, //如果true,浏览器准备好时开始回放。
+                    muted: false, // 默认情况下将会消除任何音频。
+                    loop: false, // 导致视频一结束就重新开始。
+                    preload: 'auto', // 建议浏览器在<video>加载元素后是否应该开始下载视频数据。auto浏览器选择最佳行为,立即开始加载视频（如果浏览器支持）
+                    language: 'zh-CN',
+                    aspectRatio: '16:9', // 将播放器置于流畅模式，并在计算播放器的动态大小时使用该值。值应该代表一个比例 - 用冒号分隔的两个数字（例如"16:9"或"4:3"）
+                    fluid: true, // 当true时，Video.js player将拥有流体大小。换句话说，它将按比例缩放以适应其容器。
+                    sources: [{
+                        src: '',  // 路径
+                        type: 'video/mp4'  // 类型
+                    }],
+                    //poster: "../../static/images/test.jpg", //你的封面地址
+                    // width: document.documentElement.clientWidth,
+                    notSupportedMessage: '此视频暂无法播放，请稍后再试', //允许覆盖Video.js无法播放媒体源时显示的默认信息。
+                    controlBar: {
+                        timeDivider: true,
+                        durationDisplay: true,
+                        remainingTimeDisplay: false,
+                        fullscreenToggle: true  //全屏按钮
+                    }
                 },
                 dictionary: {
                     dictionary: [
@@ -95,7 +152,19 @@
             this.$http.get(url, {params: {project_code: this.$route.query.project_id}}).then(function (res) {
                 console.log(res);
                 this.basicInfo = res.body.project.registration_form;
-                this.basicInfo.type = this.dictionary[this.basicInfo.type]
+                this.basicInfo.type = this.dictionary[this.basicInfo.type];
+                let files = res.body.project.project_files;
+                for (let i of files) {
+                    if (i.file_type === 'photo')
+                        this.photoList.push(i);
+                    else if (i.file_type === 'doc')
+                        this.docList.push(i);
+                    else {
+                        this.videoList.push(i);
+                        this.playerOptions.sources[0].src = i.file_path;
+                    }
+                }
+                console.log(this.photoList, files)
             }, function (res) {
                 console.log(res)
             });
@@ -123,6 +192,14 @@
             })
         },
         methods: {
+            viewDoc(url) {
+                window.open(url);
+            },
+            handleView(url, name) {
+                this.photoViewUrl = url;
+                this.photoViewName = name;
+                this.visible = true;
+            },
             saveReview() {
                 let url = this.$baseURL + '/api/v1/store_review';
                 let data = {
@@ -159,7 +236,8 @@
                     ).then(function (res) {
                         console.log(res);
                         this.disable = true;
-                        alert('提交成功');
+                        let alertContent = res.body.state === 'fail' ? res.body.reason : '提交成功';
+                        alert(alertContent);
                     }, function (res) {
                         console.log(res)
                     })
@@ -190,5 +268,69 @@
         padding: 3px;
         margin-bottom: 5px;
         font-size: 15px;
+    }
+
+    .demo-upload-list {
+        display: inline-block;
+        width: 60px;
+        height: 60px;
+        text-align: center;
+        line-height: 60px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        overflow: hidden;
+        background: #fff;
+        position: relative;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, .2);
+        margin-left: 10px;
+    }
+
+    .demo-upload-list img {
+        width: 100%;
+        height: 100%;
+    }
+
+    .demo-upload-list-cover {
+        display: none;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, .6);
+    }
+
+    .demo-upload-list:hover .demo-upload-list-cover {
+        display: block;
+    }
+
+    .demo-upload-list-cover i {
+        color: #fff;
+        font-size: 20px;
+        cursor: pointer;
+        margin: 0 2px;
+    }
+
+    ul {
+        list-style-type: none;
+    }
+
+    li {
+        cursor: default;
+        padding: 5px 10px 5px 10px;
+        margin: 1px;
+        width: fit-content;
+        border-radius: 5px;
+        color: #666666;
+    }
+
+    li:hover {
+        background: #eeeeee;
+        color: #2b85e4;
+    }
+    >>> .video-js .vjs-big-play-button{
+        position: absolute;
+        top: 43%;
+        left: 44%;
     }
 </style>
