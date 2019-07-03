@@ -14,6 +14,7 @@ from flask_cors import *
 from DBClass import DbOperate
 import Config
 from utils import encode, make_zip
+import time
 
 app = Flask(__name__)
 CORS(app, resources=r'/*')
@@ -90,6 +91,49 @@ class DeleteFile(Resource):
             if db_res.get('state') == 'fail':
                 res['reason'] = db_res.get('reason')
                 raise FError("Error")
+            res['state'] = 'success'
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+
+# 上传公告附件
+class UpAnnounceFile(Resource):
+    def post(self):
+        res = {"state": "fail", 'reason': '网络错误或未知原因'}
+        try:
+            file = request.files.get('file')
+            basedir = os.path.abspath(os.path.dirname(__file__))
+            path = basedir + '/static/announce_file/'
+            timestamp = int(round(time.time()))
+            # 存文件到文件夹
+            file_name = str(timestamp) + '_' + file.filename
+            file_path = path + file_name
+            file.save(file_path)
+            res['state'] = "success"
+            res['url'] = Config.DOMAIN_NAME + '/static/announce_file/' + file_name
+            res['file_name'] = file.filename
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+
+# 删除附件
+class DeleteAnnounceFile(Resource):
+    def post(self):
+        res = {"state": "fail", 'reason': '网络错误或未知原因'}
+        try:
+            data = request.get_json()
+            file_path = data.get('file_path')
+            basedir = os.path.abspath(os.path.dirname(__file__))
+            path = basedir + "/static/announce_file/"
+            file_path = path + file_path.split('/')[-1]
+            if not os.path.exists(file_path):
+                res['reason'] = 'The file does not exists'
+                raise FError("Error")
+            os.remove(file_path)
             res['state'] = 'success'
         except:
             pass
@@ -822,6 +866,9 @@ api.add_resource(ChangeCompStat, '/api/v1/changeCompStat', endpoint='changeCompS
 api.add_resource(GetNews, '/api/v1/get_news', endpoint='getNews')
 api.add_resource(DeleteNews, '/api/v1/delete_news', endpoint='seleteNews')
 api.add_resource(AddNews, '/api/v1/add_news', endpoint='addNews')
+api.add_resource(UpAnnounceFile, '/api/v1/up_announce_file', endpoint='upAnnounceFile')
+api.add_resource(DeleteAnnounceFile, "/api/v1/delete_announce_file", endpoint="deleteAnnounceFile")
+
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", debug=True)
