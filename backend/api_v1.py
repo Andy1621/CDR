@@ -737,9 +737,8 @@ class FirstTrialChange(Resource):
         res = {"state": "fail"}
         try:
             data = request.get_json()
-            proj_id = data.get('proj_id')
-            result = data.get('result')
-            res = db.first_trial_change(proj_id, result)
+            projlst = data.get('projlst')
+            res = db.first_trial_change(projlst)
         except:
             pass
         finally:
