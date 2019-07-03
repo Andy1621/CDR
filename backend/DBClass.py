@@ -448,10 +448,9 @@ class DbOperate:
         res = {'state': 'fail', 'reason': "未知错误"}
         try:
             news_list = self.getCol('news')
-            print(news_list)
             news_detail = news_list.find_one({'_id': ObjectId(news_id)})
             if news_detail:
-                print(news_detail)
+                news_detail['_id'] = str(news_detail['_id'])
                 res['state'] = 'success'
                 res['reason'] = None
                 res['news_detail'] = news_detail

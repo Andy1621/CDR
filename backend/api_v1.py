@@ -591,13 +591,29 @@ class AddNews(Resource):
 
 
 '''
-获取公告
+获取公告列表
 '''
 class GetNews(Resource):
     def get(self):
         res = {"state": "fail"}
         try:
             res = db.get_news()
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+
+'''
+获取公告详情
+'''
+class GetNewsDetail(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            news_id = data.get('news_id')
+            res = db.get_news_detail(news_id)
         except:
             pass
         finally:
@@ -866,6 +882,7 @@ api.add_resource(invite_mail, '/api/v1/invite_mail', endpoint='invite_mail')
 api.add_resource(ContestList, '/api/v1/contestlist', endpoint='contestlist')
 api.add_resource(ChangeCompStat, '/api/v1/changeCompStat', endpoint='changeCompStat')
 api.add_resource(GetNews, '/api/v1/get_news', endpoint='getNews')
+api.add_resource(GetNewsDetail, '/api/v1/get_news_detail', endpoint='getNewsDetail')
 api.add_resource(DeleteNews, '/api/v1/delete_news', endpoint='seleteNews')
 api.add_resource(AddNews, '/api/v1/add_news', endpoint='addNews')
 api.add_resource(UpAnnounceFile, '/api/v1/up_announce_file', endpoint='upAnnounceFile')
