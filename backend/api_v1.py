@@ -518,6 +518,62 @@ class RefuseReview(Resource):
         finally:
             return jsonify(res)
 
+'''
+新增公告
+参数：
+    1.题目title
+    2.时间time
+    3.内容content
+    4.附件files
+'''
+class AddNews(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            title = data.get('title')
+            time = data.get('time')
+            content = data.get('content')
+            files = list()
+            if data.get('files'):
+                files = data.get(files)
+            res = db.add_news(title, time, content, files)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+
+'''
+获取公告
+'''
+class GetNews(Resource):
+    def get(self):
+        res = {"state": "fail"}
+        try:
+            res = db.get_news()
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+
+'''
+删除公告
+参数：
+    公告ID
+'''
+class DeleteNews(Resource):
+    def get(self):
+        res = {"state": "fail"}
+        try:
+            data = request.args
+            news_id = data.get('news_id')
+            res = db.delete_news(news_id)
+        except:
+            pass
+        finally:
+            return jsonify(res)
 #######################################################################################################################
 """
 登录
@@ -762,6 +818,9 @@ api.add_resource(expert_set_password, '/api/v1/expert_set_password', endpoint='e
 api.add_resource(invite_mail, '/api/v1/invite_mail', endpoint='invite_mail')
 api.add_resource(ContestList, '/api/v1/contestlist', endpoint='contestlist')
 api.add_resource(ChangeCompStat, '/api/v1/changeCompStat', endpoint='changeCompStat')
+api.add_resource(GetNews, '/api/v1/get_news', endpoint='getNews')
+api.add_resource(DeleteNews, '/api/v1/delete_news', endpoint='seleteNews')
+api.add_resource(AddNews, '/api/v1/add_news', endpoint='addNews')
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", debug=True)

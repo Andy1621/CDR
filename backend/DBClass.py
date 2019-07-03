@@ -277,7 +277,6 @@ class DbOperate:
         finally:
             return res
 
-
     '''
     提交评审意见
     '''
@@ -367,6 +366,78 @@ class DbOperate:
             pass
         finally:
             return res
+
+    '''
+    发布公告
+    '''
+    def add_news(self, title, time, content, files):
+        res = {'state': 'fail', 'reason': "未知错误"}
+        try:
+            news = {
+                'title': title,
+                'time': time,
+                'content': content,
+                'files': files
+            }
+            result = self.getCol('news').insert_one(news)
+            res['state'] = 'success'
+            res['reason'] = None
+            res['news_id'] = str(result.inserted_id)
+        except:
+            pass
+        finally:
+            return res
+
+    '''
+    删除公告
+    '''
+    def delete_news(self, news_id):
+        res = {'state': 'fail', 'reason': "未知错误"}
+        try:
+            news = self.getCol('news').find_one({'_id': ObjectId(news_id)})
+            if news:
+                files = self.getCol('news').find_one({'_id': ObjectId(news_id)}, {'files': 1})
+                news_files = files['files']
+                flag = True
+                basedir = os.path.abspath(os.path.dirname(__file__))
+                for pf in news_files:
+                    file_path = basedir + "/static/" + pf['file_type'] + "/" + pf["file_path"]
+                    if not os.path.exists(file_path):
+                        res['reason'] = '附件不存在，请联系管理员'
+                        flag = False
+                        break
+                    os.remove(file_path)
+                if flag:
+                    self.getCol('news').remove({'_id': ObjectId(news_id)})
+                    res['state'] = 'success'
+                    res['reason'] = ''
+            else:
+                res['reason'] = "公告不存在"
+        except:
+            pass
+        finally:
+            return res
+
+    '''
+    获取公告
+    '''
+    def get_news(self):
+        res = {'state': 'fail', 'reason': "未知错误"}
+        try:
+            origin_news = self.getCol('news').find()
+            news_list = list()
+            for news in origin_news:
+                news['news_id'] = str(news['_id'])
+                news.pop('_id')
+                news_list.append(news)
+            res['state'] = 'success'
+            res['reason'] = None
+            res['news_list'] = news_list
+        except:
+            pass
+        finally:
+            return res
+
 ##############################################################################################
     '''
     检查邮箱是否已注册
