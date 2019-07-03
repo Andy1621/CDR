@@ -102,7 +102,8 @@ class DbOperate:
                                           'address': '', 'phone': '', 'email': '',
                                           'applier': list(), 'title': '',
                                           'type': '', 'description': '',
-                                          'creation': '', 'keyword': ''},
+                                          'creation': '', 'keyword': '',
+                                          'display': list(), 'investigation': list()},
                     'project_files': list()
                 }
                 self.getCol('project').insert_one(t_project)
