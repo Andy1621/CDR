@@ -5,7 +5,7 @@
             <div>
                 <Breadcrumb style="font-size: 16px">
                     <BreadcrumbItem class="breadcrumb-item" @click.native="back_to_index">首页</BreadcrumbItem>
-                    <BreadcrumbItem class="breadcrumb-item" @click.native="back_to_list" v-if="isMoreNews">{{newsType}}</BreadcrumbItem>
+                    <BreadcrumbItem class="breadcrumb-item" @click.native="back_to_list" v-if="isFromList">{{listName}}</BreadcrumbItem>
                     <BreadcrumbItem class="breadcrumb-item" v-if="competitionDetail">{{detailType}}详情</BreadcrumbItem>
                 </Breadcrumb>
                 <Divider/>
@@ -70,9 +70,9 @@
         data () {
             return {
                 value2: 0,
-                isMoreNews: false,
+                isFromList: false,
                 competitionDetail: false,
-                newsType: '',
+                listName: '',
                 detailType: '',
                 show_news:[],
                 latest_news:[],
@@ -115,18 +115,18 @@
             more_news(type){
                 // this.$Message.info('moreNews')
                 if(type == 'latest'){
-                    this.newsType = '最新公告';
+                    this.listName = '最新公告';
                     this.show_news = this.latest_news;
                 }
                 else if(type == 'competition'){
-                    this.newsType = '竞赛列表';
+                    this.listName = '竞赛列表';
                     this.show_news = this.competition_news;
                 }
-                this.isMoreNews = true
+                this.isFromList = true
                 this.pageNum = 1
             },
             back_to_index(){
-                this.isMoreNews = false;
+                this.isFromList = false;
                 this.competitionDetail = false;
                 this.msgDetail = {};
                 this.$router.push({
@@ -134,7 +134,11 @@
                 })
             },
             back_to_list(){
-                this.competitionDetail = false;
+                if(this.listName == '竞赛列表'){
+                    this.$router.push({
+                        path : '/competitionList'
+                    })
+                }
             },
             show_detail(type,index){
                 console.log(type + index)
@@ -159,10 +163,18 @@
             if(query.type == 'competition'){
                 this.competitionDetail = true
                 this.detailType = '竞赛'
+                if(query.from == 'list'){
+                    this.listName = '竞赛列表'
+                    this.isFromList = true
+                }
                 //this.$http.get(this.$baseURL + '',{params:{'competition_id': query.competitionID}}
             }
             else{
                 this.detailType = '公告'
+                if(query.from == 'list'){
+                    this.listName = '最新公告'
+                    this.isFromList = true
+                }
             }
             this.get_news();
         }

@@ -269,6 +269,7 @@
                     path : '/messageDetail',
                     query: {
                         type: 'competition',
+                        from: 'index',
                         competitionID: competition_id,
                     }
                 })

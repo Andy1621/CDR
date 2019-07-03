@@ -303,7 +303,7 @@
                     <img :src="imgUrl" v-if="visible" style="width: 100%">
                 </Modal>
                 <Divider/>
-                <h4 style="margin-bottom: 20px">作品视频（仅限 mp4 flv）</h4>
+                <h4 style="margin-bottom: 20px">作品视频（仅限 mp4）</h4>
                 <div v-if="readonly" class="show-upload">
                     <ul>
                         <li v-for="item in uploadVideoList" @click="videoView(item)">
@@ -319,7 +319,7 @@
                     :on-success="handleSuccessVideo"
                     :on-remove="handleRemoveVideo"
                     :on-preview="videoView"
-                    :format="['mp4','flv']"
+                    :format="['mp4']"
                     :max-size="102400"
                     :on-format-error="handleFormatErrorVideo"
                     :on-exceeded-size="handleMaxSizeVideo"
@@ -773,7 +773,7 @@
             handleFormatErrorVideo (file) {
                 this.$Notice.warning({
                     title: '文件格式错误',
-                    desc: '文件 ' + file.name + ' 格式错误请选择 mp4 或 flv 格式'
+                    desc: '文件 ' + file.name + ' 格式错误请选择 mp4 格式'
                 });
             },
             handleMaxSizeVideo (file) {
