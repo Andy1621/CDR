@@ -82,7 +82,8 @@
                               h('Button', {
                               props: {
                                 type: 'primary',
-                                size: 'small'
+                                size: 'small',
+                                disabled: params.row.com_status == "未开始"
                               },
                               style: {
                                 marginRight: '5px'
