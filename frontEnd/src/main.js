@@ -21,7 +21,9 @@ Vue.use(VueResource)
 
 Vue.config.productionTip = false;
 
+// Vue.prototype.$baseURL = 'http://help.lkc1621.xyz';
 Vue.prototype.$baseURL = 'http://127.0.0.1:5000';
+// Vue.prototype.$baseURL = 'http://180.76.96.46';
 Vue.prototype.$cookie =cookie;
 
 /* eslint-disable no-new */

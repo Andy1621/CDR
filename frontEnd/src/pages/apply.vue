@@ -3,11 +3,11 @@
         <NavBar></NavBar>
         <div class="body">
             <h1>作品提交内容填写</h1>
-            <Steps :current="current" style="margin: 30px">
-                <Step title="作品基本信息" content=""></Step>
-                <Step title="申请者信息" content=""></Step>
-                <Step title="作品详细信息" content=""></Step>
-                <Step title="附件上传" content=""></Step>
+            <Steps :current="current" style="margin: 30px" :class="readonly?'steps-readonly':''">
+                <Step title="作品基本信息" content="" @click.native="readonly?current=0:current=current"></Step>
+                <Step title="申请者信息" content="" @click.native="readonly?current=1:current=current"></Step>
+                <Step title="作品详细信息" content="" @click.native="readonly?current=2:current=current"></Step>
+                <Step title="附件上传" content="" @click.native="readonly?current=3:current=current"></Step>
             </Steps>
             <Divider/>
             <div class="form" v-show="current == 0">
@@ -1009,5 +1009,8 @@
     .show-upload li:hover{
         background: #eeeeee;
         color: #2b85e4;
+    }
+    .steps-readonly{
+        cursor: pointer;
     }
 </style>
