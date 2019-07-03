@@ -238,6 +238,7 @@ class AddProject(Resource):
         try:
             data = request.get_json()
             competition_id = data.get('competition_id')
+            DbOperate.update_com_status(competition_id)
             email = data.get('email')
             name = data.get('name')
             res = db.add_project(competition_id, email, name)
@@ -643,7 +644,7 @@ class StageProList(Resource):
         try:
             data = request.get_json()
             competition_id = data.get('competition_id')
-            print(competition_id)
+            DbOperate.update_com_status(competition_id)
             res = db.get_contest_projects(competition_id)
         except:
             pass
