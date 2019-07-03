@@ -666,7 +666,7 @@ class GetExpertInviteList(Resource):
 '''
 邀请专家并插入关系
 '''
-class invite_mail(Resource):
+class InviteMail(Resource):
     def post(self):
         res = {"state": "fail"}
         try:
@@ -687,7 +687,7 @@ class invite_mail(Resource):
 '''
 检查邮箱和邀请码
 '''
-class check_code(Resource):
+class CheckCode(Resource):
     def post(self):
         res = {"state": "fail"}
         try:
@@ -705,7 +705,7 @@ class check_code(Resource):
 '''
 专家设置密码
 '''
-class expert_set_password(Resource):
+class ExpertSetPassword(Resource):
     def post(self):
         res = {"state": "fail"}
         try:
@@ -713,6 +713,59 @@ class expert_set_password(Resource):
             mail = data.get('mail')
             password = encode(data.get('password'))
             res = db.expert_set_password(mail, password)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+
+'''
+用户修改密码
+'''
+class ChangePassword(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            mail = data.get('mail')
+            old_password = encode(data.get('old_password'))
+            new_password = encode(data.get('new_password'))
+            res = db.change_password(mail, old_password, new_password)
+            print("asd")
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+'''
+用户修改信息
+mail，username，string（领域）
+'''
+class ChangeInfo(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            mail = data.get('mail')
+            user_name = data.get('username')
+            realm = data.get('realm')
+            res = db.change_info(mail, user_name, realm)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+
+'''
+获取用户信息
+'''
+class GetUserInfo(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            mail = data.get('mail')
+            res = db.get_user_info(mail)
         except:
             pass
         finally:
@@ -745,11 +798,14 @@ api.add_resource(StoreReview, '/api/v1/store_review', endpoint='storeReview')
 api.add_resource(AcceptReview, '/api/v1/accept_review', endpoint='acceptReview')
 api.add_resource(RefuseReview, '/api/v1/refuse_review', endpoint='refuseReview')
 api.add_resource(GetReview, '/api/v1/get_review', endpoint='getReview')
-api.add_resource(check_code, '/api/v1/check_code', endpoint='check_code')
-api.add_resource(expert_set_password, '/api/v1/expert_set_password', endpoint='expert_set_password')
-api.add_resource(invite_mail, '/api/v1/invite_mail', endpoint='invite_mail')
+api.add_resource(CheckCode, '/api/v1/check_code', endpoint='check_code')
+api.add_resource(ExpertSetPassword, '/api/v1/expert_set_password', endpoint='expert_set_password')
+api.add_resource(ChangePassword, '/api/v1/change_password', endpoint='change_password')
+api.add_resource(ChangeInfo, '/api/v1/change_info', endpoint='change_info')
+api.add_resource(InviteMail, '/api/v1/invite_mail', endpoint='invite_mail')
 api.add_resource(ContestList, '/api/v1/contestlist', endpoint='contestlist')
 api.add_resource(ChangeCompStat, '/api/v1/changeCompStat', endpoint='changeCompStat')
+api.add_resource(GetUserInfo, '/api/v1/get_user_info', endpoint='getUserInfo')
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", debug=True)

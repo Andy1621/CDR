@@ -25,8 +25,8 @@
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown"> <span>{{name}}</span> <i
                                 class="icon-submenu lnr lnr-chevron-down"></i></a>
                             <ul class="dropdown-menu">
-                                <!--<li style="display: none" @click="info"><a><i class="lnr lnr-cog"></i> <span>个人资料</span></a></li>-->
-                                <li @click="logout"><a><i class="lnr lnr-exit"></i> <span>退出登录</span></a></li>
+                                <li @click="info"><router-link :to="{path: '/personalInfo'}"><i class="lnr lnr-cog"></i> <span>个人资料</span></router-link></li>
+                                <li @click="logout"><router-link :to="{path: '/'}"><i class="lnr lnr-exit"></i> <span>退出登录</span></router-link></li>
                             </ul>
                         </li>
                     </ul>

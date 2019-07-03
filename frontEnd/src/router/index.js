@@ -13,6 +13,8 @@ import projectReview from '@/pages/projectReview'
 import projectDetail from '@/pages/projectDetail'
 import stageProList from '@/pages/stageProList'
 import expTrialStat from '@/pages/expTrialStat'
+import personalInformation from '@/pages/personalInformation'
+
 Vue.use(Router);
 
 export default new Router({
@@ -74,14 +76,19 @@ export default new Router({
             component: projectDetail,
         },
         {
-          path: '/stageProList',
-          name: 'stageProList',
-          component: stageProList,
+            path: '/stageProList',
+            name: 'stageProList',
+            component: stageProList,
         },
         {
-          path: '/expTrialStat',
-          name: 'expTrialStat',
-          component: expTrialStat,
+            path: '/expTrialStat',
+            name: 'expTrialStat',
+            component: expTrialStat,
         },
-  ]
+        {
+            path: '/personalInfo',
+            name: 'personalInformation',
+            component: personalInformation
+        }
+    ]
 })
