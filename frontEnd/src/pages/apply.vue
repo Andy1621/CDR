@@ -1026,4 +1026,24 @@
     .steps-readonly{
         cursor: pointer;
     }
+    >>>.ivu-input[disabled]{
+        color: black;
+        background: white;
+        cursor: default;
+    }
+    >>>.ivu-select-disabled .ivu-select-selection{
+        color: black;
+        background: white;
+        cursor: default;
+    }
+    >>>.ivu-checkbox-input[disabled] {
+       cursor: default
+    }
+    >>>.ivu-checkbox-disabled .ivu-checkbox-inner-input {
+        cursor: default
+    }
+    >>>.ivu-checkbox-disabled + span {
+        color: #515a6e;
+        cursor: default
+    }
 </style>
