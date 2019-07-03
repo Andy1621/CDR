@@ -1046,4 +1046,7 @@
         color: #515a6e;
         cursor: default
     }
+    >>>.ivu-checkbox-wrapper-disabled {
+        cursor: default;
+    }
 </style>

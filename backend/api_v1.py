@@ -582,7 +582,7 @@ class AddNews(Resource):
             content = data.get('content')
             files = list()
             if data.get('files'):
-                files = data.get(files)
+                files = data.get('files')
             res = db.add_news(title, time, content, files)
         except:
             pass
