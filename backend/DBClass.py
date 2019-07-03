@@ -1154,7 +1154,7 @@ class DbOperate:
             flag = True
             for item in projlst:
                 proj_id = item['proj_id']
-                result = item['result']
+                result = item['re']
                 find_proj = proj_list.find_one({'project_code': proj_id}, {'_id': 1})
                 # 成功搜索到该项目
                 if find_proj:
