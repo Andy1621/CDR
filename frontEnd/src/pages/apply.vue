@@ -150,8 +150,8 @@
                     <FormItem label="关键词" prop="keyword">
                         <Input v-model="projectInfo.keyword" :disabled="readonly" type="textarea" :rows="3" :autosize="{minRows: 3,maxRows: 3}" placeholder="4-7个体现作品核心技术和问题的关键词"></Input>
                     </FormItem>
-                    <FormItem label="展示形式" v-if="basicInfo.type=='type1'">
-                        <CheckboxGroup style="row: 3;" v-model="projectInfo.show_type" :disabled="readonly">
+                    <FormItem label="展示形式" v-if="basicInfo.type=='type1'" prop="display">
+                        <CheckboxGroup style="row: 3;" v-model="projectInfo.display" :disabled="readonly">
                             <Checkbox label="display1" :disabled="readonly">
                                 <span>实物、产品</span>
                             </Checkbox>
@@ -178,8 +178,8 @@
                             </Checkbox>
                         </CheckboxGroup>
                     </FormItem>
-                    <FormItem label="调查方式" v-if="basicInfo.type=='type2'">
-                        <CheckboxGroup v-model="projectInfo.survey_type">
+                    <FormItem label="调查方式" v-if="basicInfo.type=='type2'" prop="investigation">
+                        <CheckboxGroup v-model="projectInfo.investigation">
                             <Checkbox label="investigation1" :disabled="readonly">
                                 <span>走访</span>
                             </Checkbox>
@@ -303,7 +303,7 @@
                     <img :src="imgUrl" v-if="visible" style="width: 100%">
                 </Modal>
                 <Divider/>
-                <h4 style="margin-bottom: 20px">作品视频（仅限 mp4 flv）</h4>
+                <h4 style="margin-bottom: 20px">作品视频（仅限 mp4）</h4>
                 <div v-if="readonly" class="show-upload">
                     <ul>
                         <li v-for="item in uploadVideoList" @click="videoView(item)">
@@ -319,7 +319,7 @@
                     :on-success="handleSuccessVideo"
                     :on-remove="handleRemoveVideo"
                     :on-preview="videoView"
-                    :format="['mp4','flv']"
+                    :format="['mp4']"
                     :max-size="102400"
                     :on-format-error="handleFormatErrorVideo"
                     :on-exceeded-size="handleMaxSizeVideo"
@@ -441,8 +441,8 @@
                     introduction: '',
                     innovation: '',
                     keyword: '',
-                    show_type: [],
-                    survey_type: [],
+                    display: [],
+                    investigation: [],
                 },
                 ruleProjectInfo:{
                     project: [
@@ -459,6 +459,12 @@
                     ],
                     keyword: [
                         { required: true, message: '关键词不能为空', trigger: 'blur' }
+                    ],
+                    display: [
+                        { required:true, type:'array', min: 1, message: '请选择作品展示形式', trigger:'change' }
+                    ],
+                    investigation: [
+                        { required:true, type:'array', min: 1, message: '请选择作品调查方式', trigger:'change' }
                     ]
                 },
                 // upload
@@ -563,6 +569,13 @@
                 var enter = this.authorInfo.school_date.toString().replace('00:00:00','08:00:00')
                 this.authorInfo.school_date = new Date(enter)
 
+                if(this.basicInfo.type == 'type1'){
+                    this.projectInfo.investigation = [];
+                }
+                else{
+                    this.projectInfo.display = [];
+                }
+
                 let params = {
                     'workCode' : this.basicInfo.workCode,
                     'mainTitle' : this.basicInfo.project,
@@ -586,8 +599,8 @@
                     'description' : this.projectInfo.introduction,
                     'creation' : this.projectInfo.innovation,
                     'keyword' : this.projectInfo.keyword,
-                    'display' : this.projectInfo.show_type,
-                    'investigation' : this.projectInfo.survey_type
+                    'display' : this.projectInfo.display,
+                    'investigation' : this.projectInfo.investigation
                 };
                 this.$http.post(this.$baseURL + '/api/v1/store_project',params)
                     .then(function (res) {
@@ -646,8 +659,8 @@
                     'description' : this.projectInfo.introduction,
                     'creation' : this.projectInfo.innovation,
                     'keyword' : this.projectInfo.keyword,
-                    'display' : this.projectInfo.show_type,
-                    'investigation' : this.projectInfo.survey_type
+                    'display' : this.projectInfo.display,
+                    'investigation' : this.projectInfo.investigation
                 };
                 this.$http.post(this.$baseURL + '/api/v1/submit_project',params)
                     .then(function (res) {
@@ -760,7 +773,7 @@
             handleFormatErrorVideo (file) {
                 this.$Notice.warning({
                     title: '文件格式错误',
-                    desc: '文件 ' + file.name + ' 格式错误请选择 mp4 或 flv 格式'
+                    desc: '文件 ' + file.name + ' 格式错误请选择 mp4 格式'
                 });
             },
             handleMaxSizeVideo (file) {
@@ -905,8 +918,8 @@
                             this.projectInfo.introduction = form.description;
                             this.projectInfo.innovation = form.creation;
                             this.projectInfo.keyword = form.keyword;
-                            this.projectInfo.show_type = form.display;
-                            this.projectInfo.survey_type = form.investigation;
+                            this.projectInfo.display = form.display;
+                            this.projectInfo.investigation = form.investigation;
                         }
                     },function (res) {
                         console.log('Failed')
@@ -1012,5 +1025,25 @@
     }
     .steps-readonly{
         cursor: pointer;
+    }
+    >>>.ivu-input[disabled]{
+        color: black;
+        background: white;
+        cursor: default;
+    }
+    >>>.ivu-select-disabled .ivu-select-selection{
+        color: black;
+        background: white;
+        cursor: default;
+    }
+    >>>.ivu-checkbox-input[disabled] {
+       cursor: default
+    }
+    >>>.ivu-checkbox-disabled .ivu-checkbox-inner-input {
+        cursor: default
+    }
+    >>>.ivu-checkbox-disabled + span {
+        color: #515a6e;
+        cursor: default
     }
 </style>

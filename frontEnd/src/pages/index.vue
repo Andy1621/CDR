@@ -43,19 +43,19 @@
                             <Icon type="ios-chatboxes"></Icon>
                             竞赛列表
                         </p>
-                        <a href="#" slot="extra" @click.prevent="more_news('competition')">
+                        <router-link :to="{path:'/competitionList'}" slot="extra">
                             <Icon type="ios-list"></Icon>
-                            更多消息
-                        </a>
+                            更多竞赛
+                        </router-link>
                         <ul>
-                            <li v-for="(item,index) in competition_news.slice(0,5)" :key="index" @click="show_detail('competition',index)">
+                            <li v-for="(item,index) in contest_list.slice(0,5)" :key="index" @click="to_competition(item.competition_id)">
 <!--                                <a :href="item.url" target="_blank">-->
                                     <Row>
                                         <Col span="18">
-                                            <div class="span-title">{{item.title}}</div>
+                                            <div class="span-title">{{item.competition_name}}</div>
                                         </Col>
                                         <Col span="6">
-                                            <span style="float: right; color: #8391a5;">{{item.date}}</span>
+                                            <span style="float: right; color: #8391a5;">{{item.com_status}}</span>
                                         </Col>
                                     </Row>
 <!--                                </a>-->
@@ -139,9 +139,10 @@
                 newsType: '',
                 pageNum: 1,
                 pageSize: 20,
-                show_news:[],
-                latest_news:[],
-                competition_news:[],
+                show_news: [],
+                latest_news: [],
+                contest_list: [],
+                competition_news: [],
                 carousel_pic:[
                     {
                         'name': 'pic1',
@@ -187,17 +188,41 @@
                     // var detail = JSON.parse(res.body)
                     console.log("Failed")
                 })
-                this.$http.get('https://www.easy-mock.com/mock/5ce254757c25615cbf8ae1ae/example/latest_news',{params: {'user_id':'12138'}})
-                .then(function (res) {
-                    var detail = res.body
-                    console.log(detail)
-                    if(detail.state == 'success'){
-                        this.competition_news = detail.data.news
-                    }
-                },function (res) {
-                    // var detail = JSON.parse(res.body)
-                    console.log("Failed")
-                })
+
+                let params={}
+                this.$http.post(this.$baseURL + '/api/v1/contestlist',params)
+                    .then(function (res) {
+                        console.log(res)
+                        var detail = res.body
+                        if(detail.state == 'success'){
+                            this.contest_list = detail.contests;
+                            // console.log(this.contest_list)
+                            for(let item of this.contest_list){
+                                switch(item.com_status){
+                                    case 0:
+                                        item.com_status = '报名中'
+                                        break;
+                                    case 1:
+                                        item.com_status = '校团委初审'
+                                        break;
+                                    case 2:
+                                        item.com_status = '专家评审中'
+                                        break;
+                                    case 3:
+                                        item.com_status = '进行现场赛'
+                                        break;
+                                    case 4:
+                                        item.com_status = '已结束'
+                                        break;
+                                }
+                            }
+                        }
+                        else{
+                            this.$Message.error('获取竞赛列表失败 '+detail.reason)
+                        }
+                    },function (res) {
+                        this.$Message.error('Failed')
+                    })
             },
             more_news(type){
                 // this.$Message.info('moreNews')
@@ -239,6 +264,16 @@
                 }
                 this.isDetail = true
             },
+            to_competition(competition_id){
+                this.$router.push({
+                    path : '/messageDetail',
+                    query: {
+                        type: 'competition',
+                        from: 'index',
+                        competitionID: competition_id,
+                    }
+                })
+            }
             // download(url){
             //     window.open("http://sqdownb.onlinedown.net/down/HA-BaoLiMotor2002-UpDate.rar")
             // }

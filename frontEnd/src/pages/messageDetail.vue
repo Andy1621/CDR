@@ -2,77 +2,14 @@
     <div>
         <NavBar></NavBar>
         <div class="body">
-<!--            <div v-if="!isMoreNews&&!isDetail">-->
-<!--            <h3>雨我无瓜科技竞赛</h3>-->
-<!--            <Divider style="margin: 3px"/>-->
-<!--            <Carousel autoplay :autoplay-speed="3000" :height="250" v-model="value2" loop>-->
-<!--                <CarouselItem v-for="(item,index) in carousel_pic" :key="index">-->
-<!--                    <img :src="item.url" class="carousel">-->
-<!--                </CarouselItem>-->
-<!--            </Carousel>-->
-<!--            <Row style="margin-top: 20px;">-->
-<!--                <Col span="12">-->
-<!--                    <Card :dis-hover="false">-->
-<!--                        <p slot="title">-->
-<!--                            <Icon type="ios-mail"></Icon>-->
-<!--                            最新公告-->
-<!--                        </p>-->
-<!--                        <a href="#" slot="extra" @click.prevent="more_news('latest')">-->
-<!--                            <Icon type="ios-list"></Icon>-->
-<!--                            更多消息-->
-<!--                        </a>-->
-<!--                        <ul>-->
-<!--                            <li v-for="(item,index) in latest_news.slice(0,5)" :key="index" @click="show_detail('latest',index)">-->
-<!--&lt;!&ndash;                                <a :href="item.url" target="_blank">&ndash;&gt;-->
-<!--                                    <Row>-->
-<!--                                        <Col span="18">-->
-<!--                                            <div class="span-title">{{item.title}}</div>-->
-<!--                                        </Col>-->
-<!--                                        <Col span="6">-->
-<!--                                            <span style="float: right; color: #8391a5;">{{item.date}}</span>-->
-<!--                                        </Col>-->
-<!--                                    </Row>-->
-<!--&lt;!&ndash;                                </a>&ndash;&gt;-->
-<!--                            </li>-->
-<!--                        </ul>-->
-<!--                    </Card>-->
-<!--                </Col>-->
-<!--                <Col span="11" offset="1">-->
-<!--                    <Card :dis-hover="false">-->
-<!--                        <p slot="title">-->
-<!--                            <Icon type="ios-chatboxes"></Icon>-->
-<!--                            竞赛列表-->
-<!--                        </p>-->
-<!--                        <a href="#" slot="extra" @click.prevent="more_news('competition')">-->
-<!--                            <Icon type="ios-list"></Icon>-->
-<!--                            更多消息-->
-<!--                        </a>-->
-<!--                        <ul>-->
-<!--                            <li v-for="(item,index) in competition_news.slice(0,5)" :key="index" @click="show_detail('competition',index)">-->
-<!--&lt;!&ndash;                                <a :href="item.url" target="_blank">&ndash;&gt;-->
-<!--                                    <Row>-->
-<!--                                        <Col span="18">-->
-<!--                                            <div class="span-title">{{item.title}}</div>-->
-<!--                                        </Col>-->
-<!--                                        <Col span="6">-->
-<!--                                            <span style="float: right; color: #8391a5;">{{item.date}}</span>-->
-<!--                                        </Col>-->
-<!--                                    </Row>-->
-<!--&lt;!&ndash;                                </a>&ndash;&gt;-->
-<!--                            </li>-->
-<!--                        </ul>-->
-<!--                    </Card>-->
-<!--                </Col>-->
-<!--            </Row>-->
-<!--            </div>-->
             <div>
                 <Breadcrumb style="font-size: 16px">
                     <BreadcrumbItem class="breadcrumb-item" @click.native="back_to_index">首页</BreadcrumbItem>
-                    <BreadcrumbItem class="breadcrumb-item" @click.native="back_to_list" v-if="isMoreNews">{{newsType}}</BreadcrumbItem>
-                    <BreadcrumbItem class="breadcrumb-item" v-if="isDetail">信息详情</BreadcrumbItem>
+                    <BreadcrumbItem class="breadcrumb-item" @click.native="back_to_list" v-if="isFromList">{{listName}}</BreadcrumbItem>
+                    <BreadcrumbItem class="breadcrumb-item" v-if="competitionDetail">{{detailType}}详情</BreadcrumbItem>
                 </Breadcrumb>
                 <Divider/>
-                <div v-if="!isDetail">
+                <div v-if="!competitionDetail">
                     <div class="news-list">
                         <ul style="list-style-type:none">
                             <li v-for="(item,index) in show_news.slice((pageNum-1)*pageSize, pageNum*pageSize)" :key="index" @click="show_detail('default',index)">
@@ -91,9 +28,8 @@
                             </li>
                         </ul>
                     </div>
-                    <Page :current="pageNum" :total="show_news.length" :page-size="pageSize" @on-change="change_page" simple style="text-align: center; margin-bottom: 20px"/>
                 </div>
-                <div v-show="isDetail">
+                <div v-show="competitionDetail">
                     <div class="news-list">
                         <h2 style="text-align: center">{{msgDetail.title}}</h2>
                         <Divider dashed/>
@@ -134,36 +70,13 @@
         data () {
             return {
                 value2: 0,
-                isMoreNews: false,
-                isDetail: false,
-                newsType: '',
-                pageNum: 1,
-                pageSize: 20,
+                isFromList: false,
+                competitionDetail: false,
+                listName: '',
+                detailType: '',
                 show_news:[],
                 latest_news:[],
                 competition_news:[],
-                carousel_pic:[
-                    {
-                        'name': 'pic1',
-                        'url': '../../static/picture/test1.jpg'
-                    },
-                    {
-                        'name': 'pic2',
-                        'url': '../../static/picture/test2.jpg'
-                    },
-                    {
-                        'name': 'pic3',
-                        'url': '../../static/picture/test3.jpg'
-                    },
-                    {
-                        'name': 'pic4',
-                        'url': '../../static/picture/test4.jpg'
-                    },
-                    {
-                        'name': 'pic5',
-                        'url': '../../static/picture/test5.jpg'
-                    }
-                ],
                 msgDetail:{
                     'title': '',
                     'date': '',
@@ -202,32 +115,30 @@
             more_news(type){
                 // this.$Message.info('moreNews')
                 if(type == 'latest'){
-                    this.newsType = '最新公告';
+                    this.listName = '最新公告';
                     this.show_news = this.latest_news;
                 }
                 else if(type == 'competition'){
-                    this.newsType = '竞赛列表';
+                    this.listName = '竞赛列表';
                     this.show_news = this.competition_news;
                 }
-                this.isMoreNews = true
+                this.isFromList = true
                 this.pageNum = 1
             },
-            change_page(value){
-                this.pageNum = value;
-                console.log(this.pageNum);
-                document.body.scrollTop = 0;
-                document.documentElement.scrollTop = 0;
-            },
             back_to_index(){
-                this.isMoreNews = false;
-                this.isDetail = false;
+                this.isFromList = false;
+                this.competitionDetail = false;
                 this.msgDetail = {};
                 this.$router.push({
                     path: '/index',
                 })
             },
             back_to_list(){
-                this.isDetail = false;
+                if(this.listName == '竞赛列表'){
+                    this.$router.push({
+                        path : '/competitionList'
+                    })
+                }
             },
             show_detail(type,index){
                 console.log(type + index)
@@ -240,13 +151,31 @@
                 else{
                     this.msgDetail = this.show_news[index];
                 }
-                this.isDetail = true
+                this.competitionDetail = true
             },
             // download(url){
             //     window.open("http://sqdownb.onlinedown.net/down/HA-BaoLiMotor2002-UpDate.rar")
             // }
         },
         created() {
+            console.log(this.$route.query.competitionID)
+            let query = this.$route.query
+            if(query.type == 'competition'){
+                this.competitionDetail = true
+                this.detailType = '竞赛'
+                if(query.from == 'list'){
+                    this.listName = '竞赛列表'
+                    this.isFromList = true
+                }
+                //this.$http.get(this.$baseURL + '',{params:{'competition_id': query.competitionID}}
+            }
+            else{
+                this.detailType = '公告'
+                if(query.from == 'list'){
+                    this.listName = '最新公告'
+                    this.isFromList = true
+                }
+            }
             this.get_news();
         }
     }

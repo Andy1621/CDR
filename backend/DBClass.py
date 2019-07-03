@@ -935,6 +935,70 @@ class DbOperate:
         return num_map[num]
 
     '''
+    字符串转化成datetime
+    '''
+    def str2datetime(self, str):
+        return datetime.datetime.strptime(str, "%Y-%m-%d %H:%M:%S")
+
+    '''
+    比较两个datetime类型的时间
+    return time1>time2 ? 1:0
+    '''
+    def compare_time(self, time1, time2):
+        diff = time1 - time2
+        if diff.days > 0:
+            return True
+        elif diff.days == 0:
+            return diff.seconds > 0
+        else:
+            return False
+
+    '''
+    比对当前时间和竞赛的时间节点，
+    更新数据库竞赛状态
+    '''
+    def update_com_status(self, competition_id):
+        com_collection = self.getCol('competition')
+        now_time = datetime.datetime.now()
+        this_competition = com_collection.find_one({'_id': ObjectId(competition_id)})
+        try:
+            begin_time = self.str2datetime(this_competition['begin_time'])
+            submission_ddl = self.str2datetime(this_competition['submission_ddl'])
+            first_review_ddl = self.str2datetime(this_competition['first_review_ddl'])
+            expert_comments_ddl = self.str2datetime(this_competition['expert_comments_ddl'])
+            live_selection_ddl = self.str2datetime(this_competition['live_selection_ddl'])
+            end_time = self.str2datetime(this_competition['end_time'])
+        except:
+            begin_time = self.str2datetime('2000-1-1 0:0:0')
+            submission_ddl = self.str2datetime('2000-1-1 0:0:0')
+            first_review_ddl = self.str2datetime('2000-1-1 0:0:0')
+            expert_comments_ddl = self.str2datetime('2000-1-1 0:0:0')
+            live_selection_ddl = self.str2datetime('2000-1-1 0:0:0')
+            end_time = self.str2datetime('2000-1-1 0:0:0')
+
+        # 未开始
+        if self.compare_time(begin_time, now_time):
+            com_collection.update_one({'_id': ObjectId(competition_id)}, {'$set': {'com_status': -1}})
+        # 提交阶段
+        elif self.compare_time(submission_ddl, now_time):
+            com_collection.update_one({'_id': ObjectId(competition_id)}, {'$set': {'com_status': 0}})
+        # 初审阶段
+        elif self.compare_time(first_review_ddl, now_time):
+            com_collection.update_one({'_id': ObjectId(competition_id)}, {'$set': {'com_status': 1}})
+        # 专家初评阶段
+        elif self.compare_time(expert_comments_ddl, now_time):
+            com_collection.update_one({'_id': ObjectId(competition_id)}, {'$set': {'com_status': 2}})
+        # 现场答辩阶段
+        elif self.compare_time(live_selection_ddl, now_time):
+            com_collection.update_one({'_id': ObjectId(competition_id)}, {'$set': {'com_status': 3}})
+        # 结果录入阶段
+        elif self.compare_time(end_time, now_time):
+            com_collection.update_one({'_id': ObjectId(competition_id)}, {'$set': {'com_status': 4}})
+        # 比赛结束
+        else:
+            com_collection.update_one({'_id': ObjectId(competition_id)}, {'$set': {'com_status': 5}})
+
+    '''
     任意阶段看A或B，A或B的显示规则
     '''
     def rule_A(self, A_List):
@@ -979,6 +1043,7 @@ class DbOperate:
         res = {
             'state': 'fail',
             'reason': '网络出错或BUG出现！',
+            'E_List': [],
             'A_List': [],
             'B_List': [],
             'C_List': [],
@@ -999,20 +1064,30 @@ class DbOperate:
             if len(projects) > 0:
                 res['state'] = 'success'
                 res['reason'] = '成功获取竞赛作品列表'
+                # 当前状态是未开始
+                if com_status == -1:
+                    pass
+                # 当前状态是提交
+                elif com_status == 0:
+                    res['E_List'] = copy.deepcopy(projects)
                 # 当前状态是初审
-                if com_status == 1:
+                elif com_status == 1:
+                    res['E_List'] = copy.deepcopy(projects)
                     res['A_List'] = self.rule_A(copy.deepcopy(projects))
                 # 当前状态是初评
                 elif com_status == 2:
+                    res['E_List'] = copy.deepcopy(projects)
                     res['A_List'] = self.rule_A(copy.deepcopy(projects))
                     res['B_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
                 # 当前状态是筛选并现场答辩
                 elif com_status == 3:
+                    res['E_List'] = copy.deepcopy(projects)
                     res['A_List'] = self.rule_A(copy.deepcopy(projects))
                     res['B_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
                     res['C_List'] = self.rule_CC(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
                 # 当前状态是录入并公布最终结果
                 elif com_status == 4:
+                    res['E_List'] = copy.deepcopy(projects)
                     res['A_List'] = self.rule_A(copy.deepcopy(projects))
                     res['B_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
                     res['C_List'] = self.rule_DC(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))

@@ -11,15 +11,17 @@
 
 <script>
     import NavBar from '../components/NavBar.vue'
+
     export default {
-        components:{
+        components: {
             NavBar
         },
         name: 'competitionList',
         inject: ['reload'],
-        data () {
+        data() {
             return {
-                columns:[
+                role: '',
+                columns: [
                     {
                         title: '竞赛名称',
                         key: 'competition_name',
@@ -38,12 +40,12 @@
                     {
                         title: '参赛作品总数',
                         key: 'count',
-                        width: 120
+                        width: 120,
                     },
                     {
-                      title: '竞赛状态',
-                      key: 'com_status',
-                      width: 160
+                        title: '竞赛状态',
+                        key: 'com_status',
+                        width: 160
                     },
                     {
                         title: '操作',
@@ -51,87 +53,120 @@
                         align: 'center',
                         render: (h, params) => {
                             return h('div', [
-                              h('Button', {
-                                props: {
-                                  type: 'error',
-                                  size: 'small',
-                                  disabled: (params.row.com_status == "校团委初审")
-                                },
-                                style: {
-                                  marginRight: '5px'
-                                },
-                                on: {
-                                  click: () => {
-                                    let param = {proj_id: params.row.competition_id, op: "back"};
-                                    this.$http.post(this.$baseURL + "/api/v1/changeCompStat",param).then(function (res) {
-                                      var detail = res.body.state;
-                                      if(detail == "fail"){
-                                        this.$Notice.open({title: "操作失败"});
-                                        this.reload();
-                                      }
-                                      else{
-                                        this.$Notice.open({title: "已退回上一阶段"});
-                                        this.reload();
-                                      }
-                                    }, function (res) {
-                                      alert(res);
-                                    });
-                                  }
-                                }
-                              }, '返回上阶段'),
-                              h('Button', {
-                              props: {
-                                type: 'primary',
-                                size: 'small'
-                              },
-                              style: {
-                                marginRight: '5px'
-                              },
-                              on: {
-                                click: () => {
-                                  this.$router.push({
-                                    path: '/stageProList',
-                                    query: {
-                                      competitionID: params.row.competition_id,
-                                      // competitionTitle: params.row.competition_name
+                                h('Button', {
+                                    props: {
+                                        type: 'error',
+                                        size: 'small',
+                                        disabled: (params.row.com_status == "校团委初审"),
+                                    },
+                                    style: {
+                                        marginRight: '5px',
+                                        display: this.role === 'student'? 'none' :'',
+                                    },
+                                    on: {
+                                        click: () => {
+                                            let param = {proj_id: params.row.competition_id, op: "back"};
+                                            this.$http.post(this.$baseURL + "/api/v1/changeCompStat", param).then(function (res) {
+                                                var detail = res.body.state;
+                                                if (detail == "fail") {
+                                                    this.$Notice.open({title: "操作失败"});
+                                                    this.reload();
+                                                } else {
+                                                    this.$Notice.open({title: "已退回上一阶段"});
+                                                    this.reload();
+                                                }
+                                            }, function (res) {
+                                                alert(res);
+                                            });
+                                        }
                                     }
-                                  })
-                                }
-                              }
-                            }, '竞赛入口'),
-                            h('Button', {
-                              props: {
-                                type: 'success',
-                                size: 'small',
-                                disabled: (params.row.com_status == "已结束")
-                              },
-                              style: {
-                                marginRight: '5px'
-                              },
-                              on: {
-                                click: () => {
-                                  let param = {proj_id: params.row.competition_id, op: "go"};
-                                  this.$http.post(this.$baseURL + "/api/v1/changeCompStat",param).then(function (res) {
-                                    var detail = res.body.state;
-                                    if(detail == "fail"){
-                                      this.$Notice.open({title: "操作失败"});
-                                      this.reload();
+                                }, '返回上阶段'),
+                                h('Button', {
+                                    props: {
+                                        type: 'primary',
+                                        size: 'small',
+                                        disabled: params.row.com_status == "未开始"
+                                    },
+                                    style: {
+                                        marginRight: '5px',
+                                        display: this.role === 'student'? 'none' :'',
+                                    },
+                                    on: {
+                                        click: () => {
+                                            this.$router.push({
+                                                path: '/stageProList',
+                                                query: {
+                                                    competitionID: params.row.competition_id,
+                                                    // competitionTitle: params.row.competition_name
+                                                }
+                                            })
+                                        }
                                     }
-                                    else{
-                                      this.$Notice.open({title: "成功进入下一阶段"});
-                                      this.reload();
+                                }, '竞赛入口'),
+                                h('Button', {
+                                    props: {
+                                        type: 'success',
+                                        size: 'small',
+                                        disabled: (params.row.com_status == "已结束")
+                                    },
+                                    style: {
+                                        marginRight: '5px',
+                                        display: this.role === 'student'? 'none' :'',
+                                    },
+                                    on: {
+                                        click: () => {
+                                            let param = {proj_id: params.row.competition_id, op: "go"};
+                                            this.$http.post(this.$baseURL + "/api/v1/changeCompStat", param).then(function (res) {
+                                                var detail = res.body.state;
+                                                if (detail == "fail") {
+                                                    this.$Notice.open({title: "操作失败"});
+                                                    this.reload();
+                                                } else {
+                                                    this.$Notice.open({title: "成功进入下一阶段"});
+                                                    this.reload();
+                                                }
+                                            }, function (res) {
+                                                alert(res);
+                                            });
+                                        }
                                     }
-                                  }, function (res) {
-                                    alert(res);
-                                  });
-                                }
-                              }
-                            }, '进入下阶段')
-                          ])
+                                }, '进入下阶段'),
+                                h('Button', {
+                                    props: {
+                                        type: 'success',
+                                        size: 'small',
+                                        disabled: (params.row.com_status != "报名提交")
+                                    },
+                                    style: {
+                                        marginRight: '5px',
+                                        display: this.role === 'student'? '' :'none',
+                                    },
+                                    on: {
+                                        click: () => {
+                                            this.apply_new(params.row.competition_id)
+                                        }
+                                    }
+                                }, '报名竞赛'),
+                                h('Button', {
+                                    props: {
+                                        type: 'primary',
+                                        size: 'small',
+                                    },
+                                    style: {
+                                        marginRight: '5px',
+                                        display: this.role === 'student'? '' :'none',
+                                    },
+                                    on: {
+                                        click: () => {
+                                            this.to_competition(params.row.competition_id)
+                                        }
+                                    }
+                                }, '竞赛详情')
+                            ])
                         }
                     }
                 ],
-                rows:[
+                rows: [
                     // {
                     //     competitionName: '冯如杯',
                     //     startTime: '2019-06-29',
@@ -142,60 +177,100 @@
                 isRouterAlive: true,
             }
         },
-      created() {
-        this.getcomList()
-      },
-      methods:{
-        getcomList(){
-          let params = {};
-          this.$http.post(this.$baseURL + "/api/v1/contestlist",params,{
-            headers:{
-              'Content-Type':"application/json",
+        created() {
+            this.role = this.$cookie.get('role');
+            if (this.role == 'student') {
+                this.columns.splice(3, 1)//对于学生不显示作品数
             }
-          }).then(function (res) {
-            var detail = res.body;
-            console.log("请求反回数据 ",detail);
-            if(detail.state =="fail"){
-              this.$Message.info("获取数据失败")
-            }
-            else{
-              for (let item of detail.contests) {
-                switch (item.com_status) {
-                  case -1:
-                    item.com_status = "未开始";
-                    break;
-                  case 0:
-                    item.com_status = "报名提交";
-                    break;
-                  case 1:
-                    item.com_status = "校团委初审";
-                    break;
-                  case 2:
-                    item.com_status = "专家初评";
-                    break;
-                  case 3:
-                    item.com_status = "现场答辩";
-                    break;
-                  case 4:
-                    item.com_status = "最终结果报名";
-                    break;
-                  case 5:
-                    item.com_status = "已结束";
-                    break;
+            this.getcomList()
+        },
+        methods: {
+            getcomList() {
+                let params = {};
+                this.$http.post(this.$baseURL + "/api/v1/contestlist", params, {
+                    headers: {
+                        'Content-Type': "application/json",
+                    }
+                }).then(function (res) {
+                    var detail = res.body;
+                    console.log("请求反回数据 ", detail);
+                    if (detail.state == "fail") {
+                        this.$Message.info("获取数据失败")
+                    } else {
+                        for (let item of detail.contests) {
+                            switch (item.com_status) {
+                                case -1:
+                                    item.com_status = "未开始";
+                                    break;
+                                case 0:
+                                    item.com_status = "报名提交";
+                                    break;
+                                case 1:
+                                    item.com_status = "校团委初审";
+                                    break;
+                                case 2:
+                                    item.com_status = "专家初评";
+                                    break;
+                                case 3:
+                                    item.com_status = "现场答辩";
+                                    break;
+                                case 4:
+                                    item.com_status = "最终结果报名";
+                                    break;
+                                case 5:
+                                    item.com_status = "已结束";
+                                    break;
+                            }
+                        }
+                        this.rows = detail.contests
+                    }
+                }, function (res) {
+                    alert(res);
+                });
+            },
+            apply_new(competition_id){
+                //default
+                let params = {
+                    'email' : this.$cookie.get('mail'),
+                    'name' : this.$cookie.get('username'),
+                    'competition_id' : competition_id,
                 }
-              }
-              this.rows = detail.contests
+                this.$http.post(this.$baseURL + '/api/v1/add_project',params)
+                    .then(function (res) {
+
+                        var detail = res.body
+                        console.log(detail)
+                        if(detail.state == 'success'){
+                            this.$router.push({
+                                path: '/apply',
+                                query: {
+                                    projectID: detail.project_code,
+                                }
+                            })
+                        }
+                        else{
+                            this.$Message.error('申请失败 ' + detail.reason)
+                        }
+                    },function (res) {
+                        this.$Message.error('Failed')
+                    })
+            },
+            to_competition(competition_id){
+                this.$router.push({
+                    path : '/messageDetail',
+                    query: {
+                        type: 'competition',
+                        from: 'list',
+                        competitionID: competition_id,
+                    }
+                })
             }
-          }, function (res) {
-            alert(res);
-          });
         }
-      }
     }
 </script>
 
 <style scoped>
-    .body{
+    .body {
         left: 280px;
         bottom: 50px;
         position: relative;
@@ -209,5 +284,12 @@
         min-height: 470px;
         min-width: 600px;
         color: black;
+    }
+
+    h2 {
+        border-left: 5px solid dodgerblue;
+        padding: 0 0 0 15px !important;
+        font-size: 28px !important;
+        margin: 24px 0 !important;
     }
 </style>
