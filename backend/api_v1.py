@@ -851,6 +851,23 @@ class ExpertSetPassword(Resource):
 
 
 '''
+提醒专家评审
+'''
+class RemindExpert(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            comp_id = data.get('comp_id')
+            res = db.remind_expert_mail(comp_id)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+################################################################################################################
+
+'''
 用户修改密码
 '''
 class ChangePassword(Resource):
