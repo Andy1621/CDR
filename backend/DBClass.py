@@ -466,7 +466,7 @@ class DbOperate:
         res = {'state': 'fail', 'reason': "表头出错"}
         try:
             if len(header) == 3:
-                if header[0] == "name" and header[1] == "email" and header[2] == "area":
+                if header[0] == "name" and header[1] == "email" and header[2] == "field":
                     res['state'] = 'success'
                     res['reason'] = None
                 else:
@@ -918,7 +918,7 @@ class DbOperate:
             list_all = user.find({'user_type': 'expert'}, {"_id": 0, "mail": 1, "username": 1, 'field': 1})
             res_list = []
             for item in list_all:
-                res_list.append({"mail": item["mail"], "username": item['username'], 'field': item['field']})
+                res_list.append({"email": item["mail"], "name": item['username'], 'field': item['field']})
             res["list"] = res_list
             res['state'] = 'success'
         except:
