@@ -37,7 +37,7 @@
                     </Row>
                     <Row class="info-detail">
                         <Col span="4"><span class="info-title">竞赛简介：</span></Col>
-                        <Col span="19"><p class="info-competition">{{competitionDetail.introduction}}</p></Col>
+                        <Col span="19"><p class="info-competition" v-html="competitionDetail.introduction"></p></Col>
                     </Row>
                     <Divider style="margin: 10px 0 20px 0;"/>
                 </div>

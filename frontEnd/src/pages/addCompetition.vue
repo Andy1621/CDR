@@ -107,7 +107,7 @@
                             <FormItem label="结束时间">
                                 <Row>
                                     <Col span="12">
-                                        <FormItem prop="end_time_time">
+                                        <FormItem prop="end_time_date">
                                             <DatePicker type="date" placeholder="日期选择"
                                                         v-model="competitionInfo.end_time_date"></DatePicker>
                                         </FormItem>
