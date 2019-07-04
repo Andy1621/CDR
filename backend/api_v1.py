@@ -946,14 +946,14 @@ class AddCompetition(Resource):
         res = {"state": "fail", "reason": "网络错误或未知原因"}
         try:
             data = request.get_json()
-            competition_name = data.get('competition_name'),
-            begin_time = data.get('begin_time'),
-            submission_ddl = data.get('submission_ddl'),
-            first_review_ddl = data.get('first_review_ddl'),
-            expert_comments_ddl = data.get('expert_comments_ddl'),
-            live_selection_ddl = data.get('live_selection_ddl'),
-            end_time = data.get('end_time'),
-            introduction = data.get('introduction'),
+            competition_name = data.get('competition_name')
+            begin_time = data.get('begin_time')
+            submission_ddl = data.get('submission_ddl')
+            first_review_ddl = data.get('first_review_ddl')
+            expert_comments_ddl = data.get('expert_comments_ddl')
+            live_selection_ddl = data.get('live_selection_ddl')
+            end_time = data.get('end_time')
+            introduction = data.get('introduction')
             res = db.add_competition(competition_name, begin_time, submission_ddl, first_review_ddl, expert_comments_ddl, live_selection_ddl, end_time, introduction)
         except:
             pass

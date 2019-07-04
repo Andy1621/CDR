@@ -26,19 +26,19 @@
                     </ul>
                 </div>
                 <Upload
-                    ref="uploadDoc"
-                    v-show="!readonly"
-                    :show-upload-list="true"
-                    :default-file-list="defaultDocList"
-                    :on-success="handleSuccessDoc"
-                    :on-remove="handleRemoveDoc"
-                    :on-preview="docView"
-                    :max-size="20480"
-                    :on-format-error="handleFormatErrorDoc"
-                    :on-exceeded-size="handleMaxSizeDoc"
-                    :before-upload="handleBeforeUploadDoc"
-                    :action="up_url"
-                    style="display: inline-block">
+                        ref="uploadDoc"
+                        v-show="!readonly"
+                        :show-upload-list="true"
+                        :default-file-list="defaultDocList"
+                        :on-success="handleSuccessDoc"
+                        :on-remove="handleRemoveDoc"
+                        :on-preview="docView"
+                        :max-size="20480"
+                        :on-format-error="handleFormatErrorDoc"
+                        :on-exceeded-size="handleMaxSizeDoc"
+                        :before-upload="handleBeforeUploadDoc"
+                        :action="up_url"
+                        style="display: inline-block">
                     <Button icon="ios-document" style="width: 100px">上传</Button>
                 </Upload>
             </div>
@@ -77,82 +77,85 @@
                 uploadDocList: [],
             }
         },
-        methods:{
-            announce(){
-                this.announceInfo.fileList = this.$refs.uploadDoc.fileList;
+        methods: {
+            announce() {
+                this.$refs['announce'].validate((valid) => {
+                    if (valid) {
+                        this.announceInfo.fileList = this.$refs.uploadDoc.fileList;
 
-                var nowdate = new Date()
-                var time = nowdate.getFullYear() + '/' + (nowdate.getMonth()+1) + '/' + nowdate.getDate() + ' '
-                time = time + (nowdate.getHours().toString().length>=1?nowdate.getHours():'0'+nowdate.getHours()) + ':' + (nowdate.getMinutes().toString().length>1?nowdate.getMinutes():'0'+nowdate.getMinutes())
-                console.log(time)
+                        var nowdate = new Date()
+                        var time = nowdate.getFullYear() + '/' + (nowdate.getMonth() + 1) + '/' + nowdate.getDate() + ' '
+                        time = time + (nowdate.getHours().toString().length >= 1 ? nowdate.getHours() : '0' + nowdate.getHours()) + ':' + (nowdate.getMinutes().toString().length > 1 ? nowdate.getMinutes() : '0' + nowdate.getMinutes())
+                        console.log(time)
 
-                let params = {
-                    'title': this.announceInfo.title,
-                    'time': time,
-                    'content': this.announceInfo.content,
-                    'files': this.announceInfo.fileList,
-                }
-                this.$http.post(this.$baseURL + '/api/v1/add_news',params)
-                    .then(function (res) {
-                        console.log(res)
-                        var detail = res.body
-                        if(detail.state == 'success'){
-                            this.$Message.success('发布成功')
-                            this.$router.push({
-                                path: '/index'
+                        let params = {
+                            'title': this.announceInfo.title,
+                            'time': time,
+                            'content': this.announceInfo.content,
+                            'files': this.announceInfo.fileList,
+                        }
+                        this.$http.post(this.$baseURL + '/api/v1/add_news', params)
+                            .then(function (res) {
+                                console.log(res)
+                                var detail = res.body
+                                if (detail.state == 'success') {
+                                    this.$Message.success('发布成功')
+                                    this.$router.push({
+                                        path: '/index'
+                                    })
+                                } else {
+                                    this.$Message.error('发布失败，请稍后再试')
+                                }
+                            }, function (res) {
+                                this.$Message.error('Failed')
                             })
-                        }
-                        else{
-                            this.$Message.error('发布失败，请稍后再试')
-                        }
-                    },function (res) {
-                        this.$Message.error('Failed')
-                    })
+                    } else {
+                        this.$Message.error('信息有误');
+                    }
+                });
             },
             //upload
-            docView(file){
+            docView(file) {
                 console.log(file)
                 window.open(file.url)
             },
-            handleSuccessDoc (res, file) {
+            handleSuccessDoc(res, file) {
                 console.log(res);
-                if(res.state == 'fail'){
+                if (res.state == 'fail') {
                     this.$Message.error('上传失败 ' + res.reason);
                     var list = this.$refs.uploadDoc.fileList
                     this.$refs.uploadDoc.fileList.splice(list.indexOf(file), 1)
-                }
-                else{
+                } else {
                     // this.$Message.success('成功上传')
                     file.url = res.url;
                 }
             },
-            handleRemoveDoc (file, fileList){
-                let params = {'file_path':file.url}
-                this.$http.post(this.$baseURL + '/api/v1/delete_announce_file',params)
+            handleRemoveDoc(file, fileList) {
+                let params = {'file_path': file.url}
+                this.$http.post(this.$baseURL + '/api/v1/delete_announce_file', params)
                     .then(function (res) {
                         console.log(res.body)
-                        if(res.body.state == 'fail'){
-                            this.$Message.error('删除失败 '+ res.body.reason)
+                        if (res.body.state == 'fail') {
+                            this.$Message.error('删除失败 ' + res.body.reason)
                             this.$refs.uploadDoc.fileList.push(file)
-                        }
-                        else{
+                        } else {
                             console.log('Success')
                         }
                     })
             },
-            handleFormatErrorDoc (file) {
+            handleFormatErrorDoc(file) {
                 this.$Notice.warning({
                     title: '文件格式错误',
                     desc: '文件 ' + file.name + ' 格式错误请选择 pdf 格式'
                 });
             },
-            handleMaxSizeDoc (file) {
+            handleMaxSizeDoc(file) {
                 this.$Notice.warning({
                     title: '文件过大',
                     desc: '文件  ' + file.name + ' 过大，不能超过20M'
                 });
             },
-            handleBeforeUploadDoc () {
+            handleBeforeUploadDoc() {
                 const check = this.uploadDocList.length < 100;
                 if (!check) {
                     this.$Notice.warning({
@@ -162,14 +165,14 @@
                 return check;
             },
         },
-        mounted () {
-            this.uploadDocList = this.$refs.uploadDoc.fileList.length>0 ? this.$refs.uploadDoc.fileList : this.defaultDocList;
+        mounted() {
+            this.uploadDocList = this.$refs.uploadDoc.fileList.length > 0 ? this.$refs.uploadDoc.fileList : this.defaultDocList;
             this.$Message.config({
                 top: 100,
                 duration: 1,
             });
         },
-        created () {
+        created() {
 
         },
     }
