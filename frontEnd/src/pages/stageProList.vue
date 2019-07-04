@@ -106,10 +106,11 @@
                           this.$router.push({
                             path: '/expTrialStat',
                             query: {
-                              competition_id:this.competition_id,
-                              competition_title:this.competition_title,
-                              projectID: params.row.project_code,
-                              projectName:params.row.project_name
+                                competition_id:this.competition_id,
+                                competition_title:this.competition_title,
+                                projectID: params.row.project_code,
+                                projectName:params.row.project_name,
+                                fromState:this.current
                             }
                           })
                         }

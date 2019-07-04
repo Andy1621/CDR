@@ -754,7 +754,7 @@ class DbOperate:
         try:
             comp_list = self.getCol('competition')
             comp = comp_list.find_one({'_id': ObjectId(comp_id), 'com_status': 2}, {'expert_comments_ddl': 1, 'competition_name': 1})
-            ddl = datetime.datetime.strptime(comp['expert_comments_ddl'], '%Y%m%d-%H:%M:%S')
+            ddl = datetime.datetime.strptime(comp['expert_comments_ddl'], '%Y-%m-%d %H:%M:%S')
             comp_name = comp['competition_name']
             now_plus_1 = datetime.datetime.today() + datetime.timedelta(days=1)
             now_plus_6 = datetime.datetime.today() + datetime.timedelta(days=6)
@@ -847,7 +847,7 @@ class DbOperate:
         return res
 
     '''
-    对于某个项目，返回邀请过和未邀请的专家列表
+    对于某个项目，返回邀请过的专家列表
     '''
     def get_project_expert_list(self, project_code):
         res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
@@ -865,13 +865,7 @@ class DbOperate:
             for item0 in list_invited:
                 res_invited.append(item0)
                 invited.append(item0['expert_mail'])
-            list_all = user.find({'user_type': 'expert'}, {"_id": 0, "mail": 1, "username": 1, 'field': 1})
-            list_uninvited = []
-            for item1 in list_all:
-                if item1['mail'] not in invited:
-                    list_uninvited.append(item1)
             res['list_invited'] = res_invited
-            res['list_uninvited'] = list_uninvited
             res['state'] = 'success'
         except:
             return res
