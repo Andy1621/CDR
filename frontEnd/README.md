@@ -30,7 +30,7 @@ npm test
 ##ThirdParty Library
 ``` bash
 # install iView
-npm install iView --save
+npm install iview --save
 
 # install js-cookie
 npm install js-cookie --save
@@ -43,6 +43,10 @@ npm install bootstrap --save
 
 # install jquery
 npm install jquery --save
+
+# install video-player
+npm install vue-video-player --save
 ```
 
 For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+

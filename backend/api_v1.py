@@ -8,6 +8,8 @@
 @desc:
 '''
 import os
+
+import xlrd
 from flask import Flask, render_template, jsonify, request
 from flask_restful import Api, Resource
 from flask_cors import *
@@ -15,6 +17,8 @@ from DBClass import DbOperate
 import Config
 from utils import encode, make_zip
 import time
+import threading
+import datetime
 
 app = Flask(__name__)
 CORS(app, resources=r'/*')
@@ -636,6 +640,25 @@ class DeleteNews(Resource):
             pass
         finally:
             return jsonify(res)
+
+
+'''
+检查专家信息表头
+参数：
+    表头header
+'''
+class CheckXlsxHeader(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            header = data.get('header')
+            res = db.check_xlsx_header(header)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
 #######################################################################################################################
 """
 登录
@@ -740,6 +763,31 @@ class ChangeCompStat(Resource):
             res = db.change_comp_stat(proj_id, op)
         except:
             pass
+        finally:
+            return jsonify(res)
+
+'''
+上传评审excel表
+'''
+class UploadReviewForm(Resource):
+    def post(self):
+        res = {'state': 'fail'}
+        try:
+            data = request.get_json()
+            file = request.files.get('file')
+            competition_id = data.get('competition_id')
+            f = file.read()
+            code_award_list = []
+            data = xlrd.open_workbook(file_contents=f)
+            table = data.sheets()[0]
+            nrows = table.nrows
+            for row in range(1, nrows):
+                code = table.cell_value(row, 0)
+                award = table.cell_value(row, 3)
+                code_award_list.append((code, award))
+            res = db.upload_review_form(competition_id, code_award_list)
+        except Exception as e:
+            print(str(e))
         finally:
             return jsonify(res)
 
@@ -881,6 +929,55 @@ class RejectProject(Resource):
         finally:
             return jsonify(res)
 
+# 计算当前时间到明日某时间的秒数差
+def get_interval_secs():
+    tomorrow = (datetime.date.today() + datetime.timedelta(days=1)).strftime('%Y%m%d')
+    tomorrow_time = tomorrow + "-09:00:00"
+    tomorrow_time_date = datetime.datetime.strptime(tomorrow_time, '%Y%m%d-%H:%M:%S')
+    now = datetime.datetime.now()
+    interval = tomorrow_time_date - now
+    secs = interval.total_seconds()
+    return secs
+
+# 定时更新进程
+def do_job():
+    try:
+        global timer
+        db.remind_all()
+        timer = threading.Timer(86400, do_job)   # 86400秒就是一天
+        timer.start()
+    except:
+        return
+    finally:
+        return
+
+'''
+定时提醒
+'''
+def begin_job():
+    try:
+        global timer
+        # db.remind_all()
+        timer = threading.Timer(get_interval_secs(), do_job)
+        timer.start()
+    except:
+        return False
+    finally:
+        return True
+
+'''
+获取专家列表
+'''
+class GetExpertList(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            res = db.get_expert_list()
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
 ################################################################################################################
 
 '''
@@ -976,6 +1073,21 @@ class AddCompetition(Resource):
         finally:
             return jsonify(res)
 
+'''
+获取竞赛详情(包括简介)
+'''
+class GetCompetitionDetail(Resource):
+    def post(self):
+        res = {"state": "fail", "reason": "网络错误或未知错误"}
+        try:
+            data = request.get_json()
+            competition_id = data.get('competition_id')
+            res = db.get_competition_detail(competition_id)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
 ################################################################################################################
 
 # 添加api资源
@@ -1021,6 +1133,11 @@ api.add_resource(EnterDefenseList, '/api/v1/enter_defense_list', endpoint='enter
 api.add_resource(AddCompetition, '/api/v1/add_competition', endpoint="addCompetition")
 api.add_resource(RemindExpert, '/api/v1/remind_expert', endpoint="remindExpert")
 api.add_resource(RejectProject, '/api/v1/reject_project', endpoint="rejectProject")
+api.add_resource(UploadReviewForm, '/api/v1/uploadreviewform', endpoint='uploadreviewform')
+api.add_resource(GetCompetitionDetail, '/api/v1/get_competition_detail', endpoint="getCompetitionDetail")
+api.add_resource(CheckXlsxHeader, '/api/v1/check_xlsx_header', endpoint="checkXlsxHeader")
+api.add_resource(GetExpertList, '/api/v1/get_expert_list', endpoint="getExpertList")
 
 if __name__ == "__main__":
+    begin_job()
     app.run(host="127.0.0.1", debug=True)

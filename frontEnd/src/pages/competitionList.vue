@@ -11,6 +11,7 @@
 
 <script>
     import NavBar from '../components/NavBar.vue'
+
     export default {
         components: {
             NavBar
@@ -168,12 +169,63 @@
                                                 path: '/inviteProfessor',
                                                 query: {
                                                     competitionID: params.row.competition_id,
-                                                    competitionTitle: params.row.competition_name
+                                                    // competitionTitle: params.row.competition_name
                                                 }
                                             })
                                         }
                                     }
-                                }, '邀请专家')
+                                }, '邀请专家'),
+                                h('Button', {
+                                    props: {
+                                        type: 'primary',
+                                        size: 'small',
+                                    },
+                                    style: {
+                                        marginRight: '5px',
+                                        display: (this.role === 'school' && params.row.com_status == "专家初评")? '' :'none',
+                                    },
+                                    on: {
+                                        click: () => {
+                                            let param = {'comp_id': params.row.competition_id};
+                                            this.$http.post(this.$baseURL + "/api/v1/remind_export",params,{
+                                                headers:{
+                                                    'Content-Type':"application/json",
+                                                }
+                                            }).then(function (res) {
+                                                var detail = res.body.state
+                                                console.log(detail);
+                                                if(detail =="fail"){
+                                                    this.$Notice.open({title: "发送失败",duration:0.5});
+                                                }
+                                                else{
+                                                    this.$Notice.open({title: "发送成功",duration:0.5});
+                                                }
+                                            }, function (res) {
+                                                alert(res);
+                                            });
+                                        }
+                                    }
+                                }, 'gkd'),
+                                h('Upload', {
+                                    props: {
+                                        action: '/api/v1/uploadreviewform',
+                                        data :{'competition_id': params.row.competition_id},
+                                        format: ['xls', 'xlsx']
+                                    },
+                                    style: {
+                                        display: (this.role === 'school' && params.row.com_status == "最终结果公布")? '' :'none',
+                                    }
+                                }, [
+                                    h('Button', {
+                                        props: {
+                                            type: 'primary',
+                                            size: 'small',
+                                        },
+                                        style: {
+                                            marginRight: '5px',
+                                        }
+                                    }, '最终成绩导入')
+                                ])
                             ])
                         }
                     }
@@ -249,6 +301,7 @@
                 }
                 this.$http.post(this.$baseURL + '/api/v1/add_project',params)
                     .then(function (res) {
+
                         var detail = res.body
                         console.log(detail)
                         if(detail.state == 'success'){
@@ -275,7 +328,7 @@
                         competitionID: competition_id,
                     }
                 })
-            }
+            },
         }
     }
 </script>
@@ -296,6 +349,7 @@
         min-width: 600px;
         color: black;
     }
+
     h2 {
         border-left: 5px solid dodgerblue;
         padding: 0 0 0 15px !important;

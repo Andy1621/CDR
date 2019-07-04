@@ -17,7 +17,6 @@ from email.header import Header
 import smtplib
 import random
 import os
-import threading
 import datetime
 
 
@@ -441,7 +440,6 @@ class DbOperate:
     '''
     获取公告详情
     '''
-
     def get_news_detail(self, news_id):
         res = {'state': 'fail', 'reason': "未知错误"}
         try:
@@ -456,6 +454,25 @@ class DbOperate:
                 res['news_detail'] = news_detail
             else:
                 res['reason'] = '未找到该消息'
+        except:
+            pass
+        finally:
+            return res
+
+    '''
+    检查专家信息表头
+    '''
+    def check_xlsx_header(self, header):
+        res = {'state': 'fail', 'reason': "表头出错"}
+        try:
+            if len(header) == 3:
+                if header[0] == "name" and header[1] == "email" and header[2] == "area":
+                    res['state'] = 'success'
+                    res['reason'] = None
+                else:
+                    res['reason'] = "表头字段内容不符规范"
+            else:
+                res['reason'] = "表头字段缺少或冗余"
         except:
             pass
         finally:
@@ -765,6 +782,22 @@ class DbOperate:
                         res['reason'] += "fail"
                     else:
                         res['reason'] += "success"
+            res['state'] = 'success'
+            return res
+        except:
+            return res
+
+    '''
+    所有竞赛调用提醒函数
+    '''
+    def remind_all(self):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
+            comp_list = self.getCol('competition')
+            comps = comp_list.find({'com_status': 2}, {'_id': 1})
+            for comp in comps:
+                self.remind_expert_mail(str(comp['_id']))
+            res['state'] = 'success'
             return res
         except:
             return res
@@ -839,16 +872,6 @@ class DbOperate:
             return res
         return res
 
-    # 计算当前时间到明日某时间的秒数差
-    def get_interval_secs(self):
-        tomorrow = (datetime.date.today() + datetime.timedelta(days=1)).strftime('%Y%m%d')
-        tomorrow_time = tomorrow + "-09:00:00"
-        tomorrow_time_date = datetime.datetime.strptime(tomorrow_time, '%Y%m%d-%H:%M:%S')
-        now = datetime.datetime.now()
-        interval = tomorrow_time_date - now
-        secs = interval.total_seconds()
-        return secs
-
     '''
     作品退回
     '''
@@ -865,6 +888,43 @@ class DbOperate:
             return res
         except:
             return res
+        
+    '''
+    辅助函数：用于获取某个项目已经邀请并尚未拒绝的专家数量、已经评审的专家数量和评审评分总和
+    '''
+    def get_review_info(self, project_code):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!', 'cnt_all': 0, 'cnt_reviewed': 0, 'score_sum': 0}
+        try:
+            expert_project = self.getCol('expert_project')
+            e_p = expert_project.find({'project_code': project_code})
+            for item in e_p:
+                if item['status'] == -1 or item['status'] == 0:
+                    res['cnt_all'] += 1
+                if item['status'] == 2:
+                    res['cnt_all'] += 1
+                    res['cnt_reviewed'] += 1
+                    res['score_sum'] += item['score']
+            return res
+        except:
+            return res
+
+    '''
+    辅助函数：返回专家列表
+    '''
+    def get_expert_list(self):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
+            user = self.getCol('user')
+            list_all = user.find({'user_type': 'expert'}, {"_id": 0, "mail": 1, "username": 1, 'field': 1})
+            res_list = []
+            for item in list_all:
+                res_list.append({"mail": item["mail"], "username": item['username'], 'field': item['field']})
+            res["list"] = res_list
+            res['state'] = 'success'
+        except:
+            res["list"] = []
+            return res
+        return res
 
 ##############################################################################################
     
@@ -1213,6 +1273,24 @@ class DbOperate:
             D_List[index]['project_status'] = self.num2status(D_List[index]['project_status'])
         return D_List
 
+    '''
+    给C阶段的项目增加平均分字段
+    '''
+    def add_score_C(self, projects):
+        c_projects = copy.deepcopy(projects)
+        result_projects = []
+        for project in c_projects:
+            project_code = project['project_code']
+            res = self.get_review_info(project_code)
+            try:
+                score = res['score_num']/res['cnt_reviewed']
+            except:
+                score = 0
+            finally:
+                project['score'] = score
+            result_projects.append(project)
+        return result_projects
+
     def get_contest_projects(self, competition_id):
         res = {
             'state': 'fail',
@@ -1247,24 +1325,24 @@ class DbOperate:
                 # 当前状态是初审
                 elif com_status == 1:
                     res['E_List'] = self.rule_other_E(copy.deepcopy(projects))
-                    res['A_List'] = self.rule_A(copy.deepcopy(projects))
+                    res['A_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 0 or x['project_status']== -2, copy.deepcopy(projects))))
                 # 当前状态是初评
                 elif com_status == 2:
                     res['E_List'] = self.rule_other_E(copy.deepcopy(projects))
-                    res['A_List'] = self.rule_A(copy.deepcopy(projects))
+                    res['A_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 0 or x['project_status']== -2, copy.deepcopy(projects))))
                     res['B_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
                 # 当前状态是筛选并现场答辩
                 elif com_status == 3:
                     res['E_List'] = self.rule_other_E(copy.deepcopy(projects))
                     res['A_List'] = self.rule_A(copy.deepcopy(projects))
                     res['B_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
-                    res['C_List'] = self.rule_CC(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
+                    res['C_List'] = self.rule_CC(list(filter(lambda x: x['project_status'] >= 1, self.add_score_C(copy.deepcopy(projects)))))
                 # 当前状态是录入并公布最终结果
                 elif com_status == 4:
                     res['E_List'] = self.rule_other_E(copy.deepcopy(projects))
                     res['A_List'] = self.rule_A(copy.deepcopy(projects))
                     res['B_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
-                    res['C_List'] = self.rule_DC(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
+                    res['C_List'] = self.rule_DC(list(filter(lambda x: x['project_status'] >= 1, self.add_score_C(copy.deepcopy(projects)))))
                     res['D_List'] = self.rule_D(list(filter(lambda x: x['project_status'] >= 3, copy.deepcopy(projects))))
             elif len(projects) == 0:
                 res['state'] = 'success'
@@ -1292,35 +1370,77 @@ class DbOperate:
                     com['count'] = project_collection.find({'competition_id': str(com['_id'])}).count()
                     com['competition_id'] = str(com['_id'])
                     com.pop('_id')
+                    com.pop('introduction')
                     res['contests'].append(com)
         except:
-            pass
+            res['reason'] = '异常'
+            return res
         finally:
             return res
 
-###############################################################################################
+    '''
+    获奖奖项转为状态
+    '''
+    def award2status(self, award):
+        award_map = {
+            '优秀奖': 4,
+            '三等奖': 5,
+            '二等奖': 6,
+            '一等奖': 7,
+        }
+        return award_map[award]
+
+    '''
+    上传获奖作品excel表
+    '''
+    def upload_review_form(self, competition_id, code_award_list):
+        project_collection = self.getCol('project')
+        com_collection = self.getCol('competition')
+        res = {'state': 'fail', 'reason': '网络出错或BUG出现！'}
+        try:
+            # 清空之前的评判结果
+            project_collection.update({'project_status': {'$gt': 3}, 'competition_id': competition_id}, {'$set': {'project_status': 3}})
+            for item in code_award_list:
+                code = item[0]
+                award = self.award2status(item[1])
+                project_collection.update_one({'project_code': code, 'competition_id': competition_id},
+                                          { '$set': {'project_status': award}})
+            res['state'] = 'success'
+        except Exception as e:
+            print(str(e))
+        finally:
+            return res
+
+    ###############################################################################################
 
     '''
     初审改变作品状态
     proj_id:项目id（字符串）   result:初审结果（字符串 'True' 'False'）
     '''
-    def first_trial_change(self, proj_id, result):
+    def first_trial_change(self, projlst):
         res = {'state': 'fail', 'reason': '网络出错或BUG出现！'}
         try:
             proj_list = self.getCol('project')
-            find_proj = proj_list.find_one({'project_code': proj_id}, {'_id': 1})
-            # 成功搜索到该项目
-            if find_proj:
-                if result == 'True':
-                    now_stat = 1
+            flag = True
+            for item in projlst:
+                proj_id = item['proj_id']
+                result = item['re']
+                find_proj = proj_list.find_one({'project_code': proj_id}, {'_id': 1})
+                # 成功搜索到该项目
+                if find_proj:
+                    if result == 'True':
+                        now_stat = 1
+                    else:
+                        now_stat = -1
+                    proj_list.update_one({"project_code": proj_id},
+                                         {"$set": {"project_status": now_stat}})
+                # 未搜索到该项目
                 else:
-                    now_stat = -1
-                proj_list.update_one({"project_code": proj_id},
-                                     {"$set": {"project_status": now_stat}})
+                    flag = False
+            if flag:
                 res['state'] = 'success'
-            # 未搜索到该项目
             else:
-                res['reason'] = '该项目不存在'
+                res['reason'] = '选择的项目列表有的不存在'
             return res
         except:
             return res
@@ -1415,6 +1535,30 @@ class DbOperate:
             res['state'] = 'success'
             res['reason'] = '新建成功'
             res['competition_id'] = str(result.inserted_id)
+        except:
+            pass
+        finally:
+            return res
+
+    '''
+    获取竞赛详情
+    '''
+
+    def get_competition_detail(self, competition_id):
+        res = {'state': 'fail', 'reason': '网络出错或未知原因！'}
+        try:
+            print(competition_id)
+            competition = self.getCol('competition').find_one({'_id': ObjectId(competition_id)})
+            if competition:
+                res['state'] = 'success'
+                res['reason'] = '成功获取'
+                competition['_id'] = str(competition['_id'])
+                competition.pop('_id')
+                temp_intro = competition['introduction'].replace('\n', '<br>')
+                competition['introduction'] = temp_intro
+                res['competition'] = competition
+            else:
+                res['reason'] = '未查找到该竞赛'
         except:
             pass
         finally:
