@@ -11,7 +11,6 @@
 
 <script>
     import NavBar from '../components/NavBar.vue'
-
     export default {
         components: {
             NavBar
@@ -250,7 +249,6 @@
                 }
                 this.$http.post(this.$baseURL + '/api/v1/add_project',params)
                     .then(function (res) {
-
                         var detail = res.body
                         console.log(detail)
                         if(detail.state == 'success'){
@@ -298,7 +296,6 @@
         min-width: 600px;
         color: black;
     }
-
     h2 {
         border-left: 5px solid dodgerblue;
         padding: 0 0 0 15px !important;
