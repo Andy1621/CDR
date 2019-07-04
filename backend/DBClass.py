@@ -1312,3 +1312,30 @@ class DbOperate:
             return res
         except:
             return res
+
+#######################################################################################################################
+    '''
+    校团委新建竞赛
+    '''
+    def add_competition(self, competition_name, begin_time, submission_ddl, first_review_ddl, expert_comments_ddl, live_selection_ddl, end_time, introduction):
+        res = {'state': 'fail', 'reason': '网络出错或未知原因！'}
+        try:
+            competition = {
+                'competition_name': competition_name,
+                'begin_time': begin_time,
+                'submission_ddl': submission_ddl,
+                'first_review_ddl': first_review_ddl,
+                'expert_comments_ddl': expert_comments_ddl,
+                'live_selection_ddl': live_selection_ddl,
+                'end_time': end_time,
+                'com_status': -1,
+                'introduction': introduction
+            }
+            result = self.getCol('competition').insert_one(competition)
+            res['state'] = 'success'
+            res['reason'] = '新建成功'
+            res['competition_id'] = str(result.inserted_id)
+        except:
+            pass
+        finally:
+            return res
