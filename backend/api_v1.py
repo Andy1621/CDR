@@ -1041,6 +1041,21 @@ class AddCompetition(Resource):
         finally:
             return jsonify(res)
 
+'''
+获取竞赛详情(包括简介)
+'''
+class GetCompetitionDetail(Resource):
+    def post(self):
+        res = {"state": "fail", "reason": "网络错误或未知错误"}
+        try:
+            data = request.get_json()
+            competition_id = data.get('competition_id')
+            res = db.get_competition_detail(competition_id)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
 ################################################################################################################
 
 # 添加api资源
@@ -1087,6 +1102,7 @@ api.add_resource(AddCompetition, '/api/v1/add_competition', endpoint="addCompeti
 api.add_resource(RemindExpert, '/api/v1/remind_expert', endpoint="remindExpert")
 api.add_resource(RejectProject, '/api/v1/reject_project', endpoint="rejectProject")
 api.add_resource(UploadReviewForm, '/api/v1/uploadreviewform', endpoint='uploadreviewform')
+api.add_resource(GetCompetitionDetail, '/api/v1/get_competition_detail', endpoint="getCompetitionDetail")
 
 if __name__ == "__main__":
     begin_job()

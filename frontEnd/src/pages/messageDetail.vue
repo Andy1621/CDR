@@ -12,40 +12,46 @@
             <Divider/>
             <div v-if="isCompetition">
                 <div class="news-list">
-                    <h2 style="text-align: center">{{competitionDetail.title}}</h2>
+                    <h2 style="text-align: center">{{competitionDetail.competition_name}}</h2>
                     <Divider dashed/>
-                    <Row style="color: #8391a5; font-size: 18px">
-                        <Col span="10" style="text-align: left">
-                            <p>发布者：校团委</p>
-                        </Col>
-                        <Col offset="4" span="10" style="text-align: right">
-                            <p>发布时间：{{competitionDetail.date}}</p>
+                    <Row style="color: #8c8c8c; font-size: 18px; font-family: '华文楷体'">
+                        <Col offset="14" span="10" style="text-align: right">
+                            <span>发布者：校团委</span>
                         </Col>
                     </Row>
-                    <p style="font-size: 16px; margin: 20px;">{{competitionDetail.text}}</p>
+                    <Row class="info-detail">
+                        <Col span="4"><span class="info-title">竞赛名称：</span></Col>
+                        <Col span="19"><p class="info-competition">{{competitionDetail.competition_name}}</p></Col>
+                    </Row>
+                    <Row class="info-detail">
+                        <Col span="4"><span class="info-title">报名开始时间：</span></Col>
+                        <Col span="19"><p class="info-competition">{{competitionDetail.begin_time}}</p></Col>
+                    </Row>
+                    <Row class="info-detail">
+                        <Col span="4"><span class="info-title">报名截止时间：</span></Col>
+                        <Col span="19"><p class="info-competition">{{competitionDetail.submission_ddl}}</p></Col>
+                    </Row>
+                    <Row class="info-detail">
+                        <Col span="4"><span class="info-title">竞赛结束时间：</span></Col>
+                        <Col span="19"><p class="info-competition">{{competitionDetail.end_time}}</p></Col>
+                    </Row>
+                    <Row class="info-detail">
+                        <Col span="4"><span class="info-title">竞赛简介：</span></Col>
+                        <Col span="19"><p class="info-competition">{{competitionDetail.introduction}}</p></Col>
+                    </Row>
                     <Divider style="margin: 10px 0 20px 0;"/>
-                    <div v-if="competitionDetail.download!=''">
-                        <p style="margin-left: 40px; font-size: 16px">附件下载：</p>
-                        <p style="margin-left: 60px">
-                            <Icon style="margin-right: 10px" type="ios-cloud-download"></Icon>
-                            {{competitionDetail.filename}}
-                            <a :download="competitionDetail.filename" :href="competitionDetail.download">
-                                <Button ghost shape="circle" style="margin-left: 20px;" type="info">点击下载</Button>
-                            </a>
-                        </p>
-                    </div>
                 </div>
             </div>
             <div v-if="isNews">
                 <div class="news-list">
                     <h2 style="text-align: center">{{newsDetail.title}}</h2>
                     <Divider dashed/>
-                    <Row style="color: #8391a5; font-size: 18px">
+                    <Row style="color: #8c8c8c; font-size: 18px; font-family: '华文楷体'">
                         <Col span="10" style="text-align: left">
-                            <p>发布者：校团委</p>
+                            <span style="margin: 5px 10px 5px 10px">发布者：校团委</span>
                         </Col>
                         <Col offset="4" span="10" style="text-align: right">
-                            <p>发布时间：{{newsDetail.time}}</p>
+                            <span style="margin: 5px 10px 5px 10px">发布时间：{{newsDetail.time}}</span>
                         </Col>
                     </Row>
                     <p style="font-size: 16px; margin: 20px;" v-html="newsDetail.content"></p>
@@ -123,8 +129,28 @@
                     this.listName = '竞赛列表'
                     this.isFromList = true
                 }
-                //this.$http.get(this.$baseURL + '',{params:{'competition_id': query.competitionID}}
-            } else {
+                let params = {
+                    'competition_id': this.$route.query.competitionID
+                }
+                this.$http.post(this.$baseURL + '/api/v1/get_competition_detail', params)
+                    .then(function (res) {
+                        console.log(res)
+                        var detail = res.body
+                        if(detail.state == 'success'){
+                            var temp_detail = detail.competition
+                            // temp_detail['begin_time'] = temp_detail['begin_time'].split(' ')[0]
+                            if (temp_detail['introduction'].length == 0)
+                                temp_detail['introduction'] = '暂无竞赛简介'
+                            this.competitionDetail = temp_detail
+                        }
+                        else{
+                            this.$Message.error('获取竞赛详情失败 ' + detail.reason)
+                        }
+                    },function (res) {
+                        this.$Message.error('Failed')
+                    })
+            }
+            else {
                 console.log(this.$route.query.newsID)
                 this.isNews = true
                 this.detailType = '公告'
@@ -149,6 +175,12 @@
                         this.$Message.error('Failed')
                     })
             }
+        },
+        mounted() {
+            this.$Message.config({
+                top: 100,
+                duration: 1,
+            });
         }
     }
 </script>
@@ -168,63 +200,34 @@
         color: black;
     }
 
-    .carousel {
-        width: 100%;
-        height: 100%;
-        background: #8391a5;
-        text-align: center;
-        font-size: 20px;
-        color: white;
+    .info-detail{
+        margin: 20px 50px 20px 50px;
+        font-family: 微软雅黑;
+        /*border-bottom: 1px dodgerblue dashed;*/
     }
 
-    .span-title {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+    .info-title{
+        border-left: 4px solid green;
+        padding: 2px 0 2px 5px;
+        font-family: 华文中宋;
+        font-size: 18px;
+        line-height: 30px;
     }
 
-    .news-list {
-        width: 90%;
-        margin-left: 5%;
-    }
-
-    .news-list li {
-        padding: 15px 0 15px 0;
-        border-bottom: #8391a5 dashed 0.5px;
-        border-top: #8391a5 dashed 0.5px;
-    }
-
-    .news-list li {
-        padding: 15px 0 15px 0;
-        border-bottom: #8391a5 dashed 0.5px;
-        border-top: #8391a5 dashed 0.5px;
-    }
-
-    .breadcrumb-item {
-        cursor: pointer;
+    .info-competition{
+        padding: 5px 10px 5px 10px;
+        line-height: 30px;
+        border: 1px solid dodgerblue;
+        border-radius: 5px;
     }
 
     h1, h2 {
         font-weight: normal;
     }
 
-    ul {
-        list-style-type: none;
-        padding: 0;
-    }
-
-    li {
-        padding: 6px 0 6px 0;
-        border-bottom: #8391a5 dashed 0.5px;
-        border-top: #8391a5 dashed 0.5px;
-        cursor: pointer;
-    }
-
     p {
-        margin: 10px;
+        line-height: 30px;
+        padding: 5px 10px 5px 10px;
     }
 
-    a {
-        color: black;
-    }
 </style>
