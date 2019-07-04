@@ -287,6 +287,11 @@ class DbOperate:
 
             print("duan4")
             if review and review['status'] == 0:
+                score = self.to_int(score)
+                if score>100:
+                    score = 100
+                if score<0:
+                    score = 0
                 review['score'] = score
                 review['suggestion'] = suggestion
                 review['status'] = 2
@@ -925,6 +930,20 @@ class DbOperate:
             res["list"] = []
             return res
         return res
+
+    '''
+    辅助函数：字符串转整形
+    '''
+    def to_int(self, str0):
+        try:
+            int(str0)
+            return int(str0)
+        except ValueError:  # 报类型错误，说明不是整型的
+            try:
+                float(str0)  # 用这个来验证，是不是浮点字符串
+                return int(float(str0))
+            except ValueError:  # 如果报错，说明即不是浮点，也不是int字符串。   是一个真正的字符串
+                return 0
 
 ##############################################################################################
     
