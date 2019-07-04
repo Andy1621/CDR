@@ -1237,6 +1237,24 @@ class DbOperate:
             D_List[index]['project_status'] = self.num2status(D_List[index]['project_status'])
         return D_List
 
+    '''
+    给C阶段的项目增加平均分字段
+    '''
+    def add_score_C(self, projects):
+        c_projects = copy.deepcopy(projects)
+        result_projects = []
+        for project in c_projects:
+            project_code = project['project_code']
+            res = self.get_review_info(project_code)
+            try:
+                score = res['score_num']/res['cnt_reviewed']
+            except:
+                score = 0
+            finally:
+                project['score'] = score
+            result_projects.append(project)
+        return result_projects
+
     def get_contest_projects(self, competition_id):
         res = {
             'state': 'fail',
@@ -1282,13 +1300,13 @@ class DbOperate:
                     res['E_List'] = self.rule_other_E(copy.deepcopy(projects))
                     res['A_List'] = self.rule_A(copy.deepcopy(projects))
                     res['B_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
-                    res['C_List'] = self.rule_CC(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
+                    res['C_List'] = self.rule_CC(list(filter(lambda x: x['project_status'] >= 1, self.add_score_C(copy.deepcopy(projects)))))
                 # 当前状态是录入并公布最终结果
                 elif com_status == 4:
                     res['E_List'] = self.rule_other_E(copy.deepcopy(projects))
                     res['A_List'] = self.rule_A(copy.deepcopy(projects))
                     res['B_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
-                    res['C_List'] = self.rule_DC(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
+                    res['C_List'] = self.rule_DC(list(filter(lambda x: x['project_status'] >= 1, self.add_score_C(copy.deepcopy(projects)))))
                     res['D_List'] = self.rule_D(list(filter(lambda x: x['project_status'] >= 3, copy.deepcopy(projects))))
             elif len(projects) == 0:
                 res['state'] = 'success'
