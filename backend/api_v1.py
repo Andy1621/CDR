@@ -875,7 +875,7 @@ class RejectProject(Resource):
         try:
             data = request.get_json()
             project_code = data.get('project_code')
-            res = db.remind_expert_mail(project_code)
+            res = db.reject_project(project_code)
         except:
             pass
         finally:
