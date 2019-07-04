@@ -15,6 +15,8 @@ from DBClass import DbOperate
 import Config
 from utils import encode, make_zip
 import time
+import threading
+import datetime
 
 app = Flask(__name__)
 CORS(app, resources=r'/*')
@@ -881,6 +883,42 @@ class RejectProject(Resource):
         finally:
             return jsonify(res)
 
+# 计算当前时间到明日某时间的秒数差
+def get_interval_secs():
+    tomorrow = (datetime.date.today() + datetime.timedelta(days=1)).strftime('%Y%m%d')
+    tomorrow_time = tomorrow + "-09:00:00"
+    tomorrow_time_date = datetime.datetime.strptime(tomorrow_time, '%Y%m%d-%H:%M:%S')
+    now = datetime.datetime.now()
+    interval = tomorrow_time_date - now
+    secs = interval.total_seconds()
+    return secs
+
+# 定时更新进程
+def do_job():
+    try:
+        global timer
+        db.remind_all()
+        timer = threading.Timer(86400, do_job)   # 86400秒就是一天
+        timer.start()
+    except:
+        return
+    finally:
+        return
+
+'''
+定时提醒
+'''
+def begin_job():
+    try:
+        global timer
+        # db.remind_all()
+        timer = threading.Timer(get_interval_secs(), do_job)
+        timer.start()
+    except:
+        return False
+    finally:
+        return True
+
 ################################################################################################################
 
 '''
@@ -1023,4 +1061,5 @@ api.add_resource(RemindExpert, '/api/v1/remind_expert', endpoint="remindExpert")
 api.add_resource(RejectProject, '/api/v1/reject_project', endpoint="rejectProject")
 
 if __name__ == "__main__":
+    begin_job()
     app.run(host="127.0.0.1", debug=True)
