@@ -54,7 +54,7 @@
                     </div>
                 </Modal>
             </div>
-            
+
         </div>
     </div>
 </template>
@@ -69,7 +69,7 @@
         },
         data(){
             return{
-                realm:[],
+                field:[],
                 username:'',
                 disabled: true,
                 role:'',
@@ -83,19 +83,20 @@
         created() {
             this.role = this.$cookie.get('role');
             this.revise_text = '修改信息';
+            // this.$Message.info('点击修改信息或修改密码可以进行修改');
             let url = this.$baseURL + '/api/v1/get_user_info';
             this.$http.post(url,{'mail':this.$cookie.get('mail')}).then(function(res){
                 // console.log(res.body)
                 this.username = res.body.username;
                 if(this.role === 'professor'){
-                    var rt = res.body.realm;
+                    var rt = res.body.field;
                     rt = rt.split('');
                     for(var i = 0;i<6; i++){
                         if (rt[i] === '1'){
-                            this.realm.push(String.fromCharCode(65+i));
+                            this.field.push(String.fromCharCode(65+i));
                         }
                     }
-                    //console.log(this.realm);
+                    //console.log(this.field);
                 }
 
             },function(res){
@@ -115,7 +116,7 @@
                     if(this.role === 'professor'){
                         rt = '000000';
                         rt = rt.split('');
-                        this.realm.forEach(v=>{
+                        this.field.forEach(v=>{
                             //console.log(v);
                             rt[v.charCodeAt()-65]='1';
                         })
@@ -126,7 +127,7 @@
                     this.$http.post(url,{
                         'mail': this.$cookie.get('mail'),
                         'username':this.username,
-                        'realm':rt
+                        'field':rt
                     }).then(function(res){
                         //console.log(res);
                         if(res.body.state!=='fail'){
@@ -169,6 +170,12 @@
                 this.passwordConform = '';
             }
         },
+        mounted(){
+            this.$Message.config({
+                top: 100,
+                duration: 1,
+            });
+        }
     }
 </script>
 
