@@ -870,6 +870,25 @@ class DbOperate:
             return res
         except:
             return res
+        
+    '''
+    辅助函数：用于获取某个项目已经邀请并尚未拒绝的专家数量、已经评审的专家数量和评审评分总和
+    '''
+    def get_review_info(self, project_code):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!', 'cnt_all': 0, 'cnt_reviewed': 0, 'score_sum': 0}
+        try:
+            expert_project = self.getCol('expert_project')
+            e_p = expert_project.find({'project_code': project_code})
+            for item in e_p:
+                if item['status'] == -1 or item['status'] == 0:
+                    res['cnt_all'] += 1
+                if item['status'] == 2:
+                    res['cnt_all'] += 1
+                    res['cnt_reviewed'] += 1
+                    res['score_sum'] += item['score']
+            return res
+        except:
+            return res
 
 ##############################################################################################
     
