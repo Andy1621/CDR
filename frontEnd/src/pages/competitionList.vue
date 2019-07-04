@@ -206,25 +206,28 @@
                                         }
                                     }
                                 }, 'gkd'),
-                                h('Upload', {
-                                    props: {
-                                        action: '/api/v1/uploadreviewform',
-                                        data :{'competition_id': params.row.competition_id},
-                                        format: ['xls', 'xlsx']
-                                    },
-                                    style: {
-                                        display: (this.role === 'school' && params.row.com_status == "最终结果公布")? '' :'none',
-                                    }
-                                }, [
-                                    h('Button', {
+                                h('div', [
+                                    h('Upload', {
                                         props: {
-                                            type: 'primary',
-                                            size: 'small',
+                                            action: this.$baseURL + '/api/v1/uploadreviewform',
+                                            data :{'competition_id': params.row.competition_id},
+                                            format: ['xls', 'xlsx']
                                         },
                                         style: {
                                             marginRight: '5px',
+                                            display: (this.role === 'school' && params.row.com_status == "最终结果公布")? '' :'none',
                                         }
-                                    }, '最终成绩导入')
+                                    }, [
+                                        h('Button', {
+                                            props: {
+                                                type: 'primary',
+                                                size: 'small',
+                                            },
+                                            style: {
+                                                marginRight: '5px',
+                                            }
+                                        }, '最终成绩导入')
+                                    ])
                                 ])
                             ])
                         }
