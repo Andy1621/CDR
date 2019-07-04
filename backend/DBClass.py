@@ -735,9 +735,13 @@ class DbOperate:
             ddl = datetime.datetime.strptime(comp['expert_comments_ddl'], '%Y%m%d-%H:%M:%S')
             comp_name = comp['competition_name']
             now_plus_1 = datetime.datetime.today() + datetime.timedelta(days=1)
+            now_plus_6 = datetime.datetime.today() + datetime.timedelta(days=6)
             now_plus_7 = datetime.datetime.today() + datetime.timedelta(days=7)
             if now_plus_1 >= ddl:
                 beford_ddl = 1
+            elif now_plus_6 >= ddl:
+                res['reason'] = '距离截止日期在1天和7天之间，不需要发送'
+                return res
             elif now_plus_7 >= ddl:
                 beford_ddl = 7
             else:
@@ -863,6 +867,77 @@ class DbOperate:
             return res
 
 ##############################################################################################
+    
+    '''
+    用户修改密码
+    '''
+    def change_password(self, mail, old_password, new_password):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
+            user = self.getCol('user')
+            finded_user = user.find_one({'mail': mail})
+            if finded_user is None:
+                res['reason'] = "未找到该用户"
+                return res
+            if finded_user['password'] == "":
+                res['reason'] = '专家密码未设置，请前往设置页面'
+                return res
+            if finded_user['password'] != old_password:
+                res['reason'] = '旧密码与原密码不符'
+                return res
+            user.update_one({'mail': mail}, {
+                            "$set": {'password': new_password}})
+            res['state'] = 'success'
+            res['reason'] = ''
+            return res
+        except:
+            return res
+
+    '''
+    用户修改信息
+    '''
+    def change_info(self, mail, user_name, realm):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
+            user = self.getCol('user')
+            finded_user = user.find_one({'mail': mail})
+            if finded_user is None:
+                res['reason'] = "未找到用户"
+                return res
+            if finded_user['user_type']=='expert':
+                user.update_one({'mail': mail}, {
+                            "$set": {'username': user_name, 'realm':realm}})
+            else:
+                user.update_one({'mail':mail},{"$set":{'username':user_name}})
+            res['state'] = 'success'
+            res['reason'] = ''
+            return res
+        except:
+            return res
+
+    '''
+    获取用户信息
+    '''
+    def get_user_info(self, mail):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
+            user = self.getCol('user')
+            finded_user = user.find_one({'mail': mail})
+            if finded_user is None:
+                res['reason'] = "未找到用户"
+                return res
+            res['username'] = finded_user['username'] 
+            if finded_user['user_type'] == 'expert':
+                if not finded_user.get('realm'):
+                    res['realm'] = '000000'
+                else:
+                    res['realm'] = finded_user['realm']
+            res['state'] = 'success'
+            res['reason'] = ''
+            return res
+        except:
+            return res
+    
     '''
     插入附件信息
     '''
