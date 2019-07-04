@@ -17,7 +17,6 @@ from email.header import Header
 import smtplib
 import random
 import os
-import threading
 import datetime
 
 
@@ -765,6 +764,22 @@ class DbOperate:
                         res['reason'] += "fail"
                     else:
                         res['reason'] += "success"
+            res['state'] = 'success'
+            return res
+        except:
+            return res
+
+    '''
+    所有竞赛调用提醒函数
+    '''
+    def remind_all(self):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
+            comp_list = self.getCol('competition')
+            comps = comp_list.find({'com_status': 2}, {'_id': 1})
+            for comp in comps:
+                self.remind_expert_mail(str(comp['_id']))
+            res['state'] = 'success'
             return res
         except:
             return res
@@ -838,16 +853,6 @@ class DbOperate:
         except:
             return res
         return res
-
-    # 计算当前时间到明日某时间的秒数差
-    def get_interval_secs(self):
-        tomorrow = (datetime.date.today() + datetime.timedelta(days=1)).strftime('%Y%m%d')
-        tomorrow_time = tomorrow + "-09:00:00"
-        tomorrow_time_date = datetime.datetime.strptime(tomorrow_time, '%Y%m%d-%H:%M:%S')
-        now = datetime.datetime.now()
-        interval = tomorrow_time_date - now
-        secs = interval.total_seconds()
-        return secs
 
     '''
     作品退回
