@@ -975,7 +975,7 @@ class DbOperate:
     '''
     用户修改信息
     '''
-    def change_info(self, mail, user_name, realm):
+    def change_info(self, mail, user_name, field):
         res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
         try:
             user = self.getCol('user')
@@ -985,7 +985,7 @@ class DbOperate:
                 return res
             if finded_user['user_type']=='expert':
                 user.update_one({'mail': mail}, {
-                            "$set": {'username': user_name, 'realm':realm}})
+                            "$set": {'username': user_name, 'field':field}})
             else:
                 user.update_one({'mail':mail},{"$set":{'username':user_name}})
             res['state'] = 'success'
@@ -1007,10 +1007,10 @@ class DbOperate:
                 return res
             res['username'] = finded_user['username'] 
             if finded_user['user_type'] == 'expert':
-                if not finded_user.get('realm'):
-                    res['realm'] = '000000'
+                if not finded_user.get('field'):
+                    res['field'] = '000000'
                 else:
-                    res['realm'] = finded_user['realm']
+                    res['field'] = finded_user['field']
             res['state'] = 'success'
             res['reason'] = ''
             return res
@@ -1415,6 +1415,7 @@ class DbOperate:
     def upload_review_form(self, competition_id, code_award_list):
         project_collection = self.getCol('project')
         com_collection = self.getCol('competition')
+        print(code_award_list)
         res = {'state': 'fail', 'reason': '网络出错或BUG出现！'}
         try:
             # 清空之前的评判结果
@@ -1507,7 +1508,7 @@ class DbOperate:
             return res
 
 
-    '''
+    '''{
     录入现场答辩名单
     '''
     def enter_defense_list(self, project_list):
@@ -1531,6 +1532,7 @@ class DbOperate:
             return res
         except:
             return res
+
 #######################################################################################################################
     '''
     校团委新建竞赛

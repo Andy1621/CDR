@@ -776,11 +776,13 @@ class UploadReviewForm(Resource):
             data = request.get_json()
             file = request.files.get('file')
             competition_id = data.get('competition_id')
+            print(competition_id)
             f = file.read()
             code_award_list = []
             data = xlrd.open_workbook(file_contents=f)
             table = data.sheets()[0]
             nrows = table.nrows
+            print('nrows', nrows)
             for row in range(1, nrows):
                 code = table.cell_value(row, 0)
                 award = table.cell_value(row, 3)
@@ -1009,8 +1011,8 @@ class ChangeInfo(Resource):
             data = request.get_json()
             mail = data.get('mail')
             user_name = data.get('username')
-            realm = data.get('realm')
-            res = db.change_info(mail, user_name, realm)
+            field = data.get('field')
+            res = db.change_info(mail, user_name, field)
         except:
             pass
         finally:
