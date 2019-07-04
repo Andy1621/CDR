@@ -50,7 +50,7 @@
           C_list:[],
           D_list:[],
           select:{type: 'selection', width: 60,align: 'center',},
-          score:{title: '评分',key: 'score'},
+          score:{title: '平均分',key: 'score',sortable: true},
           columns: [
             {
               title: '作品名称',
