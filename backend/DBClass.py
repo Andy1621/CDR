@@ -1307,11 +1307,11 @@ class DbOperate:
                 # 当前状态是初审
                 elif com_status == 1:
                     res['E_List'] = self.rule_other_E(copy.deepcopy(projects))
-                    res['A_List'] = self.rule_A(copy.deepcopy(projects))
+                    res['A_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 0 or x['project_status']== -2, copy.deepcopy(projects))))
                 # 当前状态是初评
                 elif com_status == 2:
                     res['E_List'] = self.rule_other_E(copy.deepcopy(projects))
-                    res['A_List'] = self.rule_A(copy.deepcopy(projects))
+                    res['A_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 0 or x['project_status']== -2, copy.deepcopy(projects))))
                     res['B_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
                 # 当前状态是筛选并现场答辩
                 elif com_status == 3:
