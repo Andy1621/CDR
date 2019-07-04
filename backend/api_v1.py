@@ -936,6 +936,22 @@ class GetUserInfo(Resource):
             return jsonify(res)
 
 
+
+'''
+录入现场答辩名单
+'''
+class EnterDefenseList(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            lists = data.get('list')
+            res = db.enter_defense_list(lists)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
 #######################################################################################################################
 
 '''
@@ -959,7 +975,6 @@ class AddCompetition(Resource):
             pass
         finally:
             return jsonify(res)
-
 
 ################################################################################################################
 
@@ -1002,6 +1017,7 @@ api.add_resource(DeleteNews, '/api/v1/delete_news', endpoint='seleteNews')
 api.add_resource(AddNews, '/api/v1/add_news', endpoint='addNews')
 api.add_resource(UpAnnounceFile, '/api/v1/up_announce_file', endpoint='upAnnounceFile')
 api.add_resource(DeleteAnnounceFile, "/api/v1/delete_announce_file", endpoint="deleteAnnounceFile")
+api.add_resource(EnterDefenseList, '/api/v1/enter_defense_list', endpoint='enterDefenseList')
 api.add_resource(AddCompetition, '/api/v1/add_competition', endpoint="addCompetition")
 api.add_resource(RemindExpert, '/api/v1/remind_expert', endpoint="remindExpert")
 api.add_resource(RejectProject, '/api/v1/reject_project', endpoint="rejectProject")
