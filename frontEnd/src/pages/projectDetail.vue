@@ -28,6 +28,84 @@
                     <FormItem label="项目介绍">
                         <Input v-model="basicInfo.description" type="textarea" :rows="4" readonly></Input>
                     </FormItem>
+                    <FormItem label="展示形式">
+                        <CheckboxGroup style="row: 3;" v-model="basicInfo.display">
+                            <Checkbox label="display1" disabled>
+                                <span>实物、产品</span>
+                            </Checkbox>
+                            <Checkbox label="display2" disabled>
+                                <span>模型</span>
+                            </Checkbox>
+                            <Checkbox label="display3" disabled>
+                                <span>图纸</span>
+                            </Checkbox>
+                            <Checkbox label="display4" disabled>
+                                <span>磁盘</span>
+                            </Checkbox>
+                            <br>
+                            <Checkbox label="display5" disabled>
+                                <span>现场演示</span>
+                            </Checkbox>
+                            <Checkbox label="display6" disabled>
+                                <span>图片</span>
+                            </Checkbox>
+                            <Checkbox label="display7" disabled>
+                                <span>录像</span>
+                            </Checkbox>
+                            <Checkbox label="display8" disabled>
+                                <span>样品</span>
+                            </Checkbox>
+                        </CheckboxGroup>
+                    </FormItem>
+                    <FormItem label="调查方式">
+                        <CheckboxGroup v-model="basicInfo.investigation">
+                            <Checkbox label="investigation1" disabled>
+                                <span>走访</span>
+                            </Checkbox>
+                            <Checkbox label="investigation2" disabled>
+                                <span>问卷</span>
+                            </Checkbox>
+                            <Checkbox label="investigation3" disabled>
+                                <span>现场采访</span>
+                            </Checkbox>
+                            <Checkbox label="investigation4" disabled>
+                                <span>人员介绍</span>
+                            </Checkbox>
+                            <Checkbox label="investigation5" disabled>
+                                <span>个别交谈</span>
+                            </Checkbox>
+                            <Checkbox label="investigation6" disabled>
+                                <span>亲临实践</span>
+                            </Checkbox>
+                            <Checkbox label="investigation7" disabled>
+                                <span>会议</span>
+                            </Checkbox>
+                            <Checkbox label="investigation8" disabled>
+                                <span>图片、照片</span>
+                            </Checkbox>
+                            <Checkbox label="investigation9" disabled>
+                                <span>书报刊物</span>
+                            </Checkbox>
+                            <Checkbox label="investigation10" disabled>
+                                <span>统计报表</span>
+                            </Checkbox>
+                            <Checkbox label="investigation11" disabled>
+                                <span>影视资料</span>
+                            </Checkbox>
+                            <Checkbox label="investigation12" disabled>
+                                <span>文件</span>
+                            </Checkbox>
+                            <Checkbox label="investigation13" disabled>
+                                <span>集体组织</span>
+                            </Checkbox>
+                            <Checkbox label="investigation14" disabled>
+                                <span>自发</span>
+                            </Checkbox>
+                            <Checkbox label="investigation15" disabled>
+                                <span>其它</span>
+                            </Checkbox>
+                        </CheckboxGroup>
+                    </FormItem>
                 </Form>
             </div>
             <div v-show="current==1" style="margin: 10px">
@@ -36,7 +114,8 @@
                     <template v-if="item.file_type === 'photo'">
                         <img :src="item.file_path">
                         <div class="demo-upload-list-cover">
-                            <Icon type="ios-eye-outline" @click.native="handleView(item.file_path, item.file_name)"></Icon>
+                            <Icon type="ios-eye-outline"
+                                  @click.native="handleView(item.file_path, item.file_name)"></Icon>
                         </div>
                     </template>
                 </div>
@@ -96,7 +175,7 @@
         data() {
             return {
                 disable: false,
-                current: 1,
+                current: 0,
                 basicInfo: {},
                 reviewInfo: {
                     marks: '',
@@ -328,9 +407,23 @@
         background: #eeeeee;
         color: #2b85e4;
     }
-    >>> .video-js .vjs-big-play-button{
+
+    >>> .video-js .vjs-big-play-button {
         position: absolute;
         top: 43%;
         left: 44%;
+    }
+    >>>.ivu-checkbox-input[disabled] {
+        cursor: default
+    }
+    >>>.ivu-checkbox-disabled .ivu-checkbox-inner-input {
+        cursor: default
+    }
+    >>>.ivu-checkbox-disabled + span {
+        color: #515a6e;
+        cursor: default
+    }
+    >>>.ivu-checkbox-wrapper-disabled {
+        cursor: default;
     }
 </style>
