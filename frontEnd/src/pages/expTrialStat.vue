@@ -37,7 +37,7 @@
             return{
                 com_stat: {title: '评审状态', key: 'status', width: 120, align: 'center'},
                 com_score: {title: '专家评分', key: 'score', width: 90, align: 'center'},
-                com_detail: {title: '专家评审意见', key: 'suggestion', width: 550},
+                com_detail: {title: '专家评审意见', key: 'suggestion', width: 550, ellipsis: true},
                 columns: [
                     {
                         title: '专家名称',
