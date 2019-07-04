@@ -424,12 +424,10 @@ class DbOperate:
     def get_news(self):
         res = {'state': 'fail', 'reason': "未知错误"}
         try:
-            origin_news = self.getCol('news').find()
+            origin_news = self.getCol('news').find({}, {'content': 0, 'files': 0})
             news_list = list()
             for news in origin_news:
                 news['news_id'] = str(news['_id'])
-                news.pop('content')
-                news.pop('files')
                 news.pop('_id')
                 news_list.append(news)
             res['state'] = 'success'
@@ -450,7 +448,9 @@ class DbOperate:
             news_list = self.getCol('news')
             news_detail = news_list.find_one({'_id': ObjectId(news_id)})
             if news_detail:
-                news_detail['_id'] = str(news_detail['_id'])
+                news_detail.pop('_id')
+                temp_content = news_detail['content'].replace("\n", "<br>")
+                news_detail['content'] = temp_content
                 res['state'] = 'success'
                 res['reason'] = None
                 res['news_detail'] = news_detail
