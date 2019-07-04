@@ -890,6 +890,24 @@ class DbOperate:
         except:
             return res
 
+    '''
+    辅助函数：返回专家列表
+    '''
+    def get_expert_list(self):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
+            user = self.getCol('user')
+            list_all = user.find({'user_type': 'expert'}, {"_id": 0, "mail": 1, "username": 1, 'field': 1})
+            res_list = []
+            for item in list_all:
+                res_list.append({"mail": item["mail"], "username": item['username'], 'field': item['field']})
+            res["list"] = res_list
+            res['state'] = 'success'
+        except:
+            res["list"] = []
+            return res
+        return res
+
 ##############################################################################################
     
     '''

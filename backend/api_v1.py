@@ -946,6 +946,19 @@ def begin_job():
     finally:
         return True
 
+'''
+获取专家列表
+'''
+class GetExpertList(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            res = db.get_expert_list()
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
 ################################################################################################################
 
 '''
@@ -1103,6 +1116,7 @@ api.add_resource(RemindExpert, '/api/v1/remind_expert', endpoint="remindExpert")
 api.add_resource(RejectProject, '/api/v1/reject_project', endpoint="rejectProject")
 api.add_resource(UploadReviewForm, '/api/v1/uploadreviewform', endpoint='uploadreviewform')
 api.add_resource(GetCompetitionDetail, '/api/v1/get_competition_detail', endpoint="getCompetitionDetail")
+api.add_resource(GetExpertList, '/api/v1/get_expert_list', endpoint="getExpertList")
 
 if __name__ == "__main__":
     begin_job()
