@@ -1417,23 +1417,30 @@ class DbOperate:
     初审改变作品状态
     proj_id:项目id（字符串）   result:初审结果（字符串 'True' 'False'）
     '''
-    def first_trial_change(self, proj_id, result):
+    def first_trial_change(self, projlst):
         res = {'state': 'fail', 'reason': '网络出错或BUG出现！'}
         try:
             proj_list = self.getCol('project')
-            find_proj = proj_list.find_one({'project_code': proj_id}, {'_id': 1})
-            # 成功搜索到该项目
-            if find_proj:
-                if result == 'True':
-                    now_stat = 1
+            flag = True
+            for item in projlst:
+                proj_id = item['proj_id']
+                result = item['re']
+                find_proj = proj_list.find_one({'project_code': proj_id}, {'_id': 1})
+                # 成功搜索到该项目
+                if find_proj:
+                    if result == 'True':
+                        now_stat = 1
+                    else:
+                        now_stat = -1
+                    proj_list.update_one({"project_code": proj_id},
+                                         {"$set": {"project_status": now_stat}})
+                # 未搜索到该项目
                 else:
-                    now_stat = -1
-                proj_list.update_one({"project_code": proj_id},
-                                     {"$set": {"project_status": now_stat}})
+                    flag = False
+            if flag:
                 res['state'] = 'success'
-            # 未搜索到该项目
             else:
-                res['reason'] = '该项目不存在'
+                res['reason'] = '选择的项目列表有的不存在'
             return res
         except:
             return res
