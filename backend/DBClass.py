@@ -1324,6 +1324,18 @@ class DbOperate:
             return res
 
     '''
+    获奖奖项转为状态
+    '''
+    def award2status(self, award):
+        award_map = {
+            '优秀奖': 4,
+            '三等奖': 5,
+            '二等奖': 6,
+            '一等奖': 7,
+        }
+        return award_map[award]
+
+    '''
     上传获奖作品excel表
     '''
     def upload_review_form(self, competition_id, code_award_list):
@@ -1335,9 +1347,9 @@ class DbOperate:
             project_collection.update({'project_status': {'$gt': 3}, 'competition_id': competition_id}, {'$set': {'project_status': 3}})
             for item in code_award_list:
                 code = item[0]
-                award = item[1]
+                award = self.award2status(item[1])
                 project_collection.update_one({'project_code': code, 'competition_id': competition_id},
-                                          {'$set': {'project_status': award}})
+                                          { '$set': {'project_status': award}})
             res['state'] = 'success'
         except Exception as e:
             print(str(e))
