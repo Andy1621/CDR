@@ -1588,6 +1588,7 @@ class DbOperate:
             expert = self.getCol('user').find_one({'mail': expert_mail, 'user_type': 'expert'})
             if expert:
                 self.getCol('user').remove({'mail': expert_mail, 'user_type': 'expert'})
+                self.getCol('expert_project').remove({'expert_mail': expert_mail})
                 res['state'] = 'success'
                 res['reason'] = '删除成功'
             else:
