@@ -17,7 +17,6 @@ from email.header import Header
 import smtplib
 import random
 import os
-import threading
 import datetime
 
 
@@ -765,6 +764,22 @@ class DbOperate:
                         res['reason'] += "fail"
                     else:
                         res['reason'] += "success"
+            res['state'] = 'success'
+            return res
+        except:
+            return res
+
+    '''
+    所有竞赛调用提醒函数
+    '''
+    def remind_all(self):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
+            comp_list = self.getCol('competition')
+            comps = comp_list.find({'com_status': 2}, {'_id': 1})
+            for comp in comps:
+                self.remind_expert_mail(str(comp['_id']))
+            res['state'] = 'success'
             return res
         except:
             return res
@@ -838,16 +853,6 @@ class DbOperate:
         except:
             return res
         return res
-
-    # 计算当前时间到明日某时间的秒数差
-    def get_interval_secs(self):
-        tomorrow = (datetime.date.today() + datetime.timedelta(days=1)).strftime('%Y%m%d')
-        tomorrow_time = tomorrow + "-09:00:00"
-        tomorrow_time_date = datetime.datetime.strptime(tomorrow_time, '%Y%m%d-%H:%M:%S')
-        now = datetime.datetime.now()
-        interval = tomorrow_time_date - now
-        secs = interval.total_seconds()
-        return secs
 
     '''
     作品退回
@@ -1298,7 +1303,28 @@ class DbOperate:
         finally:
             return res
 
-###############################################################################################
+    '''
+    上传获奖作品excel表
+    '''
+    def upload_review_form(self, competition_id, code_award_list):
+        project_collection = self.getCol('project')
+        com_collection = self.getCol('competition')
+        res = {'state': 'fail', 'reason': '网络出错或BUG出现！'}
+        try:
+            # 清空之前的评判结果
+            project_collection.update({'project_status': {'$gt': 3}, 'competition_id': competition_id}, {'$set': {'project_status': 3}})
+            for item in code_award_list:
+                code = item[0]
+                award = item[1]
+                project_collection.update_one({'project_code': code, 'competition_id': competition_id},
+                                          {'$set': {'project_status': award}})
+            res['state'] = 'success'
+        except Exception as e:
+            print(str(e))
+        finally:
+            return res
+
+    ###############################################################################################
 
     '''
     初审改变作品状态

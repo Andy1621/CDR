@@ -20,7 +20,7 @@
               @on-selection-change="selectionChange"></Table>
       <div v-if="current==1&&com_status==1" style="background-color: #6ecadc;margin-top: 10px;width:85%;margin-left: 6%;border-radius: 3px;height:40px;
         line-height:40px;">
-        <span style="margin-left: 2%">已选中 {{this.selectnum}} 项</span>
+        <span style="margin-left: 2%">已选中{{this.selectnum}} 项</span>
         <button style=";margin-left: 75%;background-color: red;border: none;width: 10%" @click="pass">通过</button>
       </div>
     </div>
@@ -49,8 +49,11 @@
           B_list:[],
           C_list:[],
           D_list:[],
-          select:{type: 'selection', width: 60,align: 'center',},
-          score:{title: '评分',key: 'score'},
+          select:{
+            type: 'selection',
+            width: 60,
+            align: 'center',
+          },
           columns: [
             {
               title: '作品名称',
@@ -65,10 +68,6 @@
               title: '状态',
               key: 'project_status'
             },
-            // {
-            //   title: '评分',
-            //   key: 'score'
-            // },
             {
               title: '操作',
               key: 'oper',
@@ -102,7 +101,7 @@
                         //     }
                         //   })
                         // }
-                        else if(this.current == 2||this.current == 3){
+                        else if(this.current == 2){
                           this.$router.push({
                             path: '/expTrialStat',
                             query: {
@@ -120,26 +119,24 @@
                     props: {
                       type: 'primary',
                       size: 'small',
-                      disabled:(params.row.project_status=="编辑中")||(this.com_status>0)
+                      disabled:(params.row.project_status=="编辑中")
                     },
                     style: {
                       marginRight:'5px',
-                      display:(this.current==0||this.current==1)?"inline-block":"none"
+                      display:(this.com_status==0||this.com_status==1)?"inline-block":"none"
                     },
                     on: {
                       click: () => {
-                        if(this.com_status==0)
-                          this.rejectPro(params.row.project_code);
-                        else if(this.com_status==1)
-                          console.log(1);
+                          if(this.com_status==0)
+                            this.rejectPro(params.row.project_code)
                       }
                     }
-                    },this.current==0?"退回":"下载附件"),
+                    },this.changeTitle()),
                   h('Button', {
                     props: {
                       type: 'error',
                       size: 'small',
-                      disabled:(params.row.project_status=="通过初审")
+                      disabled:(params.row.project_status=="编辑中")
                     },
                     style: {
                       marginRight:'5px',
@@ -147,8 +144,7 @@
                     },
                     on: {
                       click: () => {
-                        this.selectItem=[{'proj_id':params.row.project_code,'re':'False'}];
-                        this.pass();
+
                       }
                     }
                   },'拒绝'),
@@ -207,8 +203,8 @@
         check_table(id){
           this.$http.get(this.$baseURL + '/api/v1/view_apply',{params:{'project_code': id}})
             .then(function (res) {
-              var detail = res.body;
-              console.log(detail);
+              var detail = res.body
+              console.log(detail)
               if(detail.state == 'fail'){
                 this.$Message.error(detail.reason)
               }
@@ -251,12 +247,8 @@
         changeList(){
           this.selectnum = 0;
           this.selectItem.length=0;
-          if(this.current==1||this.current==3){
-            if(this.columns[this.columns.length-1].type!="selection"){this.columns.push(this.select);}
-          }
-          else{
-            this.columns.pop();
-          }
+          if(this.com_status==1&&this.current==0)this.columns.pop();
+          else if(this.com_status==1&&this.columns.length==4)this.columns.push(this.select);
           if(this.btshow.length>0){
             this.btshow.length = 0;
           }
@@ -278,24 +270,17 @@
               break;
           }
           for(let item of this.rows){
-            if(this.com_status==1){
-              if(item.project_status!="已提交") item._disabled = true;
+            if(item.project_status=="编辑中"){
+              this.btshow.push(true);
+              //item._disabled = true;
             }
-            else if(this.com_status==3){
-                if(this.current==1) item._disabled = true;
-                if(this.current==3) {
-                  if(item.project_status!="通过初审") item._disabled = true;
-                }
-            }
-            // if(item.project_status=="编辑中"){
-            //   this.btshow.push(true);
-            // }
-            // else
-            //   this.btshow.push(false)
+            else
+              this.btshow.push(false)
           }
+          console.log(this.btshow)
         },
         jump(num){
-          if(num != this.current && num <= this.com_status) {
+          if(num <= this.com_status) {
             this.current = num;
             this.changeList();
           }
@@ -348,6 +333,5 @@
   step{
     cursor:pointer;
   }
-
 
 </style>
