@@ -142,7 +142,7 @@
             <div v-show="current==2">
                 <Form ref="reviewInfo" :model="reviewInfo" :label-width="80">
                     <FormItem label="评分">
-                        <Input v-model="reviewInfo.marks" :disabled="disable" placeholder="请输入评分，0-100"></Input>
+                        <Input type="number" v-model="reviewInfo.marks" :disabled="disable" placeholder="请输入评分，0-100"></Input>
                     </FormItem>
                     <FormItem label="评价">
                         <Input v-model="reviewInfo.comment" :disabled="disable" type="textarea"
@@ -280,11 +280,15 @@
                 this.visible = true;
             },
             saveReview() {
+                if (Number(this.reviewInfo.marks) < 0 || Number(this.reviewInfo.marks) > 100) {
+                    alert("分数在0-100内，请填写正确的评分！");
+                    return;
+                }
                 let url = this.$baseURL + '/api/v1/store_review';
                 let data = {
                     project_code: this.$route.query.project_id,
                     expert_email: this.$cookie.get('mail'),
-                    score: this.reviewInfo.marks,
+                    score: Number(this.reviewInfo.marks),
                     suggestion: this.reviewInfo.comment
                 };
                 this.$http.post(url, data).then(function (res) {
