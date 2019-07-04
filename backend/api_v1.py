@@ -8,6 +8,8 @@
 @desc:
 '''
 import os
+
+import xlrd
 from flask import Flask, render_template, jsonify, request
 from flask_restful import Api, Resource
 from flask_cors import *
@@ -743,6 +745,31 @@ class ChangeCompStat(Resource):
         finally:
             return jsonify(res)
 
+'''
+上传评审excel表
+'''
+class UploadReviewForm(Resource):
+    def post(self):
+        res = {'state': 'fail'}
+        try:
+            data = request.get_json()
+            file = request.files.get('file')
+            competition_id = data.get('competition_id')
+            f = file.read()
+            code_award_list = []
+            data = xlrd.open_workbook(file_contents=f)
+            table = data.sheets()[0]
+            nrows = table.nrows
+            for row in range(1, nrows):
+                code = table.cell_value(row, 0)
+                award = table.cell_value(row, 3)
+                code_award_list.append((code, award))
+            res = db.upload_review_form(competition_id, code_award_list)
+        except Exception as e:
+            print(str(e))
+        finally:
+            return jsonify(res)
+
 ##############################################################################################################
 '''
 初审改变作品状态
@@ -1021,6 +1048,7 @@ api.add_resource(EnterDefenseList, '/api/v1/enter_defense_list', endpoint='enter
 api.add_resource(AddCompetition, '/api/v1/add_competition', endpoint="addCompetition")
 api.add_resource(RemindExpert, '/api/v1/remind_expert', endpoint="remindExpert")
 api.add_resource(RejectProject, '/api/v1/reject_project', endpoint="rejectProject")
+api.add_resource(UploadReviewForm, '/api/v1/uploadreviewform', endpoint='uploadreviewform')
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", debug=True)
