@@ -86,7 +86,7 @@
                     },
                     on: {
                       click: () => {
-                        if(this.current == 0) {
+                        if(this.current == 1) {
                           this.$router.push({
                             path: '/firstTrial',
                             query: {
@@ -97,7 +97,7 @@
                             }
                           })
                         }
-                        else if(this.current == 1){
+                        else if(this.current == 2){
                           this.$router.push({
                             path: '/expTrialStat',
                             query: {

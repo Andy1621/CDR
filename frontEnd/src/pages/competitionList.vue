@@ -169,7 +169,7 @@
                                                 path: '/inviteProfessor',
                                                 query: {
                                                     competitionID: params.row.competition_id,
-                                                    // competitionTitle: params.row.competition_name
+                                                    competitionTitle: params.row.competition_name
                                                 }
                                             })
                                         }
