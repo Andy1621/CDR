@@ -902,7 +902,7 @@ class DbOperate:
                 if item['status'] == 2:
                     res['cnt_all'] += 1
                     res['cnt_reviewed'] += 1
-                    res['score_sum'] += item['score']
+                    res['score_sum'] += int(item['score'])
             return res
         except:
             return res
@@ -1296,7 +1296,9 @@ class DbOperate:
             project_code = project['project_code']
             res = self.get_review_info(project_code)
             try:
-                score = res['score_num']/res['cnt_reviewed']
+                score = res['score_sum']/res['cnt_reviewed']
+                print(res['score_sum'])
+                print(res['cnt_reviewed'])
             except:
                 score = 0
             finally:
