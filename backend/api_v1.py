@@ -865,6 +865,22 @@ class RemindExpert(Resource):
         finally:
             return jsonify(res)
 
+
+'''
+作品退回
+'''
+class RejectProject(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            project_code = data.get('project_code')
+            res = db.remind_expert_mail(project_code)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
 ################################################################################################################
 
 '''
@@ -987,6 +1003,8 @@ api.add_resource(AddNews, '/api/v1/add_news', endpoint='addNews')
 api.add_resource(UpAnnounceFile, '/api/v1/up_announce_file', endpoint='upAnnounceFile')
 api.add_resource(DeleteAnnounceFile, "/api/v1/delete_announce_file", endpoint="deleteAnnounceFile")
 api.add_resource(AddCompetition, '/api/v1/add_competition', endpoint="addCompetition")
+api.add_resource(RemindExpert, '/api/v1/remind_expert', endpoint="remindExpert")
+api.add_resource(RejectProject, '/api/v1/reject_project', endpoint="rejectProject")
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", debug=True)

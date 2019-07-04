@@ -750,6 +750,23 @@ class DbOperate:
         secs = interval.total_seconds()
         return secs
 
+    '''
+    作品退回
+    '''
+    def reject_project(self, project_code):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
+            pro_list = self.getCol('project')
+            pro = pro_list.find_one({'project_code': project_code, 'project_status': 0})
+            if pro:
+                pro_list.update({'project_code': project_code, 'project_status': 0}, {"$set": {"project_status": -1}})
+                res['state'] = 'success'
+            else:
+                res['reason'] = "作品不存在或作品状态不为已提交"
+            return res
+        except:
+            return res
+
 ##############################################################################################
     '''
     插入附件信息
