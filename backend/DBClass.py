@@ -1583,3 +1583,20 @@ class DbOperate:
             pass
         finally:
             return res
+
+    def delete_expert(self, expert_mail):
+        res = {'state': 'fail', 'reason': '网络出错或未知原因！'}
+        try:
+            expert = self.getCol('user').find_one({'mail': expert_mail, 'user_type': 'expert'})
+            if expert:
+                self.getCol('user').remove({'mail': expert_mail, 'user_type': 'expert'})
+                res['state'] = 'success'
+                res['reason'] = '删除成功'
+            else:
+                res['state'] = 'fail'
+                res['reason'] = '未找到该专家'
+        except:
+            pass
+        finally:
+            return res
+
