@@ -1297,6 +1297,7 @@ class DbOperate:
                     com['count'] = project_collection.find({'competition_id': str(com['_id'])}).count()
                     com['competition_id'] = str(com['_id'])
                     com.pop('_id')
+                    com.pop('introduction')
                     res['contests'].append(com)
         except:
             pass
@@ -1440,6 +1441,30 @@ class DbOperate:
             res['state'] = 'success'
             res['reason'] = '新建成功'
             res['competition_id'] = str(result.inserted_id)
+        except:
+            pass
+        finally:
+            return res
+
+    '''
+    获取竞赛详情
+    '''
+
+    def get_competition_detail(self, competition_id):
+        res = {'state': 'fail', 'reason': '网络出错或未知原因！'}
+        try:
+            print(competition_id)
+            competition = self.getCol('competition').find_one({'_id': ObjectId(competition_id)})
+            if competition:
+                res['state'] = 'success'
+                res['reason'] = '成功获取'
+                competition['_id'] = str(competition['_id'])
+                competition.pop('_id')
+                temp_intro = competition['introduction'].replace('\n', '<br>')
+                competition['introduction'] = temp_intro
+                res['competition'] = competition
+            else:
+                res['reason'] = '未查找到该竞赛'
         except:
             pass
         finally:
