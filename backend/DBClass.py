@@ -1319,7 +1319,8 @@ class DbOperate:
                     com.pop('introduction')
                     res['contests'].append(com)
         except:
-            pass
+            res['reason'] = '异常'
+            return res
         finally:
             return res
 
