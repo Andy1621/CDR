@@ -1311,3 +1311,28 @@ class DbOperate:
             return res
         except:
             return res
+
+    '''
+    录入现场答辩名单
+    '''
+    def enter_defense_list(self, project_list):
+        res = {'state': 'fail', 'reason': '网络出错或BUG出现！'}
+        try:
+            res['detail_reason'] = list()
+            res['success_list'] = list()
+            for project_code in project_list:
+                project = self.getCol('project').find_one({'project_code': project_code}, {'project_status': 1})
+                print(project)
+                if project:
+                    if project['project_status'] == 1:
+                        self.getCol('project').update_one({'project_code': project_code}, {'$set': {'project_status': 3}})
+                        res['success_list'].append(project_code)
+                    else:
+                        res['detail_reason'].append('作品 ' + project_code + '状态为' + str(project['project_status']) + ';不符合已通过初审的状态！')
+                else:
+                    res['detail_reason'].append('作品 ' + project_code + ' 不存在!')
+            res['state'] = 'success'
+            res['reason'] = ''
+            return res
+        except:
+            return res

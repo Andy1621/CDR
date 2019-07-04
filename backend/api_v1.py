@@ -902,6 +902,22 @@ class GetUserInfo(Resource):
         finally:
             return jsonify(res)
 
+
+'''
+录入现场答辩名单
+'''
+class EnterDefenseList(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            lists = data.get('list')
+            res = db.enter_defense_list(lists)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
 ################################################################################################################
 
 # 添加api资源
@@ -943,6 +959,7 @@ api.add_resource(DeleteNews, '/api/v1/delete_news', endpoint='seleteNews')
 api.add_resource(AddNews, '/api/v1/add_news', endpoint='addNews')
 api.add_resource(UpAnnounceFile, '/api/v1/up_announce_file', endpoint='upAnnounceFile')
 api.add_resource(DeleteAnnounceFile, "/api/v1/delete_announce_file", endpoint="deleteAnnounceFile")
+api.add_resource(EnterDefenseList, '/api/v1/enter_defense_list', endpoint='enterDefenseList')
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", debug=True)
