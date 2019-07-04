@@ -287,6 +287,11 @@ class DbOperate:
 
             print("duan4")
             if review and review['status'] == 0:
+                score = self.to_int(score)
+                if score>100:
+                    score = 100
+                if score<0:
+                    score = 0
                 review['score'] = score
                 review['suggestion'] = suggestion
                 review['status'] = 2
@@ -926,6 +931,20 @@ class DbOperate:
             return res
         return res
 
+    '''
+    辅助函数：字符串转整形
+    '''
+    def to_int(self, str0):
+        try:
+            int(str0)
+            return int(str0)
+        except ValueError:  # 报类型错误，说明不是整型的
+            try:
+                float(str0)  # 用这个来验证，是不是浮点字符串
+                return int(float(str0))
+            except ValueError:  # 如果报错，说明即不是浮点，也不是int字符串。   是一个真正的字符串
+                return 0
+
 ##############################################################################################
     
     '''
@@ -956,7 +975,7 @@ class DbOperate:
     '''
     用户修改信息
     '''
-    def change_info(self, mail, user_name, realm):
+    def change_info(self, mail, user_name, field):
         res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
         try:
             user = self.getCol('user')
@@ -966,7 +985,7 @@ class DbOperate:
                 return res
             if finded_user['user_type']=='expert':
                 user.update_one({'mail': mail}, {
-                            "$set": {'username': user_name, 'realm':realm}})
+                            "$set": {'username': user_name, 'field':field}})
             else:
                 user.update_one({'mail':mail},{"$set":{'username':user_name}})
             res['state'] = 'success'
@@ -988,10 +1007,10 @@ class DbOperate:
                 return res
             res['username'] = finded_user['username'] 
             if finded_user['user_type'] == 'expert':
-                if not finded_user.get('realm'):
-                    res['realm'] = '000000'
+                if not finded_user.get('field'):
+                    res['field'] = '000000'
                 else:
-                    res['realm'] = finded_user['realm']
+                    res['field'] = finded_user['field']
             res['state'] = 'success'
             res['reason'] = ''
             return res
@@ -1395,16 +1414,15 @@ class DbOperate:
     '''
     def upload_review_form(self, competition_id, code_award_list):
         project_collection = self.getCol('project')
-        com_collection = self.getCol('competition')
         res = {'state': 'fail', 'reason': '网络出错或BUG出现！'}
         try:
             # 清空之前的评判结果
-            project_collection.update({'project_status': {'$gt': 3}, 'competition_id': competition_id}, {'$set': {'project_status': 3}})
+            project_collection.update({'project_status': {'$gt': 3}}, {'$set': {'project_status': 3}})
             for item in code_award_list:
-                code = item[0]
+                code = str(item[0])
                 award = self.award2status(item[1])
-                project_collection.update_one({'project_code': code, 'competition_id': competition_id},
-                                          { '$set': {'project_status': award}})
+                project_collection.update({'project_code': code}, {'$set': {'project_status': award}})
+                print(project_collection.update({'project_code': code}, { '$set': {'project_status': award}}))
             res['state'] = 'success'
         except Exception as e:
             print(str(e))
@@ -1417,23 +1435,30 @@ class DbOperate:
     初审改变作品状态
     proj_id:项目id（字符串）   result:初审结果（字符串 'True' 'False'）
     '''
-    def first_trial_change(self, proj_id, result):
+    def first_trial_change(self, projlst):
         res = {'state': 'fail', 'reason': '网络出错或BUG出现！'}
         try:
             proj_list = self.getCol('project')
-            find_proj = proj_list.find_one({'project_code': proj_id}, {'_id': 1})
-            # 成功搜索到该项目
-            if find_proj:
-                if result == 'True':
-                    now_stat = 1
+            flag = True
+            for item in projlst:
+                proj_id = item['proj_id']
+                result = item['re']
+                find_proj = proj_list.find_one({'project_code': proj_id}, {'_id': 1})
+                # 成功搜索到该项目
+                if find_proj:
+                    if result == 'True':
+                        now_stat = 1
+                    else:
+                        now_stat = -1
+                    proj_list.update_one({"project_code": proj_id},
+                                         {"$set": {"project_status": now_stat}})
+                # 未搜索到该项目
                 else:
-                    now_stat = -1
-                proj_list.update_one({"project_code": proj_id},
-                                     {"$set": {"project_status": now_stat}})
+                    flag = False
+            if flag:
                 res['state'] = 'success'
-            # 未搜索到该项目
             else:
-                res['reason'] = '该项目不存在'
+                res['reason'] = '选择的项目列表有的不存在'
             return res
         except:
             return res
@@ -1481,7 +1506,7 @@ class DbOperate:
             return res
 
 
-    '''
+    '''{
     录入现场答辩名单
     '''
     def enter_defense_list(self, project_list):
@@ -1505,6 +1530,7 @@ class DbOperate:
             return res
         except:
             return res
+
 #######################################################################################################################
     '''
     校团委新建竞赛
@@ -1555,3 +1581,20 @@ class DbOperate:
             pass
         finally:
             return res
+
+    def delete_expert(self, expert_mail):
+        res = {'state': 'fail', 'reason': '网络出错或未知原因！'}
+        try:
+            expert = self.getCol('user').find_one({'mail': expert_mail, 'user_type': 'expert'})
+            if expert:
+                self.getCol('user').remove({'mail': expert_mail, 'user_type': 'expert'})
+                res['state'] = 'success'
+                res['reason'] = '删除成功'
+            else:
+                res['state'] = 'fail'
+                res['reason'] = '未找到该专家'
+        except:
+            pass
+        finally:
+            return res
+
