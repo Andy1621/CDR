@@ -1091,6 +1091,20 @@ class GetCompetitionDetail(Resource):
         finally:
             return jsonify(res)
 
+'''
+校团委删除专家
+'''
+class DeleteExpert(Resource):
+    def post(self):
+        res = {"state": "fail", "reason": "网络错误或未知错误"}
+        try:
+            data = request.get_json()
+            expert_mail = data.get('expert_mail')
+            res = db.delete_expert(expert_mail)
+        except:
+            pass
+        finally:
+            return jsonify(res)
 ################################################################################################################
 
 # 添加api资源
@@ -1140,6 +1154,7 @@ api.add_resource(UploadReviewForm, '/api/v1/uploadreviewform', endpoint='uploadr
 api.add_resource(GetCompetitionDetail, '/api/v1/get_competition_detail', endpoint="getCompetitionDetail")
 api.add_resource(CheckXlsxHeader, '/api/v1/check_xlsx_header', endpoint="checkXlsxHeader")
 api.add_resource(GetExpertList, '/api/v1/get_expert_list', endpoint="getExpertList")
+api.add_resource(DeleteExpert, '/api/v1/delete_expert', endpoint="deleteExpert")
 
 if __name__ == "__main__":
     begin_job()

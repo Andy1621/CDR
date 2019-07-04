@@ -175,37 +175,37 @@
                                         }
                                     }
                                 }, '邀请专家'),
-                                h('Button', {
-                                    props: {
-                                        type: 'primary',
-                                        size: 'small',
-                                    },
-                                    style: {
-                                        marginRight: '5px',
-                                        display: (this.role === 'school' && params.row.com_status == "专家初评")? '' :'none',
-                                    },
-                                    on: {
-                                        click: () => {
-                                            let param = {'comp_id': params.row.competition_id};
-                                            this.$http.post(this.$baseURL + "/api/v1/remind_export",params,{
-                                                headers:{
-                                                    'Content-Type':"application/json",
-                                                }
-                                            }).then(function (res) {
-                                                var detail = res.body.state
-                                                console.log(detail);
-                                                if(detail =="fail"){
-                                                    this.$Notice.open({title: "发送失败",duration:0.5});
-                                                }
-                                                else{
-                                                    this.$Notice.open({title: "发送成功",duration:0.5});
-                                                }
-                                            }, function (res) {
-                                                alert(res);
-                                            });
-                                        }
-                                    }
-                                }, 'gkd'),
+                                // h('Button', {
+                                //     props: {
+                                //         type: 'primary',
+                                //         size: 'small',
+                                //     },
+                                //     style: {
+                                //         marginRight: '5px',
+                                //         display: (this.role === 'school' && params.row.com_status == "专家初评")? '' :'none',
+                                //     },
+                                //     on: {
+                                //         click: () => {
+                                //             let param = {'comp_id': params.row.competition_id};
+                                //             this.$http.post(this.$baseURL + "/api/v1/remind_expert",param,{
+                                //                 headers:{
+                                //                     'Content-Type':"application/json",
+                                //                 }
+                                //             }).then(function (res) {
+                                //                 var detail = res.body.state
+                                //                 console.log(detail);
+                                //                 if(detail =="fail"){
+                                //                     this.$Notice.open({title: "发送失败",duration:0.5});
+                                //                 }
+                                //                 else{
+                                //                     this.$Notice.open({title: "发送成功",duration:0.5});
+                                //                 }
+                                //             }, function (res) {
+                                //                 alert(res);
+                                //             });
+                                //         }
+                                //     }
+                                // }, 'gkd'),
                                 h('div', [
                                     h('Upload', {
                                         props: {

@@ -471,7 +471,7 @@ class DbOperate:
         res = {'state': 'fail', 'reason': "表头出错"}
         try:
             if len(header) == 3:
-                if header[0] == "name" and header[1] == "email" and header[2] == "area":
+                if header[0] == "name" and header[1] == "email" and header[2] == "field":
                     res['state'] = 'success'
                     res['reason'] = None
                 else:
@@ -754,7 +754,7 @@ class DbOperate:
         try:
             comp_list = self.getCol('competition')
             comp = comp_list.find_one({'_id': ObjectId(comp_id), 'com_status': 2}, {'expert_comments_ddl': 1, 'competition_name': 1})
-            ddl = datetime.datetime.strptime(comp['expert_comments_ddl'], '%Y%m%d-%H:%M:%S')
+            ddl = datetime.datetime.strptime(comp['expert_comments_ddl'], '%Y-%m-%d %H:%M:%S')
             comp_name = comp['competition_name']
             now_plus_1 = datetime.datetime.today() + datetime.timedelta(days=1)
             now_plus_6 = datetime.datetime.today() + datetime.timedelta(days=6)
@@ -847,7 +847,7 @@ class DbOperate:
         return res
 
     '''
-    对于某个项目，返回邀请过和未邀请的专家列表
+    对于某个项目，返回邀请过的专家列表
     '''
     def get_project_expert_list(self, project_code):
         res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
@@ -865,13 +865,7 @@ class DbOperate:
             for item0 in list_invited:
                 res_invited.append(item0)
                 invited.append(item0['expert_mail'])
-            list_all = user.find({'user_type': 'expert'}, {"_id": 0, "mail": 1, "username": 1, 'field': 1})
-            list_uninvited = []
-            for item1 in list_all:
-                if item1['mail'] not in invited:
-                    list_uninvited.append(item1)
             res['list_invited'] = res_invited
-            res['list_uninvited'] = list_uninvited
             res['state'] = 'success'
         except:
             return res
@@ -908,7 +902,7 @@ class DbOperate:
                 if item['status'] == 2:
                     res['cnt_all'] += 1
                     res['cnt_reviewed'] += 1
-                    res['score_sum'] += item['score']
+                    res['score_sum'] += int(item['score'])
             return res
         except:
             return res
@@ -923,7 +917,7 @@ class DbOperate:
             list_all = user.find({'user_type': 'expert'}, {"_id": 0, "mail": 1, "username": 1, 'field': 1})
             res_list = []
             for item in list_all:
-                res_list.append({"mail": item["mail"], "username": item['username'], 'field': item['field']})
+                res_list.append({"email": item["mail"], "name": item['username'], 'field': item['field']})
             res["list"] = res_list
             res['state'] = 'success'
         except:
@@ -1161,7 +1155,7 @@ class DbOperate:
             0: '已提交',
             1: '通过初审',
             2: '凉凉',
-            3: '进入现场答辩',
+            3: '现场答辩',
             4: '优秀奖',
             5: '三等奖',
             6: '二等奖',
@@ -1302,7 +1296,9 @@ class DbOperate:
             project_code = project['project_code']
             res = self.get_review_info(project_code)
             try:
-                score = res['score_num']/res['cnt_reviewed']
+                score = res['score_sum']/res['cnt_reviewed']
+                print(res['score_sum'])
+                print(res['cnt_reviewed'])
             except:
                 score = 0
             finally:
@@ -1581,3 +1577,21 @@ class DbOperate:
             pass
         finally:
             return res
+
+    def delete_expert(self, expert_mail):
+        res = {'state': 'fail', 'reason': '网络出错或未知原因！'}
+        try:
+            expert = self.getCol('user').find_one({'mail': expert_mail, 'user_type': 'expert'})
+            if expert:
+                self.getCol('user').remove({'mail': expert_mail, 'user_type': 'expert'})
+                self.getCol('expert_project').remove({'expert_mail': expert_mail})
+                res['state'] = 'success'
+                res['reason'] = '删除成功'
+            else:
+                res['state'] = 'fail'
+                res['reason'] = '未找到该专家'
+        except:
+            pass
+        finally:
+            return res
+
