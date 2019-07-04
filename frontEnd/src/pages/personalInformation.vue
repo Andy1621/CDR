@@ -17,7 +17,7 @@
                     <b>领域</b>
                 </Col>
                 <Col span="20">
-                    <CheckboxGroup v-model="realm" >
+                    <CheckboxGroup v-model="field" >
                         <Checkbox label="A" size="large" :disabled="disabled">机械与控制（包括机械、仪器仪表、自动化控
 制、工程、交通、建筑等）</Checkbox><br>
                         <Checkbox label="B" size="large" :disabled="disabled">信息技术（包括计算机、电信、通讯、电子等）</Checkbox><br>
@@ -89,10 +89,9 @@
                 // console.log(res.body)
                 this.username = res.body.username;
                 if(this.role === 'professor'){
-                    var rt = res.body.field;
-                    rt = rt.split('');
+                    var field = res.body.field;
                     for(var i = 0;i<6; i++){
-                        if (rt[i] === '1'){
+                        if (field[i] === '1'){
                             this.field.push(String.fromCharCode(65+i));
                         }
                     }
