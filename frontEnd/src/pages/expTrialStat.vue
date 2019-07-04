@@ -10,19 +10,15 @@
       </Breadcrumb>
     </div>
     <div class="body">
-      <h3>专家评审状况</h3>
-      <Table stripe border :columns="columns1" :data="rows1" height="450" ref="table"></Table>
-    </div>
-    <div class="body" style="width: 40%">
-      <h3>邀请专家</h3>
-      <Table stripe border :columns="columns2" :data="rows2" height="450" ref="table"></Table>
-      <Modal
-        v-model="detail"
-        title="评审结果详情"
-        width="500">
-        <p class="size"><b>专家评分：</b>{{score}}</p><br /><br />
-        <p class="size"><b>评审意见：</b>{{suggestion}}</p>
-      </Modal>
+        <h3>专家评审状况</h3>
+        <Table stripe border :columns="columns" :data="rows" height="450" ref="table"></Table>
+        <Modal
+            v-model="detail"
+            title="评审结果详情"
+            width="500">
+            <p class="size"><b>专家评分：</b>{{score}}</p><br /><br />
+            <p class="size"><b>评审意见：</b>{{suggestion}}</p>
+        </Modal>
     </div>
     <router-view v-if="isRouterAlive"></router-view>
   </div>
@@ -39,7 +35,7 @@
     inject: ['reload'],
     data(){
       return{
-        columns1: [
+        columns: [
           {
             title: '专家名称',
             key: 'username',
@@ -73,8 +69,8 @@
                     click: () => {
                       this.detail = true;
                       console.log(this.detail);
-                      this.score = this.rows1[params.index].score;
-                      this.suggestion = this.rows1[params.index].suggestion;
+                      this.score = this.rows[params.index].score;
+                      this.suggestion = this.rows[params.index].suggestion;
                     }
                   }
                 }, params.row.status=="已评审" ? '查看详情' : '')
@@ -82,63 +78,7 @@
             }
           }
         ],
-        columns2: [
-          {
-            title: '专家名称',
-            key: 'username',
-            width: 100
-          },
-          {
-            title: '专家邮箱',
-            key: 'mail'
-          },
-          {
-            title: '研究领域',
-            key: 'field',
-            width: 140
-          },
-          {
-            title: '操作',
-            key: 'oper',
-            width: 120,
-            align: 'center',
-            render: (h, params) => {
-              return h('div', [
-                h('Button', {
-                  props: {
-                    type: 'primary',
-                    size: 'small',
-                    disabled: this.button_able
-                  },
-                  style: {
-                    marginRight:'5px'
-                  },
-                  on: {
-                    click: () => {
-                      this.button_able = true;
-                      let param = {mail:this.rows2[params.index].mail, project_code:this.proj_id};
-                      this.$http.post(this.$baseURL + "/api/v1/invite_mail",param).then(function (res) {
-                        var detail = res.body.state;
-                        if(detail == "fail"){
-                          this.$Notice.open({title: "发送失败"});
-                          this.reload();
-                        }
-                        else{
-                          this.$Notice.open({title: "已发送邮件"});
-                          this.reload();
-                        }
-                      }, function (res) {
-                        alert(res);
-                      });
-                    }
-                  }
-                }, '发送评审邀请')
-              ])
-            }
-          }
-        ],
-        rows1: [],
-        rows2: [],
+        rows: [],
         detail: false,
         proj_id: '0001',
         score: 1,
@@ -181,8 +121,7 @@
                   break;
               }
             }
-            this.rows1 = res.body.list_invited;
-            this.rows2 = res.body.list_uninvited;
+            this.rows = res.body.list_invited;
           }
         }, function (res) {
           alert(res);

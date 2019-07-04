@@ -48,7 +48,7 @@
                             <p>发布时间：{{newsDetail.time}}</p>
                         </Col>
                     </Row>
-                    <p style="font-size: 16px; margin: 20px;">{{newsDetail.content}}</p>
+                    <p style="font-size: 16px; margin: 20px;" v-html="newsDetail.content"></p>
                     <Divider style="margin: 10px 0 20px 0;"/>
                     <div v-if="newsDetail.files!=''">
                         <p style="margin-left: 40px; font-size: 16px">附件下载：</p>

@@ -851,6 +851,39 @@ class ExpertSetPassword(Resource):
 
 
 '''
+提醒专家评审
+'''
+class RemindExpert(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            comp_id = data.get('comp_id')
+            res = db.remind_expert_mail(comp_id)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+
+'''
+作品退回
+'''
+class RejectProject(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            project_code = data.get('project_code')
+            res = db.remind_expert_mail(project_code)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+################################################################################################################
+
+'''
 用户修改密码
 '''
 class ChangePassword(Resource):
@@ -903,6 +936,7 @@ class GetUserInfo(Resource):
             return jsonify(res)
 
 
+
 '''
 录入现场答辩名单
 '''
@@ -913,6 +947,30 @@ class EnterDefenseList(Resource):
             data = request.get_json()
             lists = data.get('list')
             res = db.enter_defense_list(lists)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+#######################################################################################################################
+
+'''
+校团委新建竞赛
+'''
+class AddCompetition(Resource):
+    def post(self):
+        res = {"state": "fail", "reason": "网络错误或未知原因"}
+        try:
+            data = request.get_json()
+            competition_name = data.get('competition_name')
+            begin_time = data.get('begin_time')
+            submission_ddl = data.get('submission_ddl')
+            first_review_ddl = data.get('first_review_ddl')
+            expert_comments_ddl = data.get('expert_comments_ddl')
+            live_selection_ddl = data.get('live_selection_ddl')
+            end_time = data.get('end_time')
+            introduction = data.get('introduction')
+            res = db.add_competition(competition_name, begin_time, submission_ddl, first_review_ddl, expert_comments_ddl, live_selection_ddl, end_time, introduction)
         except:
             pass
         finally:
@@ -960,6 +1018,9 @@ api.add_resource(AddNews, '/api/v1/add_news', endpoint='addNews')
 api.add_resource(UpAnnounceFile, '/api/v1/up_announce_file', endpoint='upAnnounceFile')
 api.add_resource(DeleteAnnounceFile, "/api/v1/delete_announce_file", endpoint="deleteAnnounceFile")
 api.add_resource(EnterDefenseList, '/api/v1/enter_defense_list', endpoint='enterDefenseList')
+api.add_resource(AddCompetition, '/api/v1/add_competition', endpoint="addCompetition")
+api.add_resource(RemindExpert, '/api/v1/remind_expert', endpoint="remindExpert")
+api.add_resource(RejectProject, '/api/v1/reject_project', endpoint="rejectProject")
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", debug=True)
