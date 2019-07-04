@@ -640,6 +640,25 @@ class DeleteNews(Resource):
             pass
         finally:
             return jsonify(res)
+
+
+'''
+检查专家信息表头
+参数：
+    表头header
+'''
+class CheckXlsxHeader(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            header = data.get('header')
+            res = db.check_xlsx_header(header)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
 #######################################################################################################################
 """
 登录
@@ -1103,6 +1122,7 @@ api.add_resource(RemindExpert, '/api/v1/remind_expert', endpoint="remindExpert")
 api.add_resource(RejectProject, '/api/v1/reject_project', endpoint="rejectProject")
 api.add_resource(UploadReviewForm, '/api/v1/uploadreviewform', endpoint='uploadreviewform')
 api.add_resource(GetCompetitionDetail, '/api/v1/get_competition_detail', endpoint="getCompetitionDetail")
+api.add_resource(CheckXlsxHeader, '/api/v1/check_xlsx_header', endpoint="checkXlsxHeader")
 
 if __name__ == "__main__":
     begin_job()

@@ -440,7 +440,6 @@ class DbOperate:
     '''
     获取公告详情
     '''
-
     def get_news_detail(self, news_id):
         res = {'state': 'fail', 'reason': "未知错误"}
         try:
@@ -455,6 +454,25 @@ class DbOperate:
                 res['news_detail'] = news_detail
             else:
                 res['reason'] = '未找到该消息'
+        except:
+            pass
+        finally:
+            return res
+
+    '''
+    检查专家信息表头
+    '''
+    def check_xlsx_header(self, header):
+        res = {'state': 'fail', 'reason': "表头出错"}
+        try:
+            if len(header) == 3:
+                if header[0] == "name" and header[1] == "email" and header[2] == "area":
+                    res['state'] = 'success'
+                    res['reason'] = None
+                else:
+                    res['reason'] = "表头字段内容不符规范"
+            else:
+                res['reason'] = "表头字段缺少或冗余"
         except:
             pass
         finally:
