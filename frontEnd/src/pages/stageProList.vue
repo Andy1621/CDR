@@ -14,13 +14,21 @@
         <Step :title=t[1]  @click.native="jump(1)"></Step>
         <Step :title=t[2]  @click.native="jump(2)"></Step>
         <Step :title=t[3]  @click.native="jump(3)"></Step>
-        <Step :title=t[0]  @click.native="jump(4)"></Step>
+        <Step :title=t[4]  @click.native="jump(4)"></Step>
       </Steps>
-      <Table stripe border :columns="columns" :data="rows" ref="selection" style="margin-right: 9%;margin-left:6%"
-      @on-select-all="selectAll" @on-selection-change="selectionChange"></Table>
-      <div v-if="com_status==1" style="background-color: #6ecadc;margin-top: 10px;width:85%;margin-left: 6%;border-radius: 3px;height:40px;
+      <Table  stripe border :columns="columns" :data="rows" ref="selection" style="margin-right: 9%;margin-left:6%"
+              @on-selection-change="selectionChange"></Table>
+      <!--<Table v-show="current==2" stripe border :columns="columns" :data="A_list" ref="selection" style="margin-right: 9%;margin-left:6%"-->
+             <!--@on-select-all="selectAll" @on-selection-change="selectionChange"></Table>-->
+      <!--<Table v-show="current==3" stripe border :columns="columns" :data="B_list" ref="selection" style="margin-right: 9%;margin-left:6%"-->
+             <!--@on-select-all="selectAll" @on-selection-change="selectionChange"></Table>-->
+      <!--<Table v-show="current==4" stripe border :columns="columns" :data="C_list" ref="selection" style="margin-right: 9%;margin-left:6%"-->
+             <!--@on-select-all="selectAll" @on-selection-change="selectionChange"></Table>-->
+      <!--<Table v-show="current==5" stripe border :columns="columns" :data="D_list" ref="selection" style="margin-right: 9%;margin-left:6%"-->
+             <!--@on-select-all="selectAll" @on-selection-change="selectionChange"></Table>-->
+      <div v-if="current==1&&com_status==1" style="background-color: #6ecadc;margin-top: 10px;width:85%;margin-left: 6%;border-radius: 3px;height:40px;
         line-height:40px;">
-        <span style="margin-left: 2%">已选中{{this.selectnum}}</span>
+        <span style="margin-left: 2%">已选中{{this.selectnum}} 项</span>
         <button style=";margin-left: 75%;background-color: red;border: none;width: 10%" @click="pass">通过</button>
       </div>
     </div>
@@ -37,7 +45,7 @@
       data(){
         return{
           btshow:[],
-          current:3,
+          current:-2,
           selectnum:0,
           selectItem:[],
           competition_id:'5d1862380a21e6053e46c958',//''5d170bd90a21e6053e45f3eb,
@@ -79,25 +87,29 @@
                     props: {
                       type: 'primary',
                       size: 'small',
-                      disabled:this.btshow[params.index]
+                      disabled:(this.com_status==0&&params.row.project_status=="编辑中")
                     },
                     style: {
-                      marginRight:'5px'
+                      marginRight:'5px',
+                      display:(this.com_status==4)?"none":"inline-block"
                     },
                     on: {
                       click: () => {
-                        if(this.current == 0) {
-                          this.$router.push({
-                            path: '/firstTrial',
-                            query: {
-                              competition_id:this.competition_id,
-                              competition_title:this.competition_title,
-                              projectID: params.row.project_code,
-
-                            }
-                          })
+                        if(this.current==0||this.current==1){
+                            this.check_table(params.row.project_code)
                         }
-                        else if(this.current == 1){
+                        // if(this.current == 1) {
+                        //   this.$router.push({
+                        //     path: '/firstTrial',
+                        //     query: {
+                        //       competition_id:this.competition_id,
+                        //       competition_title:this.competition_title,
+                        //       projectID: params.row.project_code,
+                        //
+                        //     }
+                        //   })
+                        // }
+                        else if(this.current == 2){
                           this.$router.push({
                             path: '/expTrialStat',
                             query: {
@@ -115,16 +127,35 @@
                     props: {
                       type: 'primary',
                       size: 'small',
+                      disabled:(params.row.project_status=="编辑中")
                     },
                     style: {
-                      marginRight:'5px'
+                      marginRight:'5px',
+                      display:(this.com_status==0||this.com_status==1)?"inline-block":"none"
+                    },
+                    on: {
+                      click: () => {
+                          if(this.com_status==0)
+                            this.rejectPro(params.row.project_code)
+                      }
+                    }
+                    },this.changeTitle()),
+                  h('Button', {
+                    props: {
+                      type: 'error',
+                      size: 'small',
+                      disabled:(params.row.project_status=="编辑中")
+                    },
+                    style: {
+                      marginRight:'5px',
+                      display:(this.com_status==1&&this.current==1)?"inline-block":"none"
                     },
                     on: {
                       click: () => {
 
                       }
                     }
-                  }, this.current == -1?'退回':'通过'),
+                  },'拒绝'),
                 ])
               }
             },
@@ -142,8 +173,13 @@
         this.getProList();
       },
       methods:{
-        selectAll(data){
-          this.selectnum = data.length;
+        changeTitle(){
+            if(this.com_status ==0 && this.current==0){
+              return "退回"
+            }
+          if(this.com_status ==1 && this.current==1){
+            return "下载附件"
+          }
         },
         selectionChange(data){
           this.selectnum=0;
@@ -152,6 +188,40 @@
           for(var i of data){
             this.selectItem.push({'proj_id':i.project_code,'re':'True'})
           }
+        },
+        rejectPro(id){
+          let params = {'project_code':id};
+          this.$http.post(this.$baseURL + "/api/v1/reject_project",params,{
+            headers:{
+              'Content-Type':"application/json",
+            }
+          }).then(function (res) {
+            var detail = (res.body.state);
+            console.log(detail);
+            if(detail =="fail"){
+              this.$Notice.open({title: "退回失败",duration:0.5});
+            }
+            else{
+              this.$Notice.open({title: "退回完成",duration:0.5});
+            }
+          }, function (res) {
+            alert(res);
+          });
+        },
+        check_table(id){
+          this.$http.get(this.$baseURL + '/api/v1/view_apply',{params:{'project_code': id}})
+            .then(function (res) {
+              var detail = res.body
+              console.log(detail)
+              if(detail.state == 'fail'){
+                this.$Message.error(detail.reason)
+              }
+              else{
+                window.open(detail.html_url)
+              }
+            },function (res) {
+              this.$Message.error('Failed')
+            })
         },
         getProList(){
           let params = {'competition_id':this.competition_id};
@@ -209,7 +279,8 @@
           }
           for(let item of this.rows){
             if(item.project_status=="编辑中"){
-              this.btshow.push(true)
+              this.btshow.push(true);
+              //item._disabled = true;
             }
             else
               this.btshow.push(false)
@@ -232,7 +303,7 @@
             var detail = (res.body.state);
             console.log(detail);
             if(detail =="fail"){
-              this.$Message.info("评审失败")
+              this.$Notice.open({title: "评审失败",duration:0.5});
             }
             else{
               this.$Notice.open({title: "评审完成",duration:0.5});
