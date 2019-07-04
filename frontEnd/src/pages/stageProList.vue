@@ -80,7 +80,7 @@
                     props: {
                       type: 'primary',
                       size: 'small',
-                      disabled:(this.com_status==0&&params.row.project_status=="编辑中")
+                      disabled:(params.row.project_status=="编辑中")
                     },
                     style: {
                       marginRight:'5px',
@@ -255,7 +255,7 @@
             if(this.columns[this.columns.length-1].type!="selection"){this.columns.push(this.select);}
           }
           else{
-            this.columns.pop();
+            if(this.columns[this.columns.length-1].type=="selection"){this.columns.pop();}
           }
           if(this.btshow.length>0){
             this.btshow.length = 0;
@@ -278,14 +278,17 @@
               break;
           }
           for(let item of this.rows){
-            if(this.com_status==1){
-              if(item.project_status!="已提交") item._disabled = true;
+            if(this.current==1){
+              if(this.com_status==1){
+                if(item.project_status!="已提交") item._disabled = true;
+              }
+              else{item._disabled = true;}
             }
-            else if(this.com_status==3){
-                if(this.current==1) item._disabled = true;
-                if(this.current==3) {
-                  if(item.project_status!="通过初审") item._disabled = true;
-                }
+            else if(this.current==3){
+              if(this.com_status==3) {
+                if (item.project_status != "通过初审") item._disabled = true;
+              }
+              else{item._disabled = true;}
             }
             // if(item.project_status=="编辑中"){
             //   this.btshow.push(true);
