@@ -912,8 +912,8 @@ class ChangeInfo(Resource):
             data = request.get_json()
             mail = data.get('mail')
             user_name = data.get('username')
-            realm = data.get('realm')
-            res = db.change_info(mail, user_name, realm)
+            field = data.get('field')
+            res = db.change_info(mail, user_name, field)
         except:
             pass
         finally:
