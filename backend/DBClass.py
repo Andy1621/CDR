@@ -1414,17 +1414,15 @@ class DbOperate:
     '''
     def upload_review_form(self, competition_id, code_award_list):
         project_collection = self.getCol('project')
-        com_collection = self.getCol('competition')
-        print(code_award_list)
         res = {'state': 'fail', 'reason': '网络出错或BUG出现！'}
         try:
             # 清空之前的评判结果
-            project_collection.update({'project_status': {'$gt': 3}, 'competition_id': competition_id}, {'$set': {'project_status': 3}})
+            project_collection.update({'project_status': {'$gt': 3}}, {'$set': {'project_status': 3}})
             for item in code_award_list:
-                code = item[0]
+                code = str(item[0])
                 award = self.award2status(item[1])
-                project_collection.update_one({'project_code': code, 'competition_id': competition_id},
-                                          { '$set': {'project_status': award}})
+                project_collection.update({'project_code': code}, {'$set': {'project_status': award}})
+                print(project_collection.update({'project_code': code}, { '$set': {'project_status': award}}))
             res['state'] = 'success'
         except Exception as e:
             print(str(e))

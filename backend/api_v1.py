@@ -773,10 +773,8 @@ class UploadReviewForm(Resource):
     def post(self):
         res = {'state': 'fail'}
         try:
-            data = request.get_json()
+            competition_id = request.form.get('competition_id')
             file = request.files.get('file')
-            competition_id = data.get('competition_id')
-            print(competition_id)
             f = file.read()
             code_award_list = []
             data = xlrd.open_workbook(file_contents=f)
@@ -784,7 +782,10 @@ class UploadReviewForm(Resource):
             nrows = table.nrows
             print('nrows', nrows)
             for row in range(1, nrows):
-                code = table.cell_value(row, 0)
+                try:
+                    code = int(table.cell_value(row, 0))
+                except:
+                    code = table.cell_value(row, 0)
                 award = table.cell_value(row, 3)
                 code_award_list.append((code, award))
             res = db.upload_review_form(competition_id, code_award_list)
