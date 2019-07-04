@@ -735,9 +735,13 @@ class DbOperate:
             ddl = datetime.datetime.strptime(comp['expert_comments_ddl'], '%Y%m%d-%H:%M:%S')
             comp_name = comp['competition_name']
             now_plus_1 = datetime.datetime.today() + datetime.timedelta(days=1)
+            now_plus_6 = datetime.datetime.today() + datetime.timedelta(days=6)
             now_plus_7 = datetime.datetime.today() + datetime.timedelta(days=7)
             if now_plus_1 >= ddl:
                 beford_ddl = 1
+            elif now_plus_6 >= ddl:
+                res['reason'] = '距离截止日期在1天和7天之间，不需要发送'
+                return res
             elif now_plus_7 >= ddl:
                 beford_ddl = 7
             else:
