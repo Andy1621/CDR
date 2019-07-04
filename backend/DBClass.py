@@ -908,6 +908,24 @@ class DbOperate:
         except:
             return res
 
+    '''
+    辅助函数：返回专家列表
+    '''
+    def get_expert_list(self):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
+            user = self.getCol('user')
+            list_all = user.find({'user_type': 'expert'}, {"_id": 0, "mail": 1, "username": 1, 'field': 1})
+            res_list = []
+            for item in list_all:
+                res_list.append({"mail": item["mail"], "username": item['username'], 'field': item['field']})
+            res["list"] = res_list
+            res['state'] = 'success'
+        except:
+            res["list"] = []
+            return res
+        return res
+
 ##############################################################################################
     
     '''
@@ -1307,11 +1325,11 @@ class DbOperate:
                 # 当前状态是初审
                 elif com_status == 1:
                     res['E_List'] = self.rule_other_E(copy.deepcopy(projects))
-                    res['A_List'] = self.rule_A(copy.deepcopy(projects))
+                    res['A_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 0 or x['project_status']== -2, copy.deepcopy(projects))))
                 # 当前状态是初评
                 elif com_status == 2:
                     res['E_List'] = self.rule_other_E(copy.deepcopy(projects))
-                    res['A_List'] = self.rule_A(copy.deepcopy(projects))
+                    res['A_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 0 or x['project_status']== -2, copy.deepcopy(projects))))
                     res['B_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
                 # 当前状态是筛选并现场答辩
                 elif com_status == 3:
