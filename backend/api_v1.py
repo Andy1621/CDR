@@ -550,6 +550,33 @@ class AcceptReview(Resource):
 
 
 '''
+（AOE）接受评审
+参数：
+    项目编号project_code
+    专家邮箱expert_email  
+'''
+class MultiAcceptReview(Resource):
+    def get(self):
+        res = {"state": "fail", 'cnt': 0}
+        try:
+            data = request.args
+            project_codes = data.get('project_code')
+            expert_emails = data.get('expert_email')
+            mail_list = expert_emails.strip().split("|")
+            for expert_email in mail_list:
+                if expert_email == "":
+                    continue
+                res0 = db.multi_accept_review(project_codes, expert_email)
+                res['cnt'] += res0['cnt']
+            if res['cnt'] > 0:
+                res['state'] = 'success'
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+
+'''
 拒绝评审
 参数：
     项目编号project_code
@@ -567,6 +594,34 @@ class RefuseReview(Resource):
             pass
         finally:
             return jsonify(res)
+
+
+'''
+（AOE）拒绝评审
+参数：
+    项目编号project_code
+    专家邮箱expert_email  
+'''
+class MultiRefuseReview(Resource):
+    def get(self):
+        res = {"state": "fail"}
+        try:
+            data = request.args
+            project_codes = data.get('project_code')
+            expert_emails = data.get('expert_email')
+            mail_list = expert_emails.strip().split("|")
+            for expert_email in mail_list:
+                if expert_email == "":
+                    continue
+                res0 = db.multi_refuse_review(project_codes, expert_email)
+                res['cnt'] += res0['cnt']
+            if res['cnt'] > 0:
+                res['state'] = 'success'
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
 
 '''
 新增公告
@@ -867,6 +922,28 @@ class InviteMail(Resource):
             return jsonify(res)
 
 '''
+(AOE)邀请专家并插入关系
+'''
+class MultiInviteMail(Resource):
+    def post(self):
+        res = {"state": "fail", 'cnt': 0}
+        try:
+            data = request.get_json()
+            mails = data.get('mails')
+            project_codes = data.get('project_codes')
+            for mail in mails:
+                res1 = db.multi_invite_mail(mail, project_codes)
+                if res1['state'] == 'success':
+                    db.multi_add_proj_exp(mail, project_codes)
+                    res['cnt'] += res1['cnt']
+            else:
+                return jsonify(res)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+'''
 检查邮箱和邀请码
 '''
 class CheckCode(Resource):
@@ -1131,12 +1208,15 @@ api.add_resource(SubmitReview, '/api/v1/submit_review', endpoint='submitReview')
 api.add_resource(StoreReview, '/api/v1/store_review', endpoint='storeReview')
 api.add_resource(AcceptReview, '/api/v1/accept_review', endpoint='acceptReview')
 api.add_resource(RefuseReview, '/api/v1/refuse_review', endpoint='refuseReview')
+api.add_resource(MultiAcceptReview, '/api/v1/multi_accept_review', endpoint='multiAcceptReview')
+api.add_resource(MultiRefuseReview, '/api/v1/multi_refuse_review', endpoint='multiRefuseReview')
 api.add_resource(GetReview, '/api/v1/get_review', endpoint='getReview')
 api.add_resource(CheckCode, '/api/v1/check_code', endpoint='check_code')
 api.add_resource(ExpertSetPassword, '/api/v1/expert_set_password', endpoint='expert_set_password')
 api.add_resource(ChangePassword, '/api/v1/change_password', endpoint='change_password')
 api.add_resource(ChangeInfo, '/api/v1/change_info', endpoint='change_info')
 api.add_resource(InviteMail, '/api/v1/invite_mail', endpoint='invite_mail')
+api.add_resource(MultiInviteMail, '/api/v1/multi_invite_mail', endpoint='multi_invite_mail')
 api.add_resource(ContestList, '/api/v1/contestlist', endpoint='contestlist')
 api.add_resource(ChangeCompStat, '/api/v1/changeCompStat', endpoint='changeCompStat')
 api.add_resource(GetUserInfo, '/api/v1/get_user_info', endpoint='getUserInfo')

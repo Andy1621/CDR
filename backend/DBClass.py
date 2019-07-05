@@ -350,6 +350,30 @@ class DbOperate:
             return res
 
     '''
+    （AOE）接受评审
+    '''
+    def multi_accept_review(self, project_codes, expert_email):
+        res = {'state': 'fail', 'reason': "未知错误", 'cnt': 0}
+        try:
+            for project_code in project_codes:
+                review = self.getCol('expert_project').find_one({'project_code': project_code,
+                                                                 'expert_mail': expert_email})
+                if review and review['status'] == -1:
+                    review['status'] = 0
+                    self.getCol('expert_project').update_one({'project_code': project_code,
+                                                              'expert_mail': expert_email}, {'$set': review})
+                    res['cnt'] += 1
+                else:
+                    res['reason'] = "项目不存在或专家没有权利处理是否评审"
+            if res['cnt'] > 0:
+                res['state'] = 'success'
+                res['reason'] = ''
+        except:
+            pass
+        finally:
+            return res
+
+    '''
     拒绝评审
     '''
     def refuse_review(self, project_code, expert_email):
@@ -366,6 +390,30 @@ class DbOperate:
                 res['reason'] = ''
             else:
                 res['reason'] = "项目不存在或专家没有权利处理是否评审"
+        except:
+            pass
+        finally:
+            return res
+
+    '''
+    （AOE）拒绝评审
+    '''
+    def multi_refuse_review(self, project_codes, expert_email):
+        res = {'state': 'fail', 'reason': "未知错误", 'cnt': 0}
+        try:
+            for project_code in project_codes:
+                review = self.getCol('expert_project').find_one({'project_code': project_code,
+                                                                 'expert_mail': expert_email})
+                if review and review['status'] == -1:
+                    review['status'] = 1
+                    self.getCol('expert_project').update_one({'project_code': project_code,
+                                                              'expert_mail': expert_email}, {'$set': review})
+                    res['cnt'] += 1
+                else:
+                    res['reason'] = "项目不存在或专家没有权利处理是否评审"
+            if res['cnt'] > 0:
+                res['state'] = 'success'
+                res['reason'] = ''
         except:
             pass
         finally:
@@ -694,6 +742,30 @@ class DbOperate:
             return res
 
     '''
+    （AOE）添加项目-专家关系
+    '''
+    def multi_add_proj_exp(self, expert_email, project_codes):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
+        try:
+            user_list = self.getCol("user")
+            test = user_list.find_one({'mail': expert_email})
+            # 专家账号存在
+            if test:
+                name = test['username']
+                for project_code in project_codes:
+                    new_relation = {"project_code": project_code, "expert_mail": expert_email, "username": name,
+                                    "score": 0, "suggestion": "", "status": -1}
+                    exp_proj = self.getCol("expert_project")
+                    exp_proj.insert_one(new_relation)
+                res['state'] = 'success'
+            # 专家账号不存在
+            else:
+                res['reason'] = "专家账号不存在"
+            return res
+        except:
+            return res
+
+    '''
     向专家发送邀请邮件
     '''
     def invite_mail(self, mail, project_code):
@@ -734,6 +806,67 @@ class DbOperate:
             refuse_addr = "<a href=\"" + refuse_addr + "\">" + "拒绝评审" + "</a>"
             message = "<p>尊敬的 " + expert_name + " 先生/女士您好，\n</p>" + \
                       "<p>" + comp_name + "竞赛组委会诚邀您参与参赛项目\"" + project_name + "\"的评审工作。\n</p>" + \
+                      "<p>如果您接受此邀请，请点击链接: " + accept_addr + " 进入竞赛系统。\n</p>" + \
+                      "<p>如果您希望拒绝此邀请，请点击链接: " + refuse_addr + " 确认拒绝。\n</p>" + \
+                      "<p>衷心感谢您的付出和支持。\n</p>" + \
+                      "<p>----" + comp_name + "竞赛组委会\n</p>"
+            if self.send_mail(mail, header, message) is False:
+                res['reason'] = "邮件发送失败"
+                return res
+            res['state'] = 'success'
+        except:
+            return res
+        return res
+
+    '''
+    （AOE）向专家发送邀请邮件
+    '''
+    def multi_invite_mail(self, mail, project_codes):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!', 'cnt': 0}
+        try:
+            user = self.getCol('user')
+            expert = user.find_one({'user_type': 'expert', 'mail': mail})
+            if expert is None:
+                res['reason'] = "未找到专家"
+                return res
+            expert_name = expert["username"]
+            invitation_code = expert['invitation_code']
+            code_str = ""
+            project = self.getCol('project')
+            comp_code = ""
+            for project_code in project_codes:
+                pro = project.find_one({'project_code': project_code})
+                if pro is None:
+                    res['reason'] = "未找到项目"
+                    continue
+                res['cnt'] += 1
+                project_name = pro["project_name"]
+                comp_code = pro["competition_id"]
+                if code_str == "":
+                    code_str = project_code
+                else:
+                    code_str += "|" + project_code
+            competition = self.getCol('competition')
+            comp = competition.find_one({'_id': ObjectId(comp_code)})
+            if comp is None:
+                res['reason'] = "未找到竞赛"
+                return res
+            comp_name = comp["competition_name"]
+            header = comp_name + "项目评审邀请"
+            # front_ip = "http://localhost:8080"
+            front_ip = "http://114.116.189.128"
+            accept_addr = front_ip + "/#/?token=" + invitation_code + \
+                          "&email=" + mail + \
+                          "&project_code=" + code_str + "&is_accept=" + "true"
+            # accept_addr = "<a href=\"" + accept_addr + "\">" + accept_addr + "</a>"
+            accept_addr = "<a href=\"" + accept_addr + "\">" + "接受评审" + "</a>"
+            refuse_addr = front_ip + "/#/?token=" + invitation_code + \
+                          "&email=" + mail + \
+                          "&project_code=" + project_code + "&is_accept=" + "false"
+            # refuse_addr = "<a href=\"" + refuse_addr + "\">" + refuse_addr + "</a>"
+            refuse_addr = "<a href=\"" + refuse_addr + "\">" + "拒绝评审" + "</a>"
+            message = "<p>尊敬的 " + expert_name + " 先生/女士您好，\n</p>" + \
+                      "<p>" + comp_name + "竞赛组委会诚邀您参与参赛项目\"" + code_str + "\"的评审工作。\n</p>" + \
                       "<p>如果您接受此邀请，请点击链接: " + accept_addr + " 进入竞赛系统。\n</p>" + \
                       "<p>如果您希望拒绝此邀请，请点击链接: " + refuse_addr + " 确认拒绝。\n</p>" + \
                       "<p>衷心感谢您的付出和支持。\n</p>" + \
@@ -1359,7 +1492,7 @@ class DbOperate:
                     res['A_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
                     res['B_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
                     res['C_List'] = self.rule_DC(list(filter(lambda x: x['project_status'] >= 1, self.add_score_C(copy.deepcopy(projects)))))
-                    res['D_List'] = self.rule_D(list(filter(lambda x: x['project_status'] >= 3, copy.deepcopy(projects))))
+                    res['D_List'] = self.rule_D(list(filter(lambda x: x['project_status'] >= 4, copy.deepcopy(projects))))
             elif len(projects) == 0:
                 res['state'] = 'success'
                 res['reason'] = '竞赛作品列表为空'
