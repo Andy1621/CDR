@@ -18,11 +18,17 @@
     </Steps>
       <Table  stripe border :columns="columns" :data="rows" ref="selection" style="margin-right: 9%;margin-left:6%"
               @on-selection-change="selectionChange"></Table>
-      <div v-if="(current==1&&com_status==1)||(current==3&&com_status==3)" style="background-color: #9acfea;margin-top: 10px;width:85%;margin-left: 6%;border-radius: 3px;height:40px;
+      <div style="margin-right: 9%;margin-top:2%;overflow: hidden">
+        <div style="float: right;">
+          <Page :total="total_item" :current="pageNum" :page-size="pageSize"	 @on-change="changePage"></Page>
+        </div>
+      </div>
+      <div v-if="(current==1&&com_status==1)||(current==3&&com_status==3)" style="background-color: #9acfea;margin-top:1%;width:85%;margin-left: 6%;border-radius: 3px;height:40px;
         line-height:40px;">
         <span style="margin-left: 2%">已选中 {{this.selectnum}} 项</span>
         <button style=";margin-left: 75%;background-color: red;border: none;width: 10%" @click="pass(com_status)">通过</button>
       </div>
+
     </div>
   </div>
 </template>
@@ -36,7 +42,9 @@
       },
       data(){
         return{
-          btshow:[],
+          total_item:1,
+          pageSize:2,
+          pageNum:1,
           current:-2,
           selectnum:0,
           selectItem:[],
@@ -65,10 +73,6 @@
               title: '状态',
               key: 'project_status'
             },
-            // {
-            //   title: '评分',
-            //   key: 'score'
-            // },
             {
               title: '操作',
               key: 'oper',
@@ -91,17 +95,6 @@
                         if(this.current==0||this.current==1){
                             this.check_table(params.row.project_code)
                         }
-                        // if(this.current == 1) {
-                        //   this.$router.push({
-                        //     path: '/firstTrial',
-                        //     query: {
-                        //       competition_id:this.competition_id,
-                        //       competition_title:this.competition_title,
-                        //       projectID: params.row.project_code,
-                        //
-                        //     }
-                        //   })
-                        // }
                         else if(this.current == 2||this.current == 3){
                           this.$router.push({
                             path: '/expTrialStat',
@@ -287,31 +280,8 @@
             if(this.columns[3].key=='score'){this.columns.splice(3,1);}
           }
         },
-        changeList(){
-          this.selectnum = 0;
-          this.selectItem.length=0;
-          this.handelColumns();
-          // if(this.btshow.length>0){
-          //   this.btshow.length = 0;
-          // }
-          switch (this.current) {
-            case 0:
-              this.rows = this.E_list;
-              break;
-            case 1:
-              this.rows = this.A_list;
-              break;
-            case 2:
-              this.rows = this.B_list;
-              break;
-            case 3:
-              this.rows = this.C_list;
-              break;
-            case 4:
-              this.rows = this.D_list;
-              break;
-          }
-          for(let item of this.rows){
+        handleData(lst){
+          for(let item of lst){
             if(this.current==1){
               if(this.com_status==1){
                 if(item.project_status!="已提交") item._disabled = true;
@@ -324,12 +294,37 @@
               }
               else{item._disabled = true;}
             }
-            // if(item.project_status=="编辑中"){
-            //   this.btshow.push(true);
-            // }
-            // else
-            //   this.btshow.push(false)
           }
+        },
+        changeList(){
+          this.selectnum = 0;
+          this.selectItem.length=0;
+          this.handelColumns();
+          switch (this.current) {
+            case 0:
+              this.rows = this.E_list.slice(0,this.pageSize);
+              this.total_item = this.E_list.length;
+              break;
+            case 1:
+              this.handleData(this.A_list);
+              this.rows = this.A_list.slice(0,this.pageSize);
+              this.total_item = this.A_list.length;
+              break;
+            case 2:
+              this.rows = this.B_list.slice(0,this.pageSize);
+              this.total_item = this.B_list.length;
+              break;
+            case 3:
+              this.handleData(this.C_list);
+              this.rows = this.C_list.slice(0,this.pageSize);
+              this.total_item = this.C_list.length;
+              break;
+            case 4:
+              this.rows = this.D_list.slice(0,this.pageSize);
+              this.total_item = this.D_list.length;
+              break;
+          }
+          this.pageNum = 1;
         },
         jump(num){
           if(num != this.current && num <= this.com_status) {
@@ -358,6 +353,30 @@
           }, function (res) {
             alert(res);
           });
+        },
+        changePage(value){
+          this.pageNum = value;
+          let a = this.pageSize*(this.pageNum-1);
+          let b = this.pageSize*this.pageNum;
+          switch (this.current) {
+            case 0:
+              this.rows = this.E_list.slice(a,b);
+              break;
+            case 1:
+              this.rows = this.A_list.slice(a,b);
+              break;
+            case 2:
+              this.rows = this.B_list.slice(a,b);
+              break;
+            case 3:
+              this.rows = this.C_list.slice(a,b);
+              break;
+            case 4:
+              this.rows = this.D_list.slice(a,b);
+              break;
+          }
+          document.body.scrollTop = 0;
+          document.documentElement.scrollTop = 0;
         },
       }
     }

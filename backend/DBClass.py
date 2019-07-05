@@ -338,7 +338,6 @@ class DbOperate:
                                                              'expert_mail': expert_email})
             if review and review['status'] == -1:
                 review['status'] = 0
-                self.getCol('project').update_one({'project_code':project_code},{'$set'})
                 self.getCol('expert_project').update_one({'project_code': project_code,
                                                           'expert_mail': expert_email}, {'$set': review})
                 res['state'] = 'success'
@@ -1556,7 +1555,7 @@ class DbOperate:
             projects = []
             for item in project_collection.find({'competition_id': competition_id}, {'_id': 0}):
                 projects.append(item)
-            sorted(projects, key=lambda x: x['project_status'])
+            projects.sort(key=lambda x: x['project_status'], reverse=True)
             com_status = com_collection.find_one({'_id': ObjectId(competition_id)})['com_status']
             competition_name = com_collection.find_one({'_id': ObjectId(competition_id)})['competition_name']
             res['com_status'] = com_status

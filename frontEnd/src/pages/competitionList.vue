@@ -28,12 +28,12 @@
                         width: 250
                     },
                     {
-                        title: '开始时间',
+                        title: '报名开始时间',
                         key: 'begin_time',
                         width: 150
                     },
                     {
-                        title: '结束时间',
+                        title: '报名截止时间',
                         key: 'end_time',
                         width: 150
                     },
