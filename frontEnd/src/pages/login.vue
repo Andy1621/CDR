@@ -29,7 +29,7 @@
                         width="460"
                         :mask-closable="false"
                         @on-ok="ok">
-                        <LInput v-model="emailRegister" labelContent="邮箱：" :disabled="isProfessor?true:false"></LInput>
+                        <LInput v-model="emailRegister" labelContent="邮箱：" :disabled="isProfessor"></LInput>
                         <LInput v-model="passwordRegister" labelContent="密码：" inputType="password"></LInput>
                         <LInput v-model="passwordConform" labelContent="确认密码：" inputType="password"></LInput>
                         <br>
@@ -98,12 +98,12 @@
                     mail: route.email,
                     invitation_code: route.token,
                     project_code: route.project_code,
-                    is_accept: route.is_accept == 'true' ? true : false
+                    is_accept: route.is_accept === 'true'
                 }).then(function (res) {
                     console.log(res);
 
-                    if (res.body.state == 'fail') {
-                        alert('抱歉，系统出现问题，请稍后再试！');
+                    if (res.body.state === 'fail') {
+                        this.$Message.error('抱歉，系统出现问题，请稍后再试！');
                         return
                     }
                     if (!res.body.registered) {
@@ -119,7 +119,7 @@
                         messageContent[2] += '，您可以登录或者退出'
                         this.role = 'professor'
                     }
-                    alert(messageContent[res.body.old_status + 1])
+                    this.$Message.info(messageContent[res.body.old_status + 1])
                 }, function (res) {
                     console.log(res);
                 });
@@ -147,7 +147,7 @@
                             path: '/index',
                         });
                     } else {
-                        alert(res.body.reason)
+                        this.$Message.error(res.body.reason)
                     }
                 }, function (res) {
                     console.log(res)
@@ -155,7 +155,7 @@
             },
             ok: function () {
                 if (this.passwordRegister !== this.passwordConform) {
-                    alert("两次输入的密码不相同！");
+                    this.$Message.error("两次输入的密码不相同！");
                     return;
                 }
                 let data = {
@@ -169,9 +169,9 @@
                     phone: this.phone
                 };
                 this.$http.post(this.$baseURL + "/api/v1/registerstudent", data).then(function (res) {
-                    console.log(res)
+                    console.log(res);
                     if (res.body.state === 'fail') {
-                        alert(res.body.reason)
+                        this.$Message.error(res.body.reason)
                         return
                     }
                     this.$cookie.set('mail', this.emailRegister);
@@ -191,7 +191,7 @@
                     password: this.professorPasswordRegister
                 }
                 if (this.professorPasswordRegister !== this.professorPasswordConfirm) {
-                    alert("两次输入的密码不相同！");
+                    this.$Message.error("两次输入的密码不相同！");
                     return;
                 }
                 this.$http.post(url, data).then(function (res) {
