@@ -980,6 +980,46 @@ class DbOperate:
         return res
 
     '''
+    （AOE）检查邮箱和邀请码
+    '''
+    def multi_check_code(self, mail, invitation_code, project_codes, is_accept):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!', 'cnt': 0}
+        try:
+            user = self.getCol('user')
+            expert = user.find_one({'user_type': 'expert', 'mail': mail})
+            if expert is None:
+                res['reason'] = "未找到专家"
+                return res
+            if expert['invitation_code'] != invitation_code:
+                res['reason'] = "验证码错误"
+                return res
+            expert_project = self.getCol('expert_project')
+            for project_code in project_codes:
+                e_p = expert_project.find_one({'expert_mail': mail, 'project_code': project_code})
+                if e_p is None:
+                    res['reason'] = "未找到关系"
+                    continue
+                status = e_p['status']
+                if expert["password"] == "":
+                    res['registered'] = False
+                else:
+                    res['registered'] = True
+                res['old_status'] = status
+                if status == -1:
+                    if is_accept:
+                        new_status = 0
+                    else:
+                        new_status = 1
+                    expert_project.update_many({'expert_mail': mail, 'project_code': project_code},
+                                               {"$set": {'status': new_status}})
+                    res['cnt'] += 1
+            if res['cnt'] > 0:
+                res['state'] = 'success'
+        except:
+            return res
+        return res
+
+    '''
     对于某个项目，返回邀请过的专家列表
     '''
     def get_project_expert_list(self, project_code):

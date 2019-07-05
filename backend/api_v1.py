@@ -962,6 +962,29 @@ class CheckCode(Resource):
             return jsonify(res)
 
 '''
+（AOE）检查邮箱和邀请码
+'''
+class MultiCheckCode(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            mail = data.get('mail')
+            invitation_code = data.get('invitation_code')
+            project_codes = data.get('project_code').strip().split("|")
+            is_accept = data.get('is_accept')
+            for project_code in project_codes:
+                if project_code == "":
+                    continue
+                res["cnt"] += db.check_code(mail, invitation_code, project_code, is_accept)['cnt']
+            if res['cnt'] > 0:
+                res['state'] = 'success'
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+'''
 专家设置密码
 '''
 class ExpertSetPassword(Resource):
@@ -1212,6 +1235,7 @@ api.add_resource(MultiAcceptReview, '/api/v1/multi_accept_review', endpoint='mul
 api.add_resource(MultiRefuseReview, '/api/v1/multi_refuse_review', endpoint='multiRefuseReview')
 api.add_resource(GetReview, '/api/v1/get_review', endpoint='getReview')
 api.add_resource(CheckCode, '/api/v1/check_code', endpoint='check_code')
+api.add_resource(MultiCheckCode, '/api/v1/multi_check_code', endpoint='multi_check_code')
 api.add_resource(ExpertSetPassword, '/api/v1/expert_set_password', endpoint='expert_set_password')
 api.add_resource(ChangePassword, '/api/v1/change_password', endpoint='change_password')
 api.add_resource(ChangeInfo, '/api/v1/change_info', endpoint='change_info')
