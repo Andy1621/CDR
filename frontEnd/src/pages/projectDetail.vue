@@ -11,7 +11,7 @@
                 <Step title="评审打分" content="给出评价和分数" icon="ios-chatboxes" @click.native="current = 2"></Step>
             </Steps>
             <Divider/>
-            <div class="form" v-show="current == 0">
+            <div class="form" v-show="current === 0">
                 <Form ref="basicInfo" :model="basicInfo" :label-width="80">
                     <FormItem label="作品全称">
                         <Input v-model="basicInfo.title" readonly></Input>
@@ -142,7 +142,8 @@
             <div v-show="current==2">
                 <Form ref="reviewInfo" :model="reviewInfo" :label-width="80">
                     <FormItem label="评分">
-                        <Input type="number" v-model="reviewInfo.marks" :disabled="disable" placeholder="请输入评分，0-100"></Input>
+                        <Input type="number" v-model="reviewInfo.marks" :disabled="disable"
+                               placeholder="请输入评分，0-100"></Input>
                     </FormItem>
                     <FormItem label="评价">
                         <Input v-model="reviewInfo.comment" :disabled="disable" type="textarea"
@@ -417,17 +418,21 @@
         top: 43%;
         left: 44%;
     }
-    >>>.ivu-checkbox-input[disabled] {
+
+    >>> .ivu-checkbox-input[disabled] {
         cursor: default
     }
-    >>>.ivu-checkbox-disabled .ivu-checkbox-inner-input {
+
+    >>> .ivu-checkbox-disabled .ivu-checkbox-inner-input {
         cursor: default
     }
-    >>>.ivu-checkbox-disabled + span {
+
+    >>> .ivu-checkbox-disabled + span {
         color: #515a6e;
         cursor: default
     }
-    >>>.ivu-checkbox-wrapper-disabled {
+
+    >>> .ivu-checkbox-wrapper-disabled {
         cursor: default;
     }
 </style>
