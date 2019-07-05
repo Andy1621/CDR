@@ -206,28 +206,25 @@
                                 //         }
                                 //     }
                                 // }, 'gkd'),
-                                h('div', [
-                                    h('Upload', {
+                                h('Upload', {
+                                    props: {
+                                        action: this.$baseURL + '/api/v1/uploadreviewform',
+                                        data :{'competition_id': params.row.competition_id},
+                                        format: ['xls', 'xlsx']
+                                    },
+                                    style: {
+                                        display: (this.role === 'school' && params.row.com_status == "最终结果公布")? 'inline' :'none',
+                                    }
+                                }, [
+                                    h('Button', {
                                         props: {
-                                            action: this.$baseURL + '/api/v1/uploadreviewform',
-                                            data :{'competition_id': params.row.competition_id},
-                                            format: ['xls', 'xlsx']
+                                            type: 'primary',
+                                            size: 'small',
                                         },
                                         style: {
-                                            marginRight: '5px',
-                                            display: (this.role === 'school' && params.row.com_status == "最终结果公布")? '' :'none',
+
                                         }
-                                    }, [
-                                        h('Button', {
-                                            props: {
-                                                type: 'primary',
-                                                size: 'small',
-                                            },
-                                            style: {
-                                                marginRight: '5px',
-                                            }
-                                        }, '最终成绩导入')
-                                    ])
+                                    }, '最终成绩导入')
                                 ])
                             ])
                         }

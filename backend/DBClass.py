@@ -1619,7 +1619,7 @@ class DbOperate:
                     if result == 'True':
                         now_stat = 1
                     else:
-                        now_stat = -1
+                        now_stat = -2
                     proj_list.update_one({"project_code": proj_id},
                                          {"$set": {"project_status": now_stat}})
                 # 未搜索到该项目
