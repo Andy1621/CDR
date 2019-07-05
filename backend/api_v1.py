@@ -936,8 +936,10 @@ class MultiInviteMail(Resource):
                 if res1['state'] == 'success':
                     db.multi_add_proj_exp(mail, project_codes)
                     res['cnt'] += res1['cnt']
-            else:
-                return jsonify(res)
+                else:
+                    return jsonify(res)
+            if res['cnt'] > 0:
+                res['state'] = 'success'
         except:
             pass
         finally:
