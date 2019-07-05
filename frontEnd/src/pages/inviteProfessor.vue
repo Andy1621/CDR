@@ -59,32 +59,47 @@
                     {
                         title: '作品名称',
                         key: 'project_name',
-                        width: 370
+                        width: 340
                     },
                     {
-                        title: '查看作品',
-                        key: 'oper',
-                        width: 120,
-                        render: (h, params) => {
-                            return h('div', params.row.status == "已评审" ? [
-                                h('Button', {
-                                    props: {
-                                        type: 'primary',
-                                        size: 'small'
-                                    },
-                                    style: {
-                                        marginRight: '5px'
-                                    },
-                                    on: {
-                                        click: () => {
-                                            this.detail = true;
-                                            console.log(this.detail);
-                                            this.score = this.rows1[params.index].score;
-                                            this.suggestion = this.rows1[params.index].suggestion;
-                                        }
-                                    }
-                                }, params.row.status == "已评审" ? '查看详情' : '')
-                            ] : '不可操作')
+                        title: '已邀请的专家数',
+                        key: 'ac_exp_num',
+                        width: 150,
+                        filters: [
+                            {
+                              label:'0',
+                              value: 0
+                            },
+                            {
+                                label: '1',
+                                value: 1
+                            },
+                            {
+                                label: '2',
+                                value: 2
+                            },
+                            {
+                                label: '2',
+                                value: 3
+                            },
+                            {
+                                label: '3个以上',
+                                value: 4
+                            },
+                        ],
+                        filterMultiple: false,
+                        filterMethod (value, row) {
+                            if (value === 1) {
+                                return row.ac_exp_num === 1;
+                            } else if (value === 2) {
+                                return row.ac_exp_num === 2;
+                            } else if (value === 3) {
+                                return row.ac_exp_num === 3;
+                            } else if (value === 4) {
+                                return row.ac_exp_num > 3;
+                            } else if (value === 0) {
+                                return row.ac_exp_num === 0;
+                            }
                         }
                     },
                     {

@@ -808,7 +808,6 @@ class StageProList(Resource):
         try:
             data = request.get_json()
             competition_id = data.get('competition_id')
-            db = DbOperate()
             db.update_com_status(competition_id)
             res = db.get_contest_projects(competition_id)
         except Exception as e:
@@ -961,8 +960,6 @@ class MultiInviteMail(Resource):
                 if res1['state'] == 'success':
                     db.multi_add_proj_exp(mail, project_codes)
                     res['cnt'] += res1['cnt']
-                else:
-                    return jsonify(res)
             if res['cnt'] > 0:
                 res['state'] = 'success'
         except:
@@ -1290,4 +1287,4 @@ api.add_resource(ImportExpert, '/api/v1/import_expert', endpoint="importExpert")
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", debug=True)
-    begin_job()
+    # begin_job()

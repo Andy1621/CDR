@@ -93,6 +93,7 @@ class DbOperate:
                     'project_code': code,
                     'competition_id': competition_id,
                     'project_status': -1,
+                    'ac_exp_num': 0,
                     'registration_form': {'workCode': code, 'mainTitle': '',
                                           'department': '', 'mainType': '',
                                           'name': '', 'stuId': '', 'birthday': '',
@@ -409,6 +410,14 @@ class DbOperate:
                     review['status'] = 1
                     self.getCol('expert_project').update_one({'project_code': project_code,
                                                               'expert_mail': expert_email}, {'$set': review})
+                    project = self.getCol('project').find_one({'project_code':project_code})
+                    if project:
+                        if project['ac_exp_num'] is None or project['ac_exp_num'] == 0:
+                            res['reason'] = '一些奇怪的错误发生了！该项目没有专家评审。'
+                            return res
+                        ac_exp_num = project['ac_exp_num']
+                        ac_exp_num -= 1
+                        self.getCol('project').update_one({'project_code': project_code}, {'$set', {'ac_exp_num':ac_exp_num}})
                     res['cnt'] += 1
                 else:
                     res['reason'] = "项目不存在或专家没有权利处理是否评审"
@@ -817,6 +826,12 @@ class DbOperate:
             if pro is None:
                 res['reason'] = "未找到项目"
                 return res
+            try:
+                ac_exp_num = pro["ac_exp_num"]
+            except:
+                ac_exp_num = 0
+            ac_exp_num += 1
+            project.update_one({'project_code': project_code}, {'$set': {'ac_exp_num': ac_exp_num}})
             project_name = pro["project_name"]
             comp_code = pro["competition_id"]
             competition = self.getCol('competition')
@@ -876,6 +891,12 @@ class DbOperate:
                         res['reason'] = "未找到项目"
                         continue
                     res['cnt'] += 1
+                    try:
+                        ac_exp_num = pro["ac_exp_num"]
+                    except:
+                        ac_exp_num = 0
+                    ac_exp_num += 1
+                    project.update_one({'project_code': project_code}, {'$set': {'ac_exp_num': ac_exp_num}})
                     project_name = pro["project_name"]
                     comp_code = pro["competition_id"]
                     if code_str == "":
