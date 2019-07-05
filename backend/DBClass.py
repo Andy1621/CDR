@@ -1358,7 +1358,7 @@ class DbOperate:
                     res['A_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
                     res['B_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
                     res['C_List'] = self.rule_DC(list(filter(lambda x: x['project_status'] >= 1, self.add_score_C(copy.deepcopy(projects)))))
-                    res['D_List'] = self.rule_D(list(filter(lambda x: x['project_status'] >= 3, copy.deepcopy(projects))))
+                    res['D_List'] = self.rule_D(list(filter(lambda x: x['project_status'] >= 4, copy.deepcopy(projects))))
             elif len(projects) == 0:
                 res['state'] = 'success'
                 res['reason'] = '竞赛作品列表为空'
