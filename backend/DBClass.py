@@ -1005,7 +1005,7 @@ class DbOperate:
                 else:
                     res['registered'] = True
                 res['old_status'] = status
-                if status == -1:
+                if status == -1 or status == 1:
                     if is_accept:
                         new_status = 0
                     else:
