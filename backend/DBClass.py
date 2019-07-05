@@ -386,6 +386,18 @@ class DbOperate:
                 review['status'] = 1
                 self.getCol('expert_project').update_one({'project_code': project_code,
                                                           'expert_mail': expert_email}, {'$set': review})
+                project = self.getCol('project').find_one({'project_code': project_code})
+                if project:
+                    try:
+                        ac_exp_num = project['ac_exp_num']
+                    except:
+                        ac_exp_num = 0
+                    if ac_exp_num == 0:
+                        res['reason'] = '一些奇怪的错误发生了！该项目没有专家评审。'
+                        return res
+                    ac_exp_num -= 1
+                    self.getCol('project').update_one({'project_code': project_code},
+                                                      {'$set': {'ac_exp_num': ac_exp_num}})
                 res['state'] = 'success'
                 res['status'] = review['status']
                 res['reason'] = ''
@@ -409,14 +421,17 @@ class DbOperate:
                     review['status'] = 1
                     self.getCol('expert_project').update_one({'project_code': project_code,
                                                               'expert_mail': expert_email}, {'$set': review})
-                    project = self.getCol('project').find_one({'project_code':project_code})
+                    project = self.getCol('project').find_one({'project_code': project_code})
                     if project:
-                        if project['ac_exp_num'] is None or project['ac_exp_num'] == 0:
+                        try:
+                            ac_exp_num = project['ac_exp_num']
+                        except:
+                            ac_exp_num = 0
+                        if ac_exp_num == 0:
                             res['reason'] = '一些奇怪的错误发生了！该项目没有专家评审。'
                             return res
-                        ac_exp_num = project['ac_exp_num']
                         ac_exp_num -= 1
-                        self.getCol('project').update_one({'project_code': project_code}, {'$set', {'ac_exp_num':ac_exp_num}})
+                        self.getCol('project').update_one({'project_code': project_code}, {'$set': {'ac_exp_num': ac_exp_num}})
                     res['cnt'] += 1
                 else:
                     res['reason'] = "项目不存在或专家没有权利处理是否评审"
@@ -1028,6 +1043,18 @@ class DbOperate:
                     new_status = 0
                 else:
                     new_status = 1
+                    project = self.getCol('project').find_one({'project_code': project_code})
+                    if project:
+                        try:
+                            ac_exp_num = project['ac_exp_num']
+                        except:
+                            ac_exp_num = 0
+                        if ac_exp_num == 0:
+                            res['reason'] = '一些奇怪的错误发生了！该项目没有专家评审。'
+                            return res
+                        ac_exp_num -= 1
+                        self.getCol('project').update_one({'project_code': project_code},
+                                                          {'$set': {'ac_exp_num': 3}})
                 expert_project.update_many({'expert_mail': mail, 'project_code': project_code}, {"$set": {'status': new_status}})
                 # res['operation_ok'] = True
             else:
@@ -1068,8 +1095,21 @@ class DbOperate:
                         new_status = 0
                     else:
                         new_status = 1
+                        project = self.getCol('project').find_one({'project_code': project_code})
+                        if project:
+                            try:
+                                ac_exp_num = project['ac_exp_num']
+                            except:
+                                ac_exp_num = 0
+                            if ac_exp_num == 0:
+                                res['reason'] = '一些奇怪的错误发生了！该项目没有专家评审。'
+                                return res
+                            ac_exp_num -= 1
+                            self.getCol('project').update_one({'project_code': project_code},
+                                                              {'$set': {'ac_exp_num': 3}})
                     expert_project.update_many({'expert_mail': mail, 'project_code': project_code},
                                                {"$set": {'status': new_status}})
+                    print('b')
                     res['cnt'] += 1
             if res['cnt'] > 0:
                 res['state'] = 'success'
