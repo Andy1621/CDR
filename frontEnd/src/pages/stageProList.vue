@@ -18,10 +18,10 @@
       </Steps>
       <Table  stripe border :columns="columns" :data="rows" ref="selection" style="margin-right: 9%;margin-left:6%"
               @on-selection-change="selectionChange"></Table>
-      <div v-if="current==1&&com_status==1" style="background-color: #9acfea;margin-top: 10px;width:85%;margin-left: 6%;border-radius: 3px;height:40px;
+      <div v-if="(current==1&&com_status==1)||(current==3&&com_status==3)" style="background-color: #9acfea;margin-top: 10px;width:85%;margin-left: 6%;border-radius: 3px;height:40px;
         line-height:40px;">
         <span style="margin-left: 2%">已选中 {{this.selectnum}} 项</span>
-        <button style=";margin-left: 75%;background-color: red;border: none;width: 10%" @click="pass">通过</button>
+        <button style=";margin-left: 75%;background-color: red;border: none;width: 10%" @click="pass(com_status)">通过</button>
       </div>
     </div>
   </div>
@@ -50,7 +50,7 @@
           C_list:[],
           D_list:[],
           select:{type: 'selection', width: 60,align: 'center',},
-          score:{title: '平均分',key: 'score',sortable: true},
+          score:{title: '平均分',key: 'score',width:73,sortable: true},
           columns: [
             {
               title: '作品名称',
@@ -183,8 +183,15 @@
           this.selectnum=0;
           this.selectItem.length = 0;
           this.selectnum = data.length;
-          for(var i of data){
-            this.selectItem.push({'proj_id':i.project_code,'re':'True'})
+          if(this.com_status==1) {
+            for (var i of data) {
+              this.selectItem.push({'proj_id': i.project_code, 're': 'True'})
+            }
+          }
+          else{
+            for (var i of data) {
+              this.selectItem.push(i.project_code)
+            }
           }
         },
         rejectPro(id){
@@ -329,10 +336,12 @@
             this.changeList();
           }
         },
-        pass(){
+        pass(num){
           console.log(this.selectItem);
           let params = {'projlst':this.selectItem};
-          this.$http.post(this.$baseURL + "/api/vi/first_trial_change",params,{
+          console.log(1111,params);
+          let url = this.$baseURL + (num==1?"/api/vi/first_trial_change":"/api/v1/enter_defense_list");
+          this.$http.post(url ,params,{
             headers:{
               'Content-Type':"application/json",
             }

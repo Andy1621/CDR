@@ -1482,16 +1482,16 @@ class DbOperate:
                 # 当前状态是筛选并现场答辩
                 elif com_status == 3:
                     res['E_List'] = self.rule_other_E(copy.deepcopy(projects))
-                    res['A_List'] = self.rule_A(copy.deepcopy(projects))
+                    res['A_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
                     res['B_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
                     res['C_List'] = self.rule_CC(list(filter(lambda x: x['project_status'] >= 1, self.add_score_C(copy.deepcopy(projects)))))
                 # 当前状态是录入并公布最终结果
                 elif com_status == 4:
                     res['E_List'] = self.rule_other_E(copy.deepcopy(projects))
-                    res['A_List'] = self.rule_A(copy.deepcopy(projects))
+                    res['A_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
                     res['B_List'] = self.rule_A(list(filter(lambda x: x['project_status'] >= 1, copy.deepcopy(projects))))
                     res['C_List'] = self.rule_DC(list(filter(lambda x: x['project_status'] >= 1, self.add_score_C(copy.deepcopy(projects)))))
-                    res['D_List'] = self.rule_D(list(filter(lambda x: x['project_status'] >= 3, copy.deepcopy(projects))))
+                    res['D_List'] = self.rule_D(list(filter(lambda x: x['project_status'] >= 4, copy.deepcopy(projects))))
             elif len(projects) == 0:
                 res['state'] = 'success'
                 res['reason'] = '竞赛作品列表为空'

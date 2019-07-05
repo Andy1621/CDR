@@ -1122,7 +1122,7 @@ class EnterDefenseList(Resource):
         res = {"state": "fail"}
         try:
             data = request.get_json()
-            lists = data.get('list')
+            lists = data.get('projlst')
             res = db.enter_defense_list(lists)
         except:
             pass
