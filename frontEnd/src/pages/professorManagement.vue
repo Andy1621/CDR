@@ -182,11 +182,16 @@ import { constants } from 'fs';
         methods:{
             customCompFunc(params){
                 if (params.type === 'delete'){
-                    this.delete_expert = true;
-                    console.log(params)
-                    this.name = params.rowData['name'];
-                    this.email = params.rowData['email'];
-                    this.index = params.index;
+                    if(this.table1){
+                        this.delete_expert = true;
+                        console.log(params)
+                        this.name = params.rowData['name'];
+                        this.email = params.rowData['email'];
+                        this.index = params.index;
+                    }
+                    if(this.table2){
+                        this.tableData.splice(params.index,1)
+                    }
                 }
                 else if (params.type === 'edit'){
                     // alert(`行号：${params.index} 姓名：${params.rowData['name']}`)
