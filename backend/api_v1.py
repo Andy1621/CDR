@@ -1289,5 +1289,5 @@ api.add_resource(DeleteExpert, '/api/v1/delete_expert', endpoint="deleteExpert")
 api.add_resource(ImportExpert, '/api/v1/import_expert', endpoint="importExpert")
 
 if __name__ == "__main__":
-    begin_job()
     app.run(host="127.0.0.1", debug=True)
+    begin_job()
