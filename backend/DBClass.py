@@ -735,7 +735,7 @@ class DbOperate:
             message = "<p>尊敬的 " + expert_name + " 先生/女士您好，\n</p>" + \
                       "<p>" + comp_name + "竞赛组委会诚邀您参与参赛项目\"" + project_name + "\"的评审工作。\n</p>" + \
                       "<p>如果您接受此邀请，请点击链接: " + accept_addr + " 进入竞赛系统。\n</p>" + \
-                      "<p>如果您希望拒绝此邀请，请点击链接: " + refuse_addr + "确认拒绝。\n</p>" + \
+                      "<p>如果您希望拒绝此邀请，请点击链接: " + refuse_addr + " 确认拒绝。\n</p>" + \
                       "<p>衷心感谢您的付出和支持。\n</p>" + \
                       "<p>----" + comp_name + "竞赛组委会\n</p>"
             if self.send_mail(mail, header, message) is False:
