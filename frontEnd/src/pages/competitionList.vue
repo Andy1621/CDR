@@ -208,9 +208,12 @@
                                 // }, 'gkd'),
                                 h('Upload', {
                                     props: {
-                                        action: this.$baseURL + '/api/v1/uploadreviewform',
-                                        data :{'competition_id': params.row.competition_id},
-                                        format: ['xls', 'xlsx']
+                                        'action': this.$baseURL + '/api/v1/uploadreviewform',
+                                        'data': {'competition_id': params.row.competition_id},
+                                        'format': ['xls', 'xlsx'],
+                                        'show-upload-list': false,
+                                        'on-success': this.scoreUploadSuccess,
+                                        'on-format-error': this.dealFormatErr,
                                     },
                                     style: {
                                         display: (this.role === 'school' && params.row.com_status == "最终结果公布")? 'inline' :'none',
@@ -328,6 +331,24 @@
                         competitionID: competition_id,
                     }
                 })
+            },
+            dealFormatErr(){
+                this.$Notice.warning({
+                    title: '文件格式错误，应上传 PDF 格式'
+                });
+            },
+            scoreUploadSuccess(res){
+                console.log(res);
+                if(res.state == 'fail'){
+                    this.$Notice.error({
+                        title: '导入结果失败，请检查表格是否符合规范'
+                    });
+                }
+                else{
+                    this.$Notice.success({
+                        title: '成功导入结果'
+                    });
+                }
             },
         }
     }
