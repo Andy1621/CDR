@@ -28,7 +28,6 @@
         <span style="margin-left: 2%">已选中 {{this.selectnum}} 项</span>
         <button style=";margin-left: 75%;background-color: red;border: none;width: 10%" @click="pass(com_status)">通过</button>
       </div>
-
     </div>
   </div>
 </template>
@@ -66,6 +65,53 @@
               width:263
             },
             {
+              title: '作品类别',
+              key: 'type',
+              width:105,
+              filters:[
+                {
+                  label:"机械控制",
+                  value:1
+                },
+                {
+                  label:"信息技术",
+                  value:2
+                },
+                {
+                  label:"数理",
+                  value:3
+                },
+                {
+                  label:"生命科学",
+                  value:4
+                },
+                {
+                  label:"能源化工",
+                  value:5
+                },
+                {
+                  label:"哲学社科",
+                  value:6
+                }
+              ],
+              filterMultiple: false,
+              filterMethod (value, row) {
+                if (value === 1) {
+                  return row.type === '机械控制';
+                } else if (value === 2) {
+                  return row.type === '信息技术';
+                } else if (value === 3) {
+                  return row.type === '数理';
+                } else if (value === 4) {
+                  return row.type === '生命科学';
+                } else if (value === 5) {
+                  return row.type === '能源化工';
+                } else {
+                  return row.type === '哲学社科';
+                }
+              }
+            },
+            {
               title: '第一作者',
               key: 'author_name'
             },
@@ -76,7 +122,7 @@
             {
               title: '操作',
               key: 'oper',
-              width: 200,
+              width: 170,
               align: 'center',
               render: (h, params) => {
                 return h('div', [
@@ -239,6 +285,33 @@
               this.$Message.error('Failed')
             })
         },
+        handleType(lst){
+          for(var item of lst){
+            switch (item.registration_form.type) {
+              case "":
+                item["type"] = "机械控制";
+                break;
+              case "A":
+                item["type"] = "机械控制";
+                break;
+              case "B":
+                item["type"] = "信息技术";
+                break;
+              case "C":
+                item["type"] = "数理";
+                break;
+              case "D":
+                item["type"] = "生命科学";
+                break;
+              case "E":
+                item["type"] = "能源化工";
+                break;
+              case "F":
+                item["type"] = "哲学社科";
+                break;
+            }
+          }
+        },
         getProList(){
           let params = {'competition_id':this.competition_id};
           this.$http.post(this.$baseURL + "/api/v1/stageprolist",params,{
@@ -262,6 +335,11 @@
               this.B_list = detail.B_List;
               this.C_list = detail.C_List;
               this.D_list = detail.D_List;
+              this.handleType(this.E_list);
+              this.handleType(this.A_list);
+              this.handleType(this.B_list);
+              this.handleType(this.C_list);
+              this.handleType(this.D_list);
               this.changeList()
             }
           }, function (res) {
