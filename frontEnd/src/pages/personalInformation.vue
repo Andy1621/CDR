@@ -9,7 +9,7 @@
                         <b>用户名</b>
                     </Col>
                     <Col span="16" >
-                        <Input v-model="username" placeholder="请输入您的用户名" size="large" :disabled="disabled"></Input>
+                        <Input v-model="username" placeholder="请输入您的用户名" size="small" :disabled="disabled"></Input>
                     </Col>
             </Row>
             <Row v-if="role === 'professor'" style="margin-bottom:20px; font-size:16px;">
