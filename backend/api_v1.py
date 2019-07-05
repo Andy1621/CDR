@@ -561,12 +561,15 @@ class MultiAcceptReview(Resource):
         res = {"state": "fail", 'cnt': 0}
         try:
             data = request.args
-            project_codes = data.get('project_code')
-            expert_emails = data.get('expert_email')
-            mail_list = expert_emails.strip().split("|")
-            for expert_email in mail_list:
-                if expert_email == "":
+            project_code = data.get('project_code')
+            expert_email = data.get('expert_email')
+            project_list = project_code.strip().split("|")
+            project_codes = list()
+            for pc in project_list:
+                if pc == "":
                     continue
+                else:
+                    project_codes.append(pc)
                 res0 = db.multi_accept_review(project_codes, expert_email)
                 res['cnt'] += res0['cnt']
             if res['cnt'] > 0:
@@ -608,12 +611,15 @@ class MultiRefuseReview(Resource):
         res = {"state": "fail"}
         try:
             data = request.args
-            project_codes = data.get('project_code')
-            expert_emails = data.get('expert_email')
-            mail_list = expert_emails.strip().split("|")
-            for expert_email in mail_list:
-                if expert_email == "":
+            project_code = data.get('project_code')
+            expert_email = data.get('expert_email')
+            project_list = project_code.strip().split("|")
+            project_codes = list()
+            for pc in project_list:
+                if pc == "":
                     continue
+                else:
+                    project_codes.append(pc)
                 res0 = db.multi_refuse_review(project_codes, expert_email)
                 res['cnt'] += res0['cnt']
             if res['cnt'] > 0:
