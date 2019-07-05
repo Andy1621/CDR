@@ -91,7 +91,8 @@
         created() {
             let temp = this.$cookie.get('mail');
             let route = this.$route.query;
-            let messageContent = ["成功接收评审", "您已经接收该作品的评审", "您已经拒绝该作品的评审", "您已经评审过该作品"];
+            let messageContent = ["", "您已经接收该作品的评审", "您已经拒绝该作品的评审", "您已经评审过该作品"];
+            messageContent[0] = route.is_accept == 'true' ? '成功接收评审' : '成功拒绝评审';
             if (route.token) {
                 let url = this.$baseURL + "/api/v1/multi_check_code";
                 this.$http.post(url, {
@@ -108,15 +109,15 @@
                     }
                     if (!res.body.registered) {
                         this.professorRegister = true;
-                        this.professorEmailRegister = route.email
-                        messageContent[0] += '，请注册后评审'
-                        messageContent[1] += '，请注册后评审'
-                        messageContent[2] += '，您可以修改密码或者退出该页面'
+                        this.professorEmailRegister = route.email;
+                        messageContent[0] += '，请注册后评审';
+                        messageContent[1] += '，请注册后评审';
+                        messageContent[2] += '，您可以修改密码或者退出该页面';
                     } else {
-                        this.email = route.email
-                        messageContent[0] += '，请登录后评审'
-                        messageContent[1] += '，请登录后评审'
-                        messageContent[2] += '，您可以登录或者退出'
+                        this.email = route.email;
+                        messageContent[0] += '，请登录后评审';
+                        messageContent[1] += '，请登录后评审';
+                        messageContent[2] += '，您可以登录或者退出';
                         this.role = 'professor'
                     }
                     this.$Message.info(messageContent[res.body.old_status + 1])

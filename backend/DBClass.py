@@ -786,6 +786,7 @@ class DbOperate:
                 name = test['username']
                 for project_code in project_codes:
                     if not self.is_expInvitedProj(expert_email, project_code):
+                        print(expert_email, project_code)
                         new_relation = {"project_code": project_code, "expert_mail": expert_email, "username": name,
                                         "score": 0, "suggestion": "", "status": -1}
                         exp_proj = self.getCol("expert_project")
@@ -869,6 +870,7 @@ class DbOperate:
             comp_code = ""
             for project_code in project_codes:
                 if not self.is_expInvitedProj(mail, project_code):
+                    print(mail,project_code)
                     pro = project.find_one({'project_code': project_code})
                     if pro is None:
                         res['reason'] = "未找到项目"
@@ -896,7 +898,7 @@ class DbOperate:
             accept_addr = "<a href=\"" + accept_addr + "\">" + "接受评审" + "</a>"
             refuse_addr = front_ip + "/#/?token=" + invitation_code + \
                           "&email=" + mail + \
-                          "&project_code=" + project_code + "&is_accept=" + "false"
+                          "&project_code=" + code_str + "&is_accept=" + "false"
             # refuse_addr = "<a href=\"" + refuse_addr + "\">" + refuse_addr + "</a>"
             refuse_addr = "<a href=\"" + refuse_addr + "\">" + "拒绝评审" + "</a>"
             message = "<p>尊敬的 " + expert_name + " 先生/女士您好，\n</p>" + \

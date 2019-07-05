@@ -87,7 +87,11 @@
                                                     }
                                                 }).then(function (res) {
                                                     console.log(res);
-                                                    this.$Message.success("成功拒绝该项目的评审")
+                                                    if (res.body.state === 'fail') {
+                                                        this.$Message.error(res.body.reason);
+                                                        return;
+                                                    }
+                                                    this.$Message.success("成功拒绝该项目的评审");
                                                     this.rows.splice(params.index, 1);
                                                 }, function (res) {
                                                     console.log(res)
@@ -128,12 +132,12 @@
                                                         expert_email: this.$cookie.get('mail')
                                                     }
                                                 }).then(function (res) {
-                                                    console.log(res)
+                                                    console.log(res);
                                                     if (res.body.state === 'success') {
                                                         params.row.status = '评审中';
                                                         this.$Message.success("成功接收该项目的评审")
                                                     } else {
-                                                        this.$Message.error("操作失败")
+                                                        this.$Message.error("操作失败，请稍后再试")
                                                     }
                                                 }, function (res) {
                                                     console.log(res)

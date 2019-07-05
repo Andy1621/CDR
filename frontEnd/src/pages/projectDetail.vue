@@ -155,7 +155,7 @@
                     icon="ios-arrow-back" style="margin-right: 30%;margin-left: 30%"></Button>
             <Button type="primary" shape="circle" :disabled="current == 2" @click="current+=current<2?1:0"
                     icon="ios-arrow-forward"></Button>
-            <div style="margin: 15px 0 0 40%" v-show="current == 2">
+            <div v-if="!disable" style="margin: 15px 0 0 40%" v-show="current == 2">
                 <Button type="primary" style="margin-right:6%" @click="saveReview">保存</Button>
                 <Button type="error" @click="upReview">提交</Button>
             </div>
