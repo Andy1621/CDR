@@ -130,10 +130,13 @@
                                         click: () => {
                                             this.button_able = true;
                                             let param = {
-                                                email: this.rows2[params.index].email,
-                                                project_code: this.proj_id
+                                                mails: [this.rows2[params.index].email,],
+                                                project_codes: []
                                             };
-                                            this.$http.post(this.$baseURL + "/api/v1/invite_email", param).then(function (res) {
+                                            this.$refs.project_table.getSelection().forEach(v =>{
+                                                param.project_codes.push(v.project_code)
+                                            });
+                                            this.$http.post(this.$baseURL + "/api/v1/multi_invite_mail", param).then(function (res) {
                                                 var detail = res.body.state;
                                                 if (detail == "fail") {
                                                     this.$Notice.open({title: "发送失败"});
