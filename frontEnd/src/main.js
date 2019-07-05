@@ -20,9 +20,20 @@ import '../static/css/main.css'
 import $ from 'jquery/dist/jquery.min'
 import $$ from 'bootstrap/dist/js/bootstrap.min.js'
 
+
+import 'vue-easytable/libs/themes-base/index.css'
+import {VTable,VPagination} from 'vue-easytable'
+
+import vueXlsxTable from 'vue-xlsx-table'
+
 Vue.use(iView);
 Vue.use(VueResource);
 Vue.use(VideoPlayer);
+
+Vue.component(VTable.name, VTable)
+Vue.component(VPagination.name, VPagination)
+
+Vue.use(vueXlsxTable, {rABS: false})
 
 Vue.config.productionTip = false;
 

@@ -9,71 +9,71 @@
         </div>
         <div class="body" style="width: 80%;">
             <h4>选择类别</h4>
-            <Select v-model="model1" style="width:200px;float: left;margin-top:12px;margin-left: 30px;">
+            <Select v-model="model1" @on-change="selectType($event)"
+                    style="width:450px;float: left;margin-top:12px;margin-left: 30px;">
                 <Option v-for="item in typeList" :value="item.value" :key="item.value">{{ item.label }}</Option>
             </Select>
+
         </div>
         <div class="body">
             <h3>作品列表</h3>
 
-            <Table stripe border :columns="columns1" :data="rows1" height="450" ref="table"></Table>
+            <Table stripe border :columns="columns1" :data="rows1" height="450" ref="project_table" on-select-change=""></Table>
+            <div @click="chooseStudent" class="btn-lg btn-info" style="float: right; display: inline; cursor: pointer;margin-top: 10px;">
+                选择十个
+            </div>
         </div>
         <div class="body" style="width: 40%">
             <h3>邀请专家</h3>
-            <Table stripe border :columns="columns2" :data="rows2" height="450" ref="table"></Table>
-            <Modal
-                v-model="detail"
-                title="评审结果详情"
-                width="500">
-                <p class="size"><b>专家评分：</b>{{score}}</p><br /><br />
-                <p class="size"><b>评审意见：</b>{{suggestion}}</p>
-            </Modal>
+            <Table stripe border :columns="columns2" :data="rows2" height="450" ref="expert_table"></Table>
+            <div @click="sendEmail" class="btn-lg btn-success" style="float: right; display: inline; cursor: pointer;margin-top: 10px;">
+                一键发送
+            </div>
+            <div @click="chooseExpert" class="btn-lg btn-info" style="float: right; margin-right:30px;display: inline; cursor: pointer;margin-top: 10px;">
+                选择三个
+            </div>
         </div>
-        <router-view v-if="isRouterAlive"></router-view>
     </div>
 </template>
 
 
 <script>
     import NavBar from '../components/NavBar.vue'
-    import ISelect from "../../static/css/iview/iview";
+    import Button from "../../static/css/iview/iview";
+
     export default {
         name: "inviteProfessor",
-        components:{
+        components: {
+            Button,
             NavBar
         },
         inject: ['reload'],
-        data(){
-            return{
+        data() {
+            return {
                 columns1: [
                     {
-                        title: '专家名称',
-                        key: 'username',
-                        width: 100
+                        type:'index',
+                        width:60,
+                        align:'center'
                     },
                     {
-                        title: '专家邮箱',
-                        key: 'expert_mail'
+                        title: '作品名称',
+                        key: 'project_name',
+                        width: 370
                     },
                     {
-                        title: '评审状态',
-                        key: 'status',
-                        width: 85
-                    },
-                    {
-                        title: '操作',
+                        title: '查看作品',
                         key: 'oper',
-                        width: 100,
-                        align: 'center',
+                        width: 120,
                         render: (h, params) => {
-                            return h('div', params.row.status=="已评审" ? [
+                            return h('div', params.row.status == "已评审" ? [
                                 h('Button', {
                                     props: {
                                         type: 'primary',
                                         size: 'small'
                                     },
                                     style: {
-                                        marginRight:'5px'
+                                        marginRight: '5px'
                                     },
                                     on: {
                                         click: () => {
@@ -83,25 +83,32 @@
                                             this.suggestion = this.rows1[params.index].suggestion;
                                         }
                                     }
-                                }, params.row.status=="已评审" ? '查看详情' : '')
+                                }, params.row.status == "已评审" ? '查看详情' : '')
                             ] : '不可操作')
                         }
+                    },
+                    {
+                        type: 'selection',
+                        key: 'project_selection',
+                        align: 'center',
+                        width: 88.9
                     }
                 ],
                 columns2: [
                     {
-                        title: '专家名称',
-                        key: 'username',
-                        width: 100
+                        type:'index',
+                        width:60,
+                        align:'center'
+                    },
+                    {
+                        title: '专家姓名',
+                        key: 'name',
+                        width: 170
                     },
                     {
                         title: '专家邮箱',
-                        key: 'mail'
-                    },
-                    {
-                        title: '研究领域',
-                        key: 'field',
-                        width: 140
+                        key: 'email',
+                        width: 200
                     },
                     {
                         title: '操作',
@@ -117,19 +124,21 @@
                                         disabled: this.button_able
                                     },
                                     style: {
-                                        marginRight:'5px'
+                                        marginRight: '5px'
                                     },
                                     on: {
                                         click: () => {
                                             this.button_able = true;
-                                            let param = {mail:this.rows2[params.index].mail, project_code:this.proj_id};
-                                            this.$http.post(this.$baseURL + "/api/v1/invite_mail",param).then(function (res) {
+                                            let param = {
+                                                email: this.rows2[params.index].email,
+                                                project_code: this.proj_id
+                                            };
+                                            this.$http.post(this.$baseURL + "/api/v1/invite_email", param).then(function (res) {
                                                 var detail = res.body.state;
-                                                if(detail == "fail"){
+                                                if (detail == "fail") {
                                                     this.$Notice.open({title: "发送失败"});
                                                     this.reload();
-                                                }
-                                                else{
+                                                } else {
                                                     this.$Notice.open({title: "已发送邮件"});
                                                     this.reload();
                                                 }
@@ -141,18 +150,23 @@
                                 }, '发送评审邀请')
                             ])
                         }
+                    },
+                    {
+                        type: 'selection',
+                        align: 'center',
+                        key: 'expert_selection',
+                        width: 88
                     }
                 ],
                 rows1: [],
                 rows2: [],
-                detail: false,
-                proj_id: '0001',
-                score: 1,
-                suggestion: "",
-                isRouterAlive: true,
-                button_able: false,
+                competition_id:'',
                 comp_name: "冯如杯",
                 proj_name: "基于",
+                project_list : [],
+                t_project_list: [],
+                expert_list: [],
+                t_expert_list:[],
                 typeList: [
                     {
                         value: 'A',
@@ -182,51 +196,248 @@
                 model1: ''
             }
         },
-        created(){
+        created() {
             this.proj_id = this.$route.query.projectID;
-            this.getTwoList();
+            let url = this.$baseURL + '/api/v1/stageprolist';
+            this.competition_id = this.$route.query.competitionID;
+            console.log(this.competition_id);
+            this.$http.post(url, {'competition_id': this.competition_id}).then(function (res) {
+                console.log(res);
+                if (res.body.state === 'success'){
+                    this.project_list = res.body.B_List;
+                }
+                else{
+                    this.$Message.error('获取数据失败！');
+                }
+            },function (res) {
+                console.log(res)
+            })
+
+            //获取专家
+            url = this.$baseURL + '/api/v1/get_expert_list';
+            this.$http.post(url).then(function (res) {
+                console.log(res);
+                if (res.body.state === 'success'){
+                    this.expert_list = res.body.list;
+                }
+                else{
+                    this.$Message.error('获取数据失败！');
+                }
+            },function (res) {
+                console.log(res)
+            })
+
         },
-        methods:{
-            getTwoList(){
-                let params = {'proj_id': this.proj_id};
-                this.$http.post(this.$baseURL + "/api/v1/getExpertInviteList",params,{
-                    headers:{
-                        'Content-Type':"application/json",
+        methods: {
+            selectType(value) {
+                this.rows1 = [
+                    {
+                        'project_code':'0.6617120534282326',
+                        'project_name':'0'
+                    },
+                    {
+                        'project_code':'0.46977305630422306',
+                        'project_name':'1'
+                    },
+                    {
+                        'project_code':'0.47249010376488754',
+                        'project_name':'2'
+                    },
+                    {
+                        'project_code':'0.3887876101532005',
+                        'project_name':'3'
+                    },
+                    {
+                        'project_code':'0.5262874469302421',
+                        'project_name':'4'
+                    },
+                    {
+                        'project_code':'0.18664691216111706',
+                        'project_name':'5'
+                    },
+                    {
+                        'project_code':'0.3115852325657822',
+                        'project_name':'6'
+                    },
+                    {
+                        'project_code':'0.24722786077135284',
+                        'project_name':'7'
+                    },
+                    {
+                        'project_code':'0.5633343161150174',
+                        'project_name':'8'
+                    },
+                    {
+                        'project_code':'0.03332417260924592',
+                        'project_name':'9'
+                    },
+                    {
+                        'project_code':'0.5250401700104717',
+                        'project_name':'10'
+                    },
+                    {
+                        'project_code':'0.6403490394519126',
+                        'project_name':'11'
+                    },
+
+            ];
+
+                this.rows2 = [
+                    {
+                        'name':'2',
+                        'email':'5',
+                    },
+                    {
+                        'name':'4',
+                        'email':'6',
+                    },
+                    {
+                        'name':'7',
+                        'email':'3',
+                    },
+                    {
+                        'name':'5',
+                        'email':'2',
+                    },
+                    {
+                        'name':'2',
+                        'email':'5',
+                    },
+                    {
+                        'name':'4',
+                        'email':'1',
+                    },
+                    {
+                        'name':'2',
+                        'email':'5',
+                    },
+                ]
+
+                this.t_project_list = [];
+                this.t_expert_list = [];
+                //筛选
+                this.project_list.forEach(v=>{
+                    if(v.registration_form.type === value){
+                        this.t_project_list.push(v);
                     }
-                }).then(function (res) {
-                    if(res.body.state=="fail"){
-                        this.$Notice.open({title: "获取数据失败"});
+                })
+                this.rows1 = this.t_project_list;
+
+                //筛选专家
+                var pos = value.charCodeAt()-65;
+                console.log(this.expert_list);
+                this.expert_list.forEach(v=>{
+                    if(v.field[pos] === '1'){
+                        this.t_expert_list.push(v);
+                    }
+                })
+                this.rows2 = this.t_expert_list;
+            },
+            chooseStudent(){
+                if(this.model1!==''){
+                    if(this.rows1.length<=10){
+                        this.$refs.project_table.selectAll(true);
                     }
                     else{
-                        for (let item of res.body.list_invited) {
-                            switch (item.status) {
-                                case -1:
-                                    item.status = "待回应";
-                                    break;
-                                case 0:
-                                    item.status = "已接受";
-                                    break;
-                                case 1:
-                                    item.status = "已拒绝";
-                                    break;
-                                case 2:
-                                    item.status = "已评审";
-                                    break;
-                            }
+                        this.$refs.project_table.selectAll(false);
+                        for(var i=0;i<10;i++){
+                            this.$refs.project_table.toggleSelect(i);
                         }
-                        this.rows1 = res.body.list_invited;
-                        this.rows2 = res.body.list_uninvited;
                     }
-                }, function (res) {
-                    alert(res);
-                });
-            }
+                }else{
+                    this.$Message.error('请先选择类别。')
+                }
+            },
+            chooseExpert(){
+                if(this.model1!==''){
+                    if(this.rows2.length<=3){
+                        this.$refs.expert_table.selectAll(true);
+                    }
+                    else{
+                        this.$refs.expert_table.selectAll(false);
+                        for(var i=0;i<3;i++){
+                            this.$refs.expert_table.toggleSelect(i);
+                        }
+                    }
+                }else{
+                    this.$Message.error('请先选择类别。')
+                }
+            },
+            sendEmail(){
+                var params = {
+                    'mails':[],
+                    'project_codes':[]
+                };
+                if(this.model1!==''){
+                    console.log();
+                    var proj_list = this.$refs.project_table.getSelection();
+                    var lists = this.$refs.expert_table.getSelection();
+
+                    proj_list.forEach(v=>{
+                        params.project_codes.push(v.project_code);
+                    });
+
+                    lists.forEach(v=>{
+                        params.mails.push(v.email);
+                    });
+
+                    console.log(params);
+                    var url = this.$baseURL + '/api/v1/multi_invite_mail';
+                    this.$http.post(url,params).then(function (res) {
+                        console.log(res);
+                        if(res.body.state !== 'fail'){
+
+                            //启动删除程序
+                            for(let y = 0, max1 = proj_list.length; y < max1; y ++){
+                                for(let i = 0; i < this.rows1.length; i++){
+                                    if(proj_list[y].project_code === this.rows1[i].project_code && proj_list[y].project_name === this.rows1[i].project_name) {
+                                        params.project_codes.push(this.rows1[i].project_code);
+                                        this.rows1.splice(i, 1);
+                                        i--;
+                                    }
+                                }
+                            }
+                            this.t_project_list = this.rows1;
+
+                            console.log(lists);
+                            for(let y = 0, max1 = lists.length; y < max1; y ++){
+                                for(let i = 0, max = this.rows2.length; i < max; i++){
+                                    console.log(this.rows2[i]);
+                                    if(lists[y].email === this.rows2[i].email && lists[y].name === this.rows2[i].name) {
+
+                                        var tmp = this.rows2[i];
+                                        this.rows2.splice(i, 1);
+                                        this.rows2.push(tmp);
+                                    }
+                                }
+                            }
+                            this.t_expert_list = this.rows2;
+
+                            this.$Message.success('邀请成功！');
+                        }else{
+                            this.$Message.error('邀请失败！');
+                        }
+                    },function (res) {
+                        this.$Message.error('邀请失败！网络错误。')
+                    })
+
+
+                }else{
+                    this.$Message.error('请先选择类别。')
+                }
+            },
         },
+        mounted(){
+            this.$Message.config({
+                top: 100,
+                duration: 1,
+            });
+        }
     }
 </script>
 
 <style scoped>
-    .nav{
+    .nav {
         left: 280px;
         top: 100px;
         position: relative;
@@ -236,7 +447,8 @@
         padding: 0px 0px 15px 10px;
         width: 80%;
     }
-    .body{
+
+    .body {
         left: 280px;
         top: 100px;
         position: relative;
@@ -249,20 +461,23 @@
         text-align: left;
         color: black;
     }
-    .size{
+
+    .size {
         font-size: 17px;
     }
-    h3{
+
+    h3 {
         border-left: 5px solid purple;
-        padding: 0 0 0 15px!important;
-        font-size: 24px!important;
-        margin: 24px 0!important;
+        padding: 0 0 0 15px !important;
+        font-size: 24px !important;
+        margin: 24px 0 !important;
     }
-    h4{
+
+    h4 {
         border-left: 5px solid purple;
-        padding: 0 0 0 15px!important;
-        margin: 16px 0 5px 0!important;
+        padding: 0 0 0 15px !important;
+        margin: 16px 0 5px 0 !important;
         display: inline;
-        float:left;
+        float: left;
     }
 </style>
