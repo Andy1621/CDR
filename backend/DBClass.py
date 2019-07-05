@@ -337,6 +337,7 @@ class DbOperate:
                                                              'expert_mail': expert_email})
             if review and review['status'] == -1:
                 review['status'] = 0
+                self.getCol('project').update_one({'project_code':project_code},{'$set'})
                 self.getCol('expert_project').update_one({'project_code': project_code,
                                                           'expert_mail': expert_email}, {'$set': review})
                 res['state'] = 'success'
@@ -753,10 +754,11 @@ class DbOperate:
             if test:
                 name = test['username']
                 for project_code in project_codes:
-                    new_relation = {"project_code": project_code, "expert_mail": expert_email, "username": name,
-                                    "score": 0, "suggestion": "", "status": -1}
-                    exp_proj = self.getCol("expert_project")
-                    exp_proj.insert_one(new_relation)
+                    if not self.is_expInvitedProj(expert_email, project_code):
+                        new_relation = {"project_code": project_code, "expert_mail": expert_email, "username": name,
+                                        "score": 0, "suggestion": "", "status": -1}
+                        exp_proj = self.getCol("expert_project")
+                        exp_proj.insert_one(new_relation)
                 res['state'] = 'success'
             # 专家账号不存在
             else:
@@ -835,17 +837,18 @@ class DbOperate:
             project = self.getCol('project')
             comp_code = ""
             for project_code in project_codes:
-                pro = project.find_one({'project_code': project_code})
-                if pro is None:
-                    res['reason'] = "未找到项目"
-                    continue
-                res['cnt'] += 1
-                project_name = pro["project_name"]
-                comp_code = pro["competition_id"]
-                if code_str == "":
-                    code_str = project_code
-                else:
-                    code_str += "|" + project_code
+                if not self.is_expInvitedProj(mail, project_code):
+                    pro = project.find_one({'project_code': project_code})
+                    if pro is None:
+                        res['reason'] = "未找到项目"
+                        continue
+                    res['cnt'] += 1
+                    project_name = pro["project_name"]
+                    comp_code = pro["competition_id"]
+                    if code_str == "":
+                        code_str = project_code
+                    else:
+                        code_str += "|" + project_code
             competition = self.getCol('competition')
             comp = competition.find_one({'_id': ObjectId(comp_code)})
             if comp is None:
