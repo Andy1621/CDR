@@ -11,7 +11,7 @@
                 <Step title="评审打分" content="给出评价和分数" icon="ios-chatboxes" @click.native="current = 2"></Step>
             </Steps>
             <Divider/>
-            <div class="form" v-show="current == 0">
+            <div class="form" v-show="current === 0">
                 <Form ref="basicInfo" :model="basicInfo" :label-width="80">
                     <FormItem label="作品全称">
                         <Input v-model="basicInfo.title" readonly></Input>
@@ -142,7 +142,8 @@
             <div v-show="current==2">
                 <Form ref="reviewInfo" :model="reviewInfo" :label-width="80">
                     <FormItem label="评分">
-                        <Input type="number" v-model="reviewInfo.marks" :disabled="disable" placeholder="请输入评分，0-100"></Input>
+                        <Input type="number" v-model="reviewInfo.marks" :disabled="disable"
+                               placeholder="请输入评分，0-100"></Input>
                     </FormItem>
                     <FormItem label="评价">
                         <Input v-model="reviewInfo.comment" :disabled="disable" type="textarea"
@@ -254,7 +255,7 @@
                 console.log(res);
                 if (res.body.state === 'fail') {
                     this.disable = true;
-                    alert("异常，请稍后再试！");
+                    this.$Message.error("异常，请稍后再试！");
                     this.$router.go(-1);
                     return;
                 }
@@ -264,7 +265,7 @@
                 this.status = temp.status;
                 if (temp.status !== 0) {
                     this.disable = true;
-                    alert(this.dictionary.dictionary[temp.status + 1])
+                    this.$Message.info(this.dictionary.dictionary[temp.status + 1])
                 }
             }, function (res) {
                 console.log(res)
@@ -281,7 +282,7 @@
             },
             saveReview() {
                 if (Number(this.reviewInfo.marks) < 0 || Number(this.reviewInfo.marks) > 100) {
-                    alert("分数在0-100内，请填写正确的评分！");
+                    this.$Message.error("分数在0-100内，请填写正确的评分！");
                     return;
                 }
                 let url = this.$baseURL + '/api/v1/store_review';
@@ -294,9 +295,9 @@
                 this.$http.post(url, data).then(function (res) {
                     console.log(res);
                     if (res.body.state === 'fail') {
-                        alert(res.body.reason)
+                        this.$Message.error(res.body.reason)
                     } else {
-                        alert('保存成功！');
+                        this.$Message.success('保存成功！');
                     }
                 }, function (res) {
                     console.log(res)
@@ -304,10 +305,10 @@
             },
             upReview() {
                 if (this.reviewInfo.marks === '' || this.reviewInfo.comment === '') {
-                    alert("请将评审信息填写完整！");
+                    this.$Message.error("请将评审信息填写完整！");
                     return;
                 } else if (Number(this.reviewInfo.marks) < 0 || Number(this.reviewInfo.marks) > 100) {
-                    alert("分数在0-100内，请填写正确的评分！")
+                    this.$Message.error("分数在0-100内，请填写正确的评分！")
                 } else {
                     let url = this.$baseURL + '/api/v1/submit_review';
                     this.$http.post(url, {
@@ -320,7 +321,7 @@
                         console.log(res);
                         this.disable = true;
                         let alertContent = res.body.state === 'fail' ? res.body.reason : '提交成功';
-                        alert(alertContent);
+                        this.$Message.info(alertContent);
                     }, function (res) {
                         console.log(res)
                     })
@@ -417,17 +418,21 @@
         top: 43%;
         left: 44%;
     }
-    >>>.ivu-checkbox-input[disabled] {
+
+    >>> .ivu-checkbox-input[disabled] {
         cursor: default
     }
-    >>>.ivu-checkbox-disabled .ivu-checkbox-inner-input {
+
+    >>> .ivu-checkbox-disabled .ivu-checkbox-inner-input {
         cursor: default
     }
-    >>>.ivu-checkbox-disabled + span {
+
+    >>> .ivu-checkbox-disabled + span {
         color: #515a6e;
         cursor: default
     }
-    >>>.ivu-checkbox-wrapper-disabled {
+
+    >>> .ivu-checkbox-wrapper-disabled {
         cursor: default;
     }
 </style>

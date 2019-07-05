@@ -10,18 +10,18 @@
         {{competition_title}}
       </h3>
       <Steps :current="current" style="margin: 30px">
-        <Step :title=t[0]  @click.native="jump(0)"></Step>
-        <Step :title=t[1]  @click.native="jump(1)"></Step>
-        <Step :title=t[2]  @click.native="jump(2)"></Step>
-        <Step :title=t[3]  @click.native="jump(3)"></Step>
-        <Step :title=t[4]  @click.native="jump(4)"></Step>
-      </Steps>
+      <Step :title=t[0]  @click.native="jump(0)"></Step>
+      <Step :title=t[1]  @click.native="jump(1)"></Step>
+      <Step :title=t[2]  @click.native="jump(2)"></Step>
+      <Step :title=t[3]  @click.native="jump(3)"></Step>
+      <Step :title=t[4]  @click.native="jump(4)"></Step>
+    </Steps>
       <Table  stripe border :columns="columns" :data="rows" ref="selection" style="margin-right: 9%;margin-left:6%"
               @on-selection-change="selectionChange"></Table>
-      <div v-if="current==1&&com_status==1" style="background-color: #9acfea;margin-top: 10px;width:85%;margin-left: 6%;border-radius: 3px;height:40px;
+      <div v-if="(current==1&&com_status==1)||(current==3&&com_status==3)" style="background-color: #9acfea;margin-top: 10px;width:85%;margin-left: 6%;border-radius: 3px;height:40px;
         line-height:40px;">
         <span style="margin-left: 2%">已选中 {{this.selectnum}} 项</span>
-        <button style=";margin-left: 75%;background-color: red;border: none;width: 10%" @click="pass">通过</button>
+        <button style=";margin-left: 75%;background-color: red;border: none;width: 10%" @click="pass(com_status)">通过</button>
       </div>
     </div>
   </div>
@@ -50,7 +50,7 @@
           C_list:[],
           D_list:[],
           select:{type: 'selection', width: 60,align: 'center',},
-          score:{title: '评分',key: 'score'},
+          score:{title: '平均分',key: 'score',width:73,sortable: true},
           columns: [
             {
               title: '作品名称',
@@ -84,7 +84,7 @@
                     },
                     style: {
                       marginRight:'5px',
-                      display:(this.current==4)?"none":"inline-block"
+                      //display:(this.current==4)?"none":"inline-block"
                     },
                     on: {
                       click: () => {
@@ -106,10 +106,11 @@
                           this.$router.push({
                             path: '/expTrialStat',
                             query: {
-                              competition_id:this.competition_id,
-                              competition_title:this.competition_title,
-                              projectID: params.row.project_code,
-                              projectName:params.row.project_name
+                                competition_id:this.competition_id,
+                                competition_title:this.competition_title,
+                                projectID: params.row.project_code,
+                                projectName:params.row.project_name,
+                                fromState:this.current
                             }
                           })
                         }
@@ -124,7 +125,7 @@
                     },
                     style: {
                       marginRight:'5px',
-                      display:(this.current==0||this.current==1)?"inline-block":"none"
+                      display:(this.current==0||this.current==1||this.current==4)?"inline-block":"none"
                     },
                     on: {
                       click: () => {
@@ -149,7 +150,7 @@
                     on: {
                       click: () => {
                         this.selectItem=[{'proj_id':params.row.project_code,'re':'False'}];
-                        this.pass();
+                        this.pass(1);
                       }
                     }
                   },'拒绝'),
@@ -182,12 +183,20 @@
           this.selectnum=0;
           this.selectItem.length = 0;
           this.selectnum = data.length;
-          for(var i of data){
-            this.selectItem.push({'proj_id':i.project_code,'re':'True'})
+          if(this.com_status==1) {
+            for (var i of data) {
+              this.selectItem.push({'proj_id': i.project_code, 're': 'True'})
+            }
+          }
+          else{
+            for (var i of data) {
+              this.selectItem.push(i.project_code)
+            }
           }
         },
         rejectPro(id){
           let params = {'project_code':id};
+          console.log(params);
           this.$http.post(this.$baseURL + "/api/v1/reject_project",params,{
             headers:{
               'Content-Type':"application/json",
@@ -328,10 +337,11 @@
             this.changeList();
           }
         },
-        pass(){
-          console.log(this.selectItem);
+        pass(num){
+          if(this.selectItem.length==0)return;
           let params = {'projlst':this.selectItem};
-          this.$http.post(this.$baseURL + "/api/vi/first_trial_change",params,{
+          let url = this.$baseURL + (num==1?"/api/vi/first_trial_change":"/api/v1/enter_defense_list");
+          this.$http.post(url ,params,{
             headers:{
               'Content-Type':"application/json",
             }
@@ -339,10 +349,10 @@
             var detail = (res.body.state);
             console.log(detail);
             if(detail =="fail"){
-              this.$Notice.open({title: "评审失败",duration:0.5});
+              this.$Notice.open({title: "评审失败",duration:1});
             }
             else{
-              this.$Notice.open({title: "评审完成",duration:0.5});
+              //this.$Notice.open({title: "评审完成",duration:1});
               location.reload();
             }
           }, function (res) {

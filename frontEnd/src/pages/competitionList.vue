@@ -169,65 +169,62 @@
                                                 path: '/inviteProfessor',
                                                 query: {
                                                     competitionID: params.row.competition_id,
-                                                    // competitionTitle: params.row.competition_name
+                                                    competitionTitle: params.row.competition_name
                                                 }
                                             })
                                         }
                                     }
                                 }, '邀请专家'),
-                                h('Button', {
+                                // h('Button', {
+                                //     props: {
+                                //         type: 'primary',
+                                //         size: 'small',
+                                //     },
+                                //     style: {
+                                //         marginRight: '5px',
+                                //         display: (this.role === 'school' && params.row.com_status == "专家初评")? '' :'none',
+                                //     },
+                                //     on: {
+                                //         click: () => {
+                                //             let param = {'comp_id': params.row.competition_id};
+                                //             this.$http.post(this.$baseURL + "/api/v1/remind_expert",param,{
+                                //                 headers:{
+                                //                     'Content-Type':"application/json",
+                                //                 }
+                                //             }).then(function (res) {
+                                //                 var detail = res.body.state
+                                //                 console.log(detail);
+                                //                 if(detail =="fail"){
+                                //                     this.$Notice.open({title: "发送失败",duration:0.5});
+                                //                 }
+                                //                 else{
+                                //                     this.$Notice.open({title: "发送成功",duration:0.5});
+                                //                 }
+                                //             }, function (res) {
+                                //                 alert(res);
+                                //             });
+                                //         }
+                                //     }
+                                // }, 'gkd'),
+                                h('Upload', {
                                     props: {
-                                        type: 'primary',
-                                        size: 'small',
+                                        action: this.$baseURL + '/api/v1/uploadreviewform',
+                                        data :{'competition_id': params.row.competition_id},
+                                        format: ['xls', 'xlsx']
                                     },
                                     style: {
-                                        marginRight: '5px',
-                                        display: (this.role === 'school' && params.row.com_status == "专家初评")? '' :'none',
-                                    },
-                                    on: {
-                                        click: () => {
-                                            let param = {'comp_id': params.row.competition_id};
-                                            this.$http.post(this.$baseURL + "/api/v1/remind_export",params,{
-                                                headers:{
-                                                    'Content-Type':"application/json",
-                                                }
-                                            }).then(function (res) {
-                                                var detail = res.body.state
-                                                console.log(detail);
-                                                if(detail =="fail"){
-                                                    this.$Notice.open({title: "发送失败",duration:0.5});
-                                                }
-                                                else{
-                                                    this.$Notice.open({title: "发送成功",duration:0.5});
-                                                }
-                                            }, function (res) {
-                                                alert(res);
-                                            });
-                                        }
+                                        display: (this.role === 'school' && params.row.com_status == "最终结果公布")? 'inline' :'none',
                                     }
-                                }, 'gkd'),
-                                h('div', [
-                                    h('Upload', {
+                                }, [
+                                    h('Button', {
                                         props: {
-                                            action: this.$baseURL + '/api/v1/uploadreviewform',
-                                            data :{'competition_id': params.row.competition_id},
-                                            format: ['xls', 'xlsx']
+                                            type: 'primary',
+                                            size: 'small',
                                         },
                                         style: {
-                                            marginRight: '5px',
-                                            display: (this.role === 'school' && params.row.com_status == "最终结果公布")? '' :'none',
+
                                         }
-                                    }, [
-                                        h('Button', {
-                                            props: {
-                                                type: 'primary',
-                                                size: 'small',
-                                            },
-                                            style: {
-                                                marginRight: '5px',
-                                            }
-                                        }, '最终成绩导入')
-                                    ])
+                                    }, '最终成绩导入')
                                 ])
                             ])
                         }
