@@ -826,8 +826,8 @@ class DbOperate:
                 return res
             comp_name = comp["competition_name"]
             header = comp_name + "项目评审邀请"
-            # front_ip = "http://localhost:8080"
-            front_ip = "http://114.116.189.128"
+            front_ip = "http://localhost:8080"
+            # front_ip = "http://114.116.189.128"
             accept_addr = front_ip + "/#/?token=" + invitation_code + \
                           "&email=" + mail + \
                           "&project_code=" + project_code + "&is_accept=" + "true"
@@ -889,8 +889,8 @@ class DbOperate:
                 return res
             comp_name = comp["competition_name"]
             header = comp_name + "项目评审邀请"
-            # front_ip = "http://localhost:8080"
-            front_ip = "http://114.116.189.128"
+            front_ip = "http://localhost:8080"
+            # front_ip = "http://114.116.189.128"
             accept_addr = front_ip + "/#/?token=" + invitation_code + \
                           "&email=" + mail + \
                           "&project_code=" + code_str + "&is_accept=" + "true"
@@ -982,8 +982,10 @@ class DbOperate:
     def check_code(self, mail, invitation_code, project_code, is_accept):
         res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
         try:
+            print('a')
             user = self.getCol('user')
             expert = user.find_one({'user_type': 'expert', 'mail': mail})
+            print('b')
             if expert is None:
                 res['reason'] = "未找到专家"
                 return res
@@ -1009,7 +1011,7 @@ class DbOperate:
                 expert_project.update_many({'expert_mail': mail, 'project_code': project_code}, {"$set": {'status': new_status}})
                 # res['operation_ok'] = True
             else:
-                1  # res['operation_ok'] = False
+                pass  # res['operation_ok'] = False
             res['state'] = 'success'
         except:
             return res

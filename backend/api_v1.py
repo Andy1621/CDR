@@ -993,19 +993,19 @@ class CheckCode(Resource):
 '''
 class MultiCheckCode(Resource):
     def post(self):
-        res = {"state": "fail"}
+        res = {"state": "fail", "cnt": 0}
         try:
             data = request.get_json()
             mail = data.get('mail')
             invitation_code = data.get('invitation_code')
-            project_codes = data.get('project_code').strip().split("|")
+            project_code = data.get('project_code').strip().split("|")
+            project_codes = list()
             is_accept = data.get('is_accept')
-            for project_code in project_codes:
-                if project_code == "":
+            for pc in project_code:
+                if pc == "":
                     continue
-                res["cnt"] += db.check_code(mail, invitation_code, project_code, is_accept)['cnt']
-            if res['cnt'] > 0:
-                res['state'] = 'success'
+                project_codes.append(pc)
+            res = db.multi_check_code(mail, invitation_code, project_codes, is_accept)
         except:
             pass
         finally:
