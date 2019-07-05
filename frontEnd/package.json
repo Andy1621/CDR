@@ -20,7 +20,8 @@
     "vue": "^2.5.2",
     "vue-resource": "^1.5.1",
     "vue-router": "^3.0.1",
-    "vue-video-player": "^5.0.2"
+    "vue-video-player": "^5.0.2",
+    "vue-xlsx-table": "^1.2.8"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",
@@ -61,6 +62,7 @@
     "shelljs": "^0.7.6",
     "uglifyjs-webpack-plugin": "^1.1.1",
     "url-loader": "^0.5.8",
+    "vue-easytable": "^1.7.2",
     "vue-jest": "^1.0.2",
     "vue-loader": "^13.3.0",
     "vue-style-loader": "^3.0.1",

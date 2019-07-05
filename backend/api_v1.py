@@ -659,6 +659,24 @@ class CheckXlsxHeader(Resource):
         finally:
             return jsonify(res)
 
+
+'''
+导入专家信息
+参数：
+    专家列表expert_list
+'''
+class ImportExpert(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            expert_list = data.get('expert_list')
+            res = db.import_expert(expert_list)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
 #######################################################################################################################
 """
 登录
@@ -1155,6 +1173,7 @@ api.add_resource(GetCompetitionDetail, '/api/v1/get_competition_detail', endpoin
 api.add_resource(CheckXlsxHeader, '/api/v1/check_xlsx_header', endpoint="checkXlsxHeader")
 api.add_resource(GetExpertList, '/api/v1/get_expert_list', endpoint="getExpertList")
 api.add_resource(DeleteExpert, '/api/v1/delete_expert', endpoint="deleteExpert")
+api.add_resource(ImportExpert, '/api/v1/import_expert', endpoint="importExpert")
 
 if __name__ == "__main__":
     begin_job()

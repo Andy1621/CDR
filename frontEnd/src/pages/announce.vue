@@ -42,7 +42,7 @@
                     <Button icon="ios-document" style="width: 100px">上传</Button>
                 </Upload>
             </div>
-            <Button type="primary" @click="announce" style="margin-left: 45%">发布公告</Button>
+            <Button type="primary" @click="announce" style="margin-left: 45%;">发布公告</Button>
         </div>
     </div>
 </template>

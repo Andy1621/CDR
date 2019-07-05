@@ -483,6 +483,37 @@ class DbOperate:
         finally:
             return res
 
+    '''
+    导入专家信息
+    '''
+    def import_expert(self, expert_list):
+        res = {'state': 'fail', 'reason': "网络错误或其他问题!"}
+        try:
+            failure = list()
+            success_count = 0
+            fail_count = 0
+            for expert in expert_list:
+                is_exist = self.getCol('user').find_one({'mail': expert['email'], 'user_type': 'expert'})
+
+                if is_exist:
+                    fail_count += 1
+                    failure.append("导入专家【{0}】失败：邮箱【{1}】已存在！".format(expert['name'], expert['email']))
+                else:
+                    t_res = self.create_user_expert(expert['email'], expert['name'], expert['field'])
+                    if t_res['state'] == 'fail':
+                        fail_count += 1
+                        failure.append("导入专家【{0}】失败：网络错误".format(expert['name']))
+                    else:
+                        success_count += 1
+            res['state'] = 'success'
+            failure = '\n'.join(failure)
+            res['reason'] = "导入成功{0}个，导入失败{1}个".format(success_count, fail_count)
+            if fail_count:
+                res['reason'] = res['reason'] + "\n失败原因：\n" + failure
+        except:
+            pass
+        finally:
+            return res
 ##############################################################################################
     '''
     检查邮箱是否已注册
