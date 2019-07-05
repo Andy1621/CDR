@@ -17,7 +17,7 @@
                     <b>领域</b>
                 </Col>
                 <Col span="20">
-                    <CheckboxGroup v-model="realm" >
+                    <CheckboxGroup v-model="field" >
                         <Checkbox label="A" size="large" :disabled="disabled">机械与控制（包括机械、仪器仪表、自动化控
 制、工程、交通、建筑等）</Checkbox><br>
                         <Checkbox label="B" size="large" :disabled="disabled">信息技术（包括计算机、电信、通讯、电子等）</Checkbox><br>
@@ -54,7 +54,7 @@
                     </div>
                 </Modal>
             </div>
-            
+
         </div>
     </div>
 </template>
@@ -69,7 +69,7 @@
         },
         data(){
             return{
-                realm:[],
+                field:[],
                 username:'',
                 disabled: true,
                 role:'',
@@ -83,19 +83,19 @@
         created() {
             this.role = this.$cookie.get('role');
             this.revise_text = '修改信息';
+            // this.$Message.info('点击修改信息或修改密码可以进行修改');
             let url = this.$baseURL + '/api/v1/get_user_info';
             this.$http.post(url,{'mail':this.$cookie.get('mail')}).then(function(res){
                 // console.log(res.body)
                 this.username = res.body.username;
                 if(this.role === 'professor'){
-                    var rt = res.body.realm;
-                    rt = rt.split('');
+                    var field = res.body.field;
                     for(var i = 0;i<6; i++){
-                        if (rt[i] === '1'){
-                            this.realm.push(String.fromCharCode(65+i));
+                        if (field[i] === '1'){
+                            this.field.push(String.fromCharCode(65+i));
                         }
                     }
-                    //console.log(this.realm);
+                    //console.log(this.field);
                 }
 
             },function(res){
@@ -115,7 +115,7 @@
                     if(this.role === 'professor'){
                         rt = '000000';
                         rt = rt.split('');
-                        this.realm.forEach(v=>{
+                        this.field.forEach(v=>{
                             //console.log(v);
                             rt[v.charCodeAt()-65]='1';
                         })
@@ -126,7 +126,7 @@
                     this.$http.post(url,{
                         'mail': this.$cookie.get('mail'),
                         'username':this.username,
-                        'realm':rt
+                        'field':rt
                     }).then(function(res){
                         //console.log(res);
                         if(res.body.state!=='fail'){
@@ -169,6 +169,12 @@
                 this.passwordConform = '';
             }
         },
+        mounted(){
+            this.$Message.config({
+                top: 100,
+                duration: 1,
+            });
+        }
     }
 </script>
 

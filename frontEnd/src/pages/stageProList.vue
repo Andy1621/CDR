@@ -18,7 +18,7 @@
       </Steps>
       <Table  stripe border :columns="columns" :data="rows" ref="selection" style="margin-right: 9%;margin-left:6%"
               @on-selection-change="selectionChange"></Table>
-      <div v-if="current==1&&com_status==1" style="background-color: #6ecadc;margin-top: 10px;width:85%;margin-left: 6%;border-radius: 3px;height:40px;
+      <div v-if="current==1&&com_status==1" style="background-color: #9acfea;margin-top: 10px;width:85%;margin-left: 6%;border-radius: 3px;height:40px;
         line-height:40px;">
         <span style="margin-left: 2%">已选中 {{this.selectnum}} 项</span>
         <button style=";margin-left: 75%;background-color: red;border: none;width: 10%" @click="pass">通过</button>
@@ -50,12 +50,12 @@
           C_list:[],
           D_list:[],
           select:{type: 'selection', width: 60,align: 'center',},
-          score:{title: '评分',key: 'score'},
+          score:{title: '平均分',key: 'score',sortable: true},
           columns: [
             {
               title: '作品名称',
               key: 'project_name',
-              width:320
+              width:263
             },
             {
               title: '第一作者',
@@ -84,7 +84,7 @@
                     },
                     style: {
                       marginRight:'5px',
-                      display:(this.com_status==4)?"none":"inline-block"
+                      display:(this.current==4)?"none":"inline-block"
                     },
                     on: {
                       click: () => {
@@ -106,10 +106,11 @@
                           this.$router.push({
                             path: '/expTrialStat',
                             query: {
-                              competition_id:this.competition_id,
-                              competition_title:this.competition_title,
-                              projectID: params.row.project_code,
-                              projectName:params.row.project_name
+                                competition_id:this.competition_id,
+                                competition_title:this.competition_title,
+                                projectID: params.row.project_code,
+                                projectName:params.row.project_name,
+                                fromState:this.current
                             }
                           })
                         }
@@ -120,7 +121,7 @@
                     props: {
                       type: 'primary',
                       size: 'small',
-                      disabled:(params.row.project_status=="编辑中")||(this.com_status>0)
+                      disabled:(params.row.project_status=="编辑中")||(this.com_status>0&&this.current==0)
                     },
                     style: {
                       marginRight:'5px',
@@ -130,8 +131,9 @@
                       click: () => {
                         if(this.com_status==0)
                           this.rejectPro(params.row.project_code);
-                        else if(this.com_status==1)
-                          console.log(1);
+                        else if(this.com_status==1){
+                          this.downloadFile(params.row.project_code);
+                        }
                       }
                     }
                     },this.current==0?"退回":"下载附件"),
@@ -199,10 +201,27 @@
             }
             else{
               this.$Notice.open({title: "退回完成",duration:0.5});
+              location.reload();
             }
           }, function (res) {
             alert(res);
           });
+        },
+        downloadFile(id){
+          this.$http.get(this.$baseURL + '/api/v1/download_files', {
+            params: {
+              project_code: id
+            }
+          }).then(function (res) {
+            console.log(res);
+            if (res.body.state === 'Success') {
+              window.location.href = res.body.url;
+            } else {
+              this.$Message.error("下载失败" + res.body.reason)
+            }
+          }, function (res) {
+            console.log(res)
+          })
         },
         check_table(id){
           this.$http.get(this.$baseURL + '/api/v1/view_apply',{params:{'project_code': id}})
@@ -234,7 +253,7 @@
             else{
               this.competition_title = detail.competition_name;
               this.com_status = detail.com_status == 5? 4:detail.com_status;
-              if(this.com_status!=1){this.columns.pop()}
+              //if(this.com_status!=1){this.columns.pop()}
               this.t[this.com_status] = this.t[this.com_status] + "(正在进行)";
               this.current = this.com_status;
               this.E_list = detail.E_List;
@@ -248,18 +267,25 @@
             alert(res);
           });
         },
-        changeList(){
-          this.selectnum = 0;
-          this.selectItem.length=0;
+        handelColumns(){
           if(this.current==1||this.current==3){
             if(this.columns[this.columns.length-1].type!="selection"){this.columns.push(this.select);}
+            if(this.current==3&&this.columns[3].key!='score'){
+              this.columns.splice(3,0,this.score);
+            }
           }
           else{
             if(this.columns[this.columns.length-1].type=="selection"){this.columns.pop();}
+            if(this.columns[3].key=='score'){this.columns.splice(3,1);}
           }
-          if(this.btshow.length>0){
-            this.btshow.length = 0;
-          }
+        },
+        changeList(){
+          this.selectnum = 0;
+          this.selectItem.length=0;
+          this.handelColumns();
+          // if(this.btshow.length>0){
+          //   this.btshow.length = 0;
+          // }
           switch (this.current) {
             case 0:
               this.rows = this.E_list;
@@ -304,6 +330,7 @@
           }
         },
         pass(){
+          console.log(this.selectItem);
           let params = {'projlst':this.selectItem};
           this.$http.post(this.$baseURL + "/api/vi/first_trial_change",params,{
             headers:{
@@ -317,6 +344,7 @@
             }
             else{
               this.$Notice.open({title: "评审完成",duration:0.5});
+              location.reload();
             }
           }, function (res) {
             alert(res);
