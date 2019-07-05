@@ -983,6 +983,46 @@ class DbOperate:
         return res
 
     '''
+    （AOE）检查邮箱和邀请码
+    '''
+    def multi_check_code(self, mail, invitation_code, project_codes, is_accept):
+        res = {'state': 'fail', 'reason': '网络错误或其他问题!', 'cnt': 0}
+        try:
+            user = self.getCol('user')
+            expert = user.find_one({'user_type': 'expert', 'mail': mail})
+            if expert is None:
+                res['reason'] = "未找到专家"
+                return res
+            if expert['invitation_code'] != invitation_code:
+                res['reason'] = "验证码错误"
+                return res
+            expert_project = self.getCol('expert_project')
+            for project_code in project_codes:
+                e_p = expert_project.find_one({'expert_mail': mail, 'project_code': project_code})
+                if e_p is None:
+                    res['reason'] = "未找到关系"
+                    continue
+                status = e_p['status']
+                if expert["password"] == "":
+                    res['registered'] = False
+                else:
+                    res['registered'] = True
+                res['old_status'] = status
+                if status == -1 or status == 1:
+                    if is_accept:
+                        new_status = 0
+                    else:
+                        new_status = 1
+                    expert_project.update_many({'expert_mail': mail, 'project_code': project_code},
+                                               {"$set": {'status': new_status}})
+                    res['cnt'] += 1
+            if res['cnt'] > 0:
+                res['state'] = 'success'
+        except:
+            return res
+        return res
+
+    '''
     对于某个项目，返回邀请过的专家列表
     '''
     def get_project_expert_list(self, project_code):
@@ -1460,6 +1500,7 @@ class DbOperate:
             projects = []
             for item in project_collection.find({'competition_id': competition_id}, {'_id': 0}):
                 projects.append(item)
+            sorted(projects, key=lambda x: x['project_status'])
             com_status = com_collection.find_one({'_id': ObjectId(competition_id)})['com_status']
             competition_name = com_collection.find_one({'_id': ObjectId(competition_id)})['competition_name']
             res['com_status'] = com_status
@@ -1581,7 +1622,7 @@ class DbOperate:
                     if result == 'True':
                         now_stat = 1
                     else:
-                        now_stat = -1
+                        now_stat = -2
                     proj_list.update_one({"project_code": proj_id},
                                          {"$set": {"project_status": now_stat}})
                 # 未搜索到该项目

@@ -163,6 +163,7 @@ class DownloadFiles(Resource):
             res['url'] = Config.DOMAIN_NAME + '/static/zip/' + project_code + '.zip'
         except:
             res['reason'] = '可能是打包错误，查看本地是否有数据库中的数据'
+            # this is a test for keyboard. Well, not bad. I must admit that, this is better than mine.
         finally:
             return jsonify(res)
 
@@ -936,9 +937,10 @@ class MultiInviteMail(Resource):
                 if res1['state'] == 'success':
                     db.multi_add_proj_exp(mail, project_codes)
                     res['cnt'] += res1['cnt']
-                    res['state'] = 'success'
-            else:
-                return jsonify(res)
+                else:
+                    return jsonify(res)
+            if res['cnt'] > 0:
+                res['state'] = 'success'
         except:
             pass
         finally:
@@ -957,6 +959,29 @@ class CheckCode(Resource):
             project_code = data.get('project_code')
             is_accept = data.get('is_accept')
             res = db.check_code(mail, invitation_code, project_code, is_accept)
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+'''
+（AOE）检查邮箱和邀请码
+'''
+class MultiCheckCode(Resource):
+    def post(self):
+        res = {"state": "fail"}
+        try:
+            data = request.get_json()
+            mail = data.get('mail')
+            invitation_code = data.get('invitation_code')
+            project_codes = data.get('project_code').strip().split("|")
+            is_accept = data.get('is_accept')
+            for project_code in project_codes:
+                if project_code == "":
+                    continue
+                res["cnt"] += db.check_code(mail, invitation_code, project_code, is_accept)['cnt']
+            if res['cnt'] > 0:
+                res['state'] = 'success'
         except:
             pass
         finally:
@@ -1213,6 +1238,7 @@ api.add_resource(MultiAcceptReview, '/api/v1/multi_accept_review', endpoint='mul
 api.add_resource(MultiRefuseReview, '/api/v1/multi_refuse_review', endpoint='multiRefuseReview')
 api.add_resource(GetReview, '/api/v1/get_review', endpoint='getReview')
 api.add_resource(CheckCode, '/api/v1/check_code', endpoint='check_code')
+api.add_resource(MultiCheckCode, '/api/v1/multi_check_code', endpoint='multi_check_code')
 api.add_resource(ExpertSetPassword, '/api/v1/expert_set_password', endpoint='expert_set_password')
 api.add_resource(ChangePassword, '/api/v1/change_password', endpoint='change_password')
 api.add_resource(ChangeInfo, '/api/v1/change_info', endpoint='change_info')
