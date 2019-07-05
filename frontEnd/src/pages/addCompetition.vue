@@ -273,9 +273,32 @@
                                 if (detail.state == 'success') {
                                     console.log(detail.competition_id)
                                     this.$Message.success('新建竞赛成功')
-                                    this.$router.push({
-                                        path: '/competitionList'
-                                    })
+
+                                    var nowdate = new Date()
+                                    var time = nowdate.getFullYear() + '/' + (nowdate.getMonth() + 1) + '/' + nowdate.getDate() + ' '
+                                    time = time + (nowdate.getHours().toString().length >= 1 ? nowdate.getHours() : '0' + nowdate.getHours()) + ':' + (nowdate.getMinutes().toString().length > 1 ? nowdate.getMinutes() : '0' + nowdate.getMinutes())
+
+                                    let params2 = {
+                                        'title': this.competitionInfo.competition_name + '即将开始',
+                                        'time': time,
+                                        'content': this.competitionInfo.competition_name + ' 将于 ' + this.begin_time + ' 开始报名，希望各位积极参与，可以进入竞赛列表查看有关该竞赛的详细信息。',
+                                        'files': [],
+                                    }
+                                    this.$http.post(this.$baseURL + '/api/v1/add_news', params2)
+                                        .then(function (res) {
+                                            console.log(res)
+                                            var detail = res.body
+                                            if (detail.state == 'success') {
+                                                this.$Message.success('发布成功')
+                                                this.$router.push({
+                                                    path: '/competitionList'
+                                                })
+                                            } else {
+                                                this.$Message.error('发布失败，请稍后再试')
+                                            }
+                                        }, function (res) {
+                                            this.$Message.error('Failed')
+                                        })
                                 } else {
                                     this.$Message.error('新建竞赛失败 ' + detail.reason)
                                 }
