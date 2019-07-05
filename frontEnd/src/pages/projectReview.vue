@@ -86,8 +86,8 @@
                                                         expert_email: this.$cookie.get('mail')
                                                     }
                                                 }).then(function (res) {
-                                                    console.log(res)
-                                                    alert("成功拒绝该项目的评审")
+                                                    console.log(res);
+                                                    this.$Message.success("成功拒绝该项目的评审")
                                                     this.rows.splice(params.index, 1);
                                                 }, function (res) {
                                                     console.log(res)
@@ -131,9 +131,9 @@
                                                     console.log(res)
                                                     if (res.body.state === 'success') {
                                                         params.row.status = '评审中';
-                                                        alert("成功接收该项目的评审")
+                                                        this.$Message.success("成功接收该项目的评审")
                                                     } else {
-                                                        alert("操作失败")
+                                                        this.$Message.error("操作失败")
                                                     }
                                                 }, function (res) {
                                                     console.log(res)

@@ -265,7 +265,7 @@
                 this.status = temp.status;
                 if (temp.status !== 0) {
                     this.disable = true;
-                    alert(this.dictionary.dictionary[temp.status + 1])
+                    this.$Message.info(this.dictionary.dictionary[temp.status + 1])
                 }
             }, function (res) {
                 console.log(res)

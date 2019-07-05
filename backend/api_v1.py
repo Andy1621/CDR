@@ -163,6 +163,7 @@ class DownloadFiles(Resource):
             res['url'] = Config.DOMAIN_NAME + '/static/zip/' + project_code + '.zip'
         except:
             res['reason'] = '可能是打包错误，查看本地是否有数据库中的数据'
+            # this is a test for keyboard. Well, not bad. I must admit that, this is better than mine.
         finally:
             return jsonify(res)
 
