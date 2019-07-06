@@ -111,12 +111,14 @@
               }
             },
             {
-              title: '第一作者',
-              key: 'author_name'
+                title: '第一作者',
+                key: 'author_name',
+                width: 140
             },
             {
-              title: '状态',
-              key: 'project_status'
+                title: '状态',
+                key: 'project_status',
+                width: 140
             },
             {
               title: '操作',

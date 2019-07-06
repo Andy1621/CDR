@@ -3,6 +3,20 @@
         <NavBar></NavBar>
         <div class="body">
             <h2>作品评审</h2>
+            <div style="margin-bottom: 10px; text-align: center">
+                作品ID：
+                <Input style="width: 15%;margin-right: 5%" placeholder="输入作品ID搜索" v-model="searchContent1"
+                       @on-change="handleChange"/>
+                作品名称：
+                <Input style="width: 15%;margin-right: 5%" placeholder="输入作品名称搜索" v-model="searchContent2"
+                       @on-change="handleChange"/>
+                竞赛名称：
+                <Input style="width: 15%;margin-right: 5%" placeholder="输入竞赛名称搜索" v-model="searchContent3"
+                       @on-change="handleChange"/>
+                <!--评审截止时间：
+                <DatePicker confirm split-panels type="daterange" placeholder="选择订单日期范围"
+                            style="width: 20%"></DatePicker>-->
+            </div>
             <Table stripe border :columns="columns" :data="rows" ref="table"
                    @on-selection-change="setSelectedData"></Table>
             <div style="margin-top: 10px;text-align: center">
@@ -152,6 +166,10 @@
                 ],
                 rows: [],
                 selectedData: [],
+                initRows: [],
+                searchContent1: '',
+                searchContent2: '',
+                searchContent3: '',
             }
         },
         created() {
@@ -182,6 +200,7 @@
                         }
                     }
                     this.rows = res.body.project_lists;
+                    this.initRows = this.rows;
                 }, function (res) {
                     console.log(res)
                 })
@@ -213,8 +232,7 @@
                                 if (this.compareObject(selected, item))
                                     flag = true;
                             }
-                        }
-                        else flag = true;
+                        } else flag = true;
                         if (flag) {
                             this.$http.get(this.$baseURL + '/api/v1/download_files', {
                                 params: {
@@ -223,9 +241,8 @@
                             }).then(function (res) {
                                 if (res.body.state === 'Success') {
                                     window.location.href = res.body.url;
-                                }
-                                else {
-                                    this.$Message.error("下载"+item.project_id+"号作品失败，" + res.body.reason)
+                                } else {
+                                    this.$Message.error("下载" + item.project_id + "号作品失败，" + res.body.reason)
                                 }
                             }, function (res) {
                                 console.log(res)
@@ -233,6 +250,27 @@
                         }
                     }
                 }
+            },
+            handleChange() {
+                this.rows = this.initRows;
+                this.rows = this.search(this.rows, {
+                    'project_id': this.searchContent1,
+                    'project_name': this.searchContent2,
+                    'competition_name': this.searchContent3,
+                })
+            },
+            search(data, argumentObj) {
+                let res = data;
+                let dataClone = data;
+                for (let argu in argumentObj) {
+                    if (argumentObj[argu].length > 0) {
+                        res = dataClone.filter(d => {
+                            return d[argu].indexOf(argumentObj[argu]) > -1
+                        });
+                        dataClone = res
+                    }
+                }
+                return res
             },
         },
     }
