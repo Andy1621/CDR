@@ -962,6 +962,8 @@ class MultiInviteMail(Resource):
                     res['cnt'] += res1['cnt']
             if res['cnt'] > 0:
                 res['state'] = 'success'
+            else:
+                res['reason'] = '所选的专家都已邀请过。'
         except:
             pass
         finally:
