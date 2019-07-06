@@ -5,7 +5,7 @@
             <div v-if="!isMoreNews">
                 <h3>雨我无瓜科技竞赛</h3>
                 <Divider style="margin: 3px"/>
-                <Carousel autoplay :autoplay-speed="3000" :height="250" v-model="value2" loop>
+                <Carousel autoplay :autoplay-speed="3000" :height="450" v-model="value2" loop>
                     <CarouselItem v-for="(item,index) in carousel_pic" :key="index">
                         <img :src="item.url" class="carousel">
                     </CarouselItem>
