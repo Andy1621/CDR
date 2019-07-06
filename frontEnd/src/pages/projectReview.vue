@@ -6,13 +6,13 @@
             <div style="margin-bottom: 10px; text-align: center">
                 作品ID：
                 <Input style="width: 15%;margin-right: 5%" placeholder="输入作品ID搜索" v-model="searchContent1"
-                       @on-change="handleChange"/>
+                       @on-change="handleChange" clearable></Input>
                 作品名称：
                 <Input style="width: 15%;margin-right: 5%" placeholder="输入作品名称搜索" v-model="searchContent2"
-                       @on-change="handleChange"/>
+                       @on-change="handleChange" clearable></Input>
                 竞赛名称：
                 <Input style="width: 15%;margin-right: 5%" placeholder="输入竞赛名称搜索" v-model="searchContent3"
-                       @on-change="handleChange"/>
+                       @on-change="handleChange" clearable></Input>
                 <!--评审截止时间：
                 <DatePicker confirm split-panels type="daterange" placeholder="选择订单日期范围"
                             style="width: 20%"></DatePicker>-->
