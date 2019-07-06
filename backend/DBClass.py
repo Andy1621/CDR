@@ -421,21 +421,61 @@ class DbOperate:
             return res
 
     '''
-    发布公告
+    随机生成新公告ID
     '''
-    def add_news(self, title, time, content, files):
+    def random_news(self):
         res = {'state': 'fail', 'reason': "未知错误"}
         try:
-            news = {
-                'title': title,
-                'time': time,
-                'content': content,
-                'files': files
+            # 生成公告编码
+            news_list = self.getCol('news')
+            num = random.randint(0, 99999)
+            code = str(num)
+            news = news_list.find_one({'news_code': code})
+            cnt = 0
+            while news is not None:
+                num = (num + 1) % 100000
+                code = str(num)
+                news = news_list.find_one({'news_code': code})
+                cnt += 1
+                if cnt > 100000:
+                    res['reason'] = '公告数量超限'
+                    return res
+            code.zfill(5)
+            t_news = {
+                'news_code': code,
+                'title': '',
+                'time': '',
+                'content': '',
+                'files': list()
             }
-            result = self.getCol('news').insert_one(news)
+            self.getCol('news').insert_one(t_news)
             res['state'] = 'success'
             res['reason'] = None
-            res['news_id'] = str(result.inserted_id)
+            res['news_code'] = code
+        except:
+            pass
+        finally:
+            return res
+
+    '''
+    发布公告
+    '''
+    def add_news(self, news_code, title, time, content, files):
+        res = {'state': 'fail', 'reason': "未知错误"}
+        try:
+            news = self.getCol('news').find_one({'news_code': news_code})
+            if news:
+                news['title'] = title
+                news['time'] = time
+                news['content'] = content
+                news['files'] = files
+                self.getCol('news').update_one({'news_code': news_code}, {'$set': news})
+                res['state'] = 'success'
+                res['reason'] = None
+                res['news_code'] = news_code
+            else:
+                res['state'] = 'fail'
+                res['reason'] = "公告编码不存在"
         except:
             pass
         finally:
@@ -444,26 +484,23 @@ class DbOperate:
     '''
     删除公告
     '''
-    def delete_news(self, news_id):
+    def delete_news(self, news_code):
         res = {'state': 'fail', 'reason': "未知错误"}
         try:
-            news = self.getCol('news').find_one({'_id': ObjectId(news_id)})
+            news = self.getCol('news').find_one({'news_code': news_code})
             if news:
-                files = self.getCol('news').find_one({'_id': ObjectId(news_id)}, {'files': 1})
+                res['reason'] = None
+                files = self.getCol('news').find_one({'news_code': news_code}, {'files': 1})
                 news_files = files['files']
-                flag = True
                 basedir = os.path.abspath(os.path.dirname(__file__))
                 for pf in news_files:
                     file_path = basedir + "/static/" + pf['file_type'] + "/" + pf["file_path"]
                     if not os.path.exists(file_path):
                         res['reason'] = '附件不存在，请联系管理员'
-                        flag = False
-                        break
-                    os.remove(file_path)
-                if flag:
-                    self.getCol('news').remove({'_id': ObjectId(news_id)})
-                    res['state'] = 'success'
-                    res['reason'] = ''
+                    else:
+                        os.remove(file_path)
+                self.getCol('news').remove({'news_code': news_code})
+                res['state'] = 'success'
             else:
                 res['reason'] = "公告不存在"
         except:
@@ -480,7 +517,6 @@ class DbOperate:
             origin_news = self.getCol('news').find({}, {'content': 0, 'files': 0})
             news_list = list()
             for news in origin_news:
-                news['news_id'] = str(news['_id'])
                 news.pop('_id')
                 news_list.append(news)
             res['state'] = 'success'
@@ -494,11 +530,11 @@ class DbOperate:
     '''
     获取公告详情
     '''
-    def get_news_detail(self, news_id):
+    def get_news_detail(self, news_code):
         res = {'state': 'fail', 'reason': "未知错误"}
         try:
             news_list = self.getCol('news')
-            news_detail = news_list.find_one({'_id': ObjectId(news_id)})
+            news_detail = news_list.find_one({'news_code': news_code})
             if news_detail:
                 news_detail.pop('_id')
                 temp_content = news_detail['content'].replace("\n", "<br>")
