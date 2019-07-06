@@ -348,7 +348,7 @@
         },
         data(){
             return{
-                current: 0,
+                current: 3,
                 readonly: false,
                 project_id: '',
                 photo_cnt: 0,
@@ -746,7 +746,10 @@
             //upload video
             videoView(file){
                 console.log(file)
-                window.open(file.response.url)
+                if(file.url)
+                    window.open(file.url)
+                else
+                    window.open(file.response.url)
             },
             handleSuccessVideo (res, file) {
                 console.log(res);
@@ -785,19 +788,60 @@
                     desc: '文件  ' + file.name + ' 过大，不能超过100M'
                 });
             },
-            handleBeforeUploadVideo () {
+            handleBeforeUploadVideo (file) {
                 const check = this.video_cnt < 1;
                 if (!check) {
                     this.$Notice.warning({
                         title: '最多只能上传1个视频'
                     });
                 }
-                return check;
+                console.log(file)
+                var url = URL.createObjectURL(file);
+                 //经测试，发现audio也可获取视频的时长
+                var audioElement = new Audio(url);
+                var time
+                var duration
+                var that = this
+                // audioElement.addEventListener("loadedmetadata", function (_event) {
+                //     time = audioElement.duration;
+                //     console.log(time);
+                //     duration = time <= 5*60 ? true : false
+                //     console.log(duration)
+                //     if (!duration) {
+                //         that.$Notice.warning({
+                //             title: '视频时长不得大于5分钟'
+                //         });
+                //     }
+                //     console.log(check && duration)
+                //     return check && duration;
+                // });
+                var promise = new Promise(function(resolve, reject){
+                    audioElement.addEventListener("loadedmetadata", function (_event) {
+                        time = audioElement.duration;
+                        // console.log(time);
+                        duration = time <= 5*60+1 ? true : false
+                        // console.log(duration)
+                        if (!duration) {
+                            that.$Notice.warning({
+                                title: '视频时长不得大于5分钟'
+                            });
+                        }
+                        // console.log(check && duration)
+                        if(check && duration)
+                            resolve()
+                        else
+                            reject()
+                    })
+                });
+                return promise;
             },
             //upload file
             docView(file){
                 console.log(file)
-                window.open(file.response.url)
+                if(file.url)
+                    window.open(file.url)
+                else
+                    window.open(file.response.url)
             },
             handleSuccessDoc (res, file) {
                 console.log(res);
