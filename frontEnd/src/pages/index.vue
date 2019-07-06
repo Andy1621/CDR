@@ -123,23 +123,23 @@
                 carousel_pic: [
                     {
                         'name': 'pic1',
-                        'url': '../../static/picture/test1.jpg'
+                        'url': '../../static/picture/pic1.png'
                     },
                     {
                         'name': 'pic2',
-                        'url': '../../static/picture/test2.jpg'
+                        'url': '../../static/picture/pic2.png'
                     },
                     {
                         'name': 'pic3',
-                        'url': '../../static/picture/test3.jpg'
+                        'url': '../../static/picture/pic3.jpg'
                     },
                     {
                         'name': 'pic4',
-                        'url': '../../static/picture/test4.jpg'
+                        'url': '../../static/picture/pic4.jpg'
                     },
                     {
                         'name': 'pic5',
-                        'url': '../../static/picture/test5.jpg'
+                        'url': '../../static/picture/pic5.jpg'
                     }
                 ],
                 msgDetail: {
