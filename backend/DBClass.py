@@ -1310,7 +1310,7 @@ class DbOperate:
                 flag = True
                 for pf in project_files:
                     if file_path == pf.get('file_path'):
-                        res['success'] = 'success'
+                        res['state'] = 'success'
                         res['reason'] = '附件已覆盖'
                         flag = False
                         break

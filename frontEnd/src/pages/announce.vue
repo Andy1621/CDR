@@ -193,7 +193,7 @@
                     if(detail.state == 'success'){
                         this.news_code = detail.news_code
                         this.data = {
-                            'news_code': detail.news_codes
+                            'news_code': detail.news_code
                         }
                     }
                     else{
