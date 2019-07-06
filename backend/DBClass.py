@@ -792,11 +792,14 @@ class DbOperate:
                 date_str = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 for project_code in project_codes:
                     if not self.is_expInvitedProj(expert_email, project_code):
-                        # print(expert_email, project_code)
                         new_relation = {"project_code": project_code, "expert_mail": expert_email, "username": name,
                                         "score": 0, "suggestion": "", "status": -1, "invite_date": date_str}
                         exp_proj = self.getCol("expert_project")
                         exp_proj.insert_one(new_relation)
+                    elif self.getCol('expert_project').find_one({'project_code': project_code,
+                                                             'expert_mail': expert_email})['status'] == 1:
+                        self.getCol('expert_project').update_one({'project_code': project_code,
+                                                             'expert_mail': expert_email}, {'$set': {'status': -1}})
                 res['state'] = 'success'
             # 专家账号不存在
             else:
@@ -819,44 +822,48 @@ class DbOperate:
             expert_name = expert["username"]
             invitation_code = expert['invitation_code']
             project = self.getCol('project')
-            pro = project.find_one({'project_code': project_code})
-            if pro is None:
-                res['reason'] = "未找到项目"
-                return res
-            project_name = pro["project_name"]
-            comp_code = pro["competition_id"]
-            competition = self.getCol('competition')
-            comp = competition.find_one({'_id': ObjectId(comp_code)})
-            if comp is None:
-                res['reason'] = "未找到竞赛"
-                return res
-            comp_name = comp["competition_name"]
-            header = comp_name + "项目评审邀请"
-            # front_ip = "http://localhost:8080"
-            front_ip = "http://114.116.189.128"
-            accept_addr = front_ip + "/#/?token=" + invitation_code + \
-                          "&email=" + mail + \
-                          "&project_code=" + project_code + "&is_accept=" + "true"
-            # accept_addr = "<a href=\"" + accept_addr + "\">" + accept_addr + "</a>"
-            accept_addr = "<a href=\"" + accept_addr + "\">" + "接受评审" + "</a>"
-            refuse_addr = front_ip + "/#/?token=" + invitation_code + \
-                          "&email=" + mail + \
-                          "&project_code=" + project_code + "&is_accept=" + "false"
-            # refuse_addr = "<a href=\"" + refuse_addr + "\">" + refuse_addr + "</a>"
-            refuse_addr = "<a href=\"" + refuse_addr + "\">" + "拒绝评审" + "</a>"
-            message = "<p>尊敬的 " + expert_name + " 先生/女士您好，\n</p>" + \
-                      "<p>" + comp_name + "竞赛组委会诚邀您参与参赛项目\"" + project_name + "\"的评审工作。\n</p>" + \
-                      "<p>如果您接受此邀请，请点击链接: " + accept_addr + " 进入竞赛系统。\n</p>" + \
-                      "<p>如果您希望拒绝此邀请，请点击链接: " + refuse_addr + " 确认拒绝。\n</p>" + \
-                      "<p>衷心感谢您的付出和支持。\n</p>" + \
-                      "<p>----" + comp_name + "竞赛组委会\n</p>"
-            if self.send_mail(mail, header, message) is False:
-                res['reason'] = "邮件发送失败"
-                return res
-            res['state'] = 'success'
+            if not self.is_expInvitedProj(mail, project_code) or self.getCol('expert_project') \
+                    .find_one({'expert_mail': mail, 'project_code': project_code})['status'] == 1:
+                pro = project.find_one({'project_code': project_code})
+                if pro is None:
+                    res['reason'] = "未找到项目"
+                    return res
+                project_name = pro["project_name"]
+                comp_code = pro["competition_id"]
+                competition = self.getCol('competition')
+                comp = competition.find_one({'_id': ObjectId(comp_code)})
+                if comp is None:
+                    res['reason'] = "未找到竞赛"
+                    return res
+                comp_name = comp["competition_name"]
+                header = comp_name + "项目评审邀请"
+                front_ip = "http://localhost:8080"
+                # front_ip = "http://114.116.189.128"
+                accept_addr = front_ip + "/#/?token=" + invitation_code + \
+                              "&email=" + mail + \
+                              "&project_code=" + project_code + "&is_accept=" + "true"
+                # accept_addr = "<a href=\"" + accept_addr + "\">" + accept_addr + "</a>"
+                accept_addr = "<a href=\"" + accept_addr + "\">" + "接受评审" + "</a>"
+                refuse_addr = front_ip + "/#/?token=" + invitation_code + \
+                              "&email=" + mail + \
+                              "&project_code=" + project_code + "&is_accept=" + "false"
+                # refuse_addr = "<a href=\"" + refuse_addr + "\">" + refuse_addr + "</a>"
+                refuse_addr = "<a href=\"" + refuse_addr + "\">" + "拒绝评审" + "</a>"
+                message = "<p>尊敬的 " + expert_name + " 先生/女士您好，\n</p>" + \
+                          "<p>" + comp_name + "竞赛组委会诚邀您参与参赛项目\"" + project_name + "\"的评审工作。\n</p>" + \
+                          "<p>如果您接受此邀请，请点击链接: " + accept_addr + " 进入竞赛系统。\n</p>" + \
+                          "<p>如果您希望拒绝此邀请，请点击链接: " + refuse_addr + " 确认拒绝。\n</p>" + \
+                          "<p>衷心感谢您的付出和支持。\n</p>" + \
+                          "<p>----" + comp_name + "竞赛组委会\n</p>"
+                if self.send_mail(mail, header, message) is False:
+                    res['reason'] = "邮件发送失败"
+                    return res
+                res['state'] = 'success'
+            else:
+                res['reason'] = '已经给该专家发过邮件！'
         except:
             return res
-        return res
+
 
     '''
     （AOE）向专家发送邀请邮件
@@ -876,8 +883,8 @@ class DbOperate:
             comp_code = ""
             project_name = ""
             for project_code in project_codes:
-                if not self.is_expInvitedProj(mail, project_code):
-                    print(mail,project_code)
+                if not self.is_expInvitedProj(mail, project_code) or self.getCol('expert_project')\
+                        .find_one({'expert_mail': mail, 'project_code': project_code})['status'] == 1:
                     pro = project.find_one({'project_code': project_code})
                     if pro is None:
                         res['reason'] = "未找到项目"
@@ -1561,6 +1568,8 @@ class DbOperate:
             projects = []
             for item in project_collection.find({'competition_id': competition_id}, {'_id': 0}):
                 projects.append(item)
+                ac_exp_num = self.get_review_info(item['project_code'])['cnt_all']
+                project_collection.update_one({'project_code':item['project_code']},{'$set': {'ac_exp_num': ac_exp_num}})
             projects = sorted(projects, key=lambda x: x['project_status'], reverse=True)
             com_status = com_collection.find_one({'_id': ObjectId(competition_id)})['com_status']
             competition_name = com_collection.find_one({'_id': ObjectId(competition_id)})['competition_name']
