@@ -337,7 +337,7 @@ class DbOperate:
                                                              'expert_mail': expert_email})
             if review and review['status'] == -1:
                 review['status'] = 0
-                self.getCol('project').update_one({'project_code':project_code},{'$set'})
+                self.getCol('project').update_one({'project_code': project_code}, {'$set'})
                 self.getCol('expert_project').update_one({'project_code': project_code,
                                                           'expert_mail': expert_email}, {'$set': review})
                 res['state'] = 'success'
@@ -760,10 +760,15 @@ class DbOperate:
             test = user_list.find_one({'mail': expert_email})
             # 专家账号存在
             if test:
-                name = test['username']
-                new_relation = {"project_code": project_code, "expert_mail": expert_email, "username": name,
-                                "score": 0, "suggestion": "", "status": -1}
                 exp_proj = self.getCol("expert_project")
+                e_p = exp_proj.find_one({"project_code": project_code, "expert_mail": expert_email})
+                if e_p:
+                    res['reason'] = "关系已存在"
+                    return res
+                name = test['username']
+                date_str = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                new_relation = {"project_code": project_code, "expert_mail": expert_email, "username": name,
+                                "score": 0, "suggestion": "", "status": -1, "invite_date": date_str}
                 exp_proj.insert_one(new_relation)
                 res['state'] = 'success'
             # 专家账号不存在
@@ -784,11 +789,12 @@ class DbOperate:
             # 专家账号存在
             if test:
                 name = test['username']
+                date_str = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 for project_code in project_codes:
                     if not self.is_expInvitedProj(expert_email, project_code):
-                        print(expert_email, project_code)
+                        # print(expert_email, project_code)
                         new_relation = {"project_code": project_code, "expert_mail": expert_email, "username": name,
-                                        "score": 0, "suggestion": "", "status": -1}
+                                        "score": 0, "suggestion": "", "status": -1, "invite_date": date_str}
                         exp_proj = self.getCol("expert_project")
                         exp_proj.insert_one(new_relation)
                 res['state'] = 'success'
@@ -1089,14 +1095,34 @@ class DbOperate:
             pro_list = self.getCol('project')
             pro = pro_list.find_one({'project_code': project_code, 'project_status': 0})
             if pro:
-                pro_list.update({'project_code': project_code, 'project_status': 0}, {"$set": {"project_status": -1}})
+                pro_list.update_one({'project_code': project_code, 'project_status': 0}, {"$set": {"project_status": -1}})
                 res['state'] = 'success'
             else:
                 res['reason'] = "作品不存在或作品状态不为已提交"
             return res
         except:
             return res
-        
+
+    '''
+    长时间未回应视为专家拒绝评审
+    '''
+    def refuse_gugu_expert(self):
+        res = {'state': 'fail', 'reason': "未知错误"}
+        try:
+            review_list = self.getCol('expert_project').find({'status': -1})
+            before_7 = datetime.datetime.now() + datetime.timedelta(days=-7)
+            for review in review_list:
+                invite_date = datetime.datetime.strptime(review['invite_date'], '%Y-%m-%d %H:%M:%S')
+                if invite_date <= before_7:
+                    self.getCol('expert_project').update_one({'expert_mail': review['expert_mail'],
+                                                              'project_code': review['project_code']},
+                                                             {"$set": {"status": 1}})
+            res['state'] = 'success'
+        except:
+            pass
+        finally:
+            return res
+
     '''
     辅助函数：用于获取某个项目已经邀请并尚未拒绝的专家数量、已经评审的专家数量和评审评分总和
     '''
