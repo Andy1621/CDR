@@ -231,7 +231,7 @@
             </div>
             <div class="form" v-show="current == 3">
                 <h4 style="margin-bottom: 20px">相关文档（仅限PDF）</h4>
-                <div v-if="readonly" class="show-upload">
+                <div v-show="readonly" class="show-upload">
                     <ul>
                         <li v-for="item in uploadDocList" @click="docView(item)">
                             <Icon type="md-document"></Icon>{{item.name}}
@@ -270,7 +270,7 @@
                         <Progress style="margin-top: 20px" v-if="item.showProgress" :percent="item.percentage" hide-info></Progress>
                     </template>
                 </div>
-                <div v-if="readonly" class="show-upload">
+                <div v-show="readonly" class="show-upload">
                     <ul>
                         <li v-for="item in uploadPhotoList" @click="photoView(item)">
                             <Icon type="ios-image"></Icon>{{item.name}}
@@ -304,7 +304,7 @@
                 </Modal>
                 <Divider/>
                 <h4 style="margin-bottom: 20px">作品视频（仅限 mp4）</h4>
-                <div v-if="readonly" class="show-upload">
+                <div v-show="readonly" class="show-upload">
                     <ul>
                         <li v-for="item in uploadVideoList" @click="videoView(item)">
                             <Icon type="ios-film"></Icon> {{item.name}}
@@ -327,7 +327,7 @@
                     :action="up_url"
                     :data = type_video
                     style="display: inline-block">
-                    <Button :disabled="uploadVideoList.length>=1" icon="ios-videocam" style="width: 100px">视频上传</Button>
+                    <Button :disabled="video_cnt>=1" icon="ios-videocam" style="width: 100px">视频上传</Button>
                 </Upload>
             </div>
             <Button @click="check_table" style="margin-right: 20px;">预览表格</Button>
@@ -352,6 +352,7 @@
                 readonly: false,
                 project_id: '',
                 photo_cnt: 0,
+                video_cnt: 0,
                 change_btn_click: false,
                 up_url: this.$baseURL + '/api/v1/up_file',
                 type_doc: {
@@ -745,7 +746,7 @@
             //upload video
             videoView(file){
                 console.log(file)
-                window.open(file.url)
+                window.open(file.response.url)
             },
             handleSuccessVideo (res, file) {
                 console.log(res);
@@ -754,6 +755,7 @@
                 else{
                     // this.$Message.success('成功上传')
                     file.url = res.file_path;
+                    this.video_cnt += 1;
                 }
             },
             handleRemoveVideo(file){
@@ -767,6 +769,7 @@
                         }
                         else{
                             console.log('Success')
+                            this.video_cnt -= 1;
                         }
                     })
             },
@@ -783,7 +786,7 @@
                 });
             },
             handleBeforeUploadVideo () {
-                const check = this.uploadVideoList.length < 1;
+                const check = this.video_cnt < 1;
                 if (!check) {
                     this.$Notice.warning({
                         title: '最多只能上传1个视频'
@@ -794,7 +797,7 @@
             //upload file
             docView(file){
                 console.log(file)
-                window.open(file.url)
+                window.open(file.response.url)
             },
             handleSuccessDoc (res, file) {
                 console.log(res);
@@ -879,6 +882,7 @@
                             }
 
                             this.photo_cnt = this.defaultPhotoList.length
+                            this.video_cnt = this.defaultVideoList.length
                             this.project_id = form.workCode;
                             // console.log(form.workCode)
                             this.type_doc = {
@@ -927,9 +931,12 @@
             },
         },
         mounted () {
-            this.uploadDocList = this.$refs.uploadDoc.fileList.length>0 ? this.$refs.uploadDoc.fileList : this.defaultDocList;
-            this.uploadPhotoList = this.$refs.uploadPhoto.fileList.length>0 ? this.$refs.uploadPhoto.fileList : this.defaultPhotoList;
-            this.uploadVideoList = this.defaultVideoList.length>0 ? this.$refs.uploadVideo.fileList : this.defaultVideoList;
+            this.uploadDocList = this.defaultDocList;
+            // this.uploadDocList = this.$refs.uploadDoc.fileList.length>0 ? this.$refs.uploadDoc.fileList : this.defaultDocList;
+            this.uploadPhotoList = this.defaultPhotoList;
+            // this.uploadPhotoList = this.$refs.uploadPhoto.fileList.length>0 ? this.$refs.uploadPhoto.fileList : this.defaultPhotoList;
+            this.uploadVideoList = this.defaultVideoList;
+            // this.uploadVideoList = this.defaultVideoList.length>0 ? this.$refs.uploadVideo.fileList : this.defaultVideoList;
             // this.uploadPhotoList = this.defaultPhotoList;
             // console.log(this.uploadPhotoList)
             //设置Message默认属性
