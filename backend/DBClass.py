@@ -1095,7 +1095,7 @@ class DbOperate:
             pro_list = self.getCol('project')
             pro = pro_list.find_one({'project_code': project_code, 'project_status': 0})
             if pro:
-                pro_list.update({'project_code': project_code, 'project_status': 0}, {"$set": {"project_status": -1}})
+                pro_list.update_one({'project_code': project_code, 'project_status': 0}, {"$set": {"project_status": -1}})
                 res['state'] = 'success'
             else:
                 res['reason'] = "作品不存在或作品状态不为已提交"
@@ -1114,7 +1114,7 @@ class DbOperate:
             for review in review_list:
                 invite_date = datetime.datetime.strptime(review['invite_date'], '%Y-%m-%d %H:%M:%S')
                 if invite_date <= before_7:
-                    self.getCol('expert_project').update({'expert_mail': review['name'],
+                    self.getCol('expert_project').update_one({'expert_mail': review['name'],
                                                           'project_code': review['project_code']},
                                                          {"$set": {"status": 1}})
             res['state'] = 'success'
