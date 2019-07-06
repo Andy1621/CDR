@@ -1229,6 +1229,23 @@ class DeleteExpert(Resource):
             pass
         finally:
             return jsonify(res)
+
+'''
+校团委搜索作品
+'''
+class SearchWorks(Resource):
+    def post(self):
+        res = {'state': 'fail', 'reason': '网络错误或未知错误'}
+        try:
+            data = request.get_json()
+            competition_id = data['competition_id']
+            current = data['current']
+            keyword = data['keyword']
+            res = db.searchworks(competition_id, current, keyword)
+        except Exception as e:
+            print(str(e))
+        finally:
+            return jsonify(res)
 ################################################################################################################
 
 # 添加api资源
@@ -1284,6 +1301,7 @@ api.add_resource(CheckXlsxHeader, '/api/v1/check_xlsx_header', endpoint="checkXl
 api.add_resource(GetExpertList, '/api/v1/get_expert_list', endpoint="getExpertList")
 api.add_resource(DeleteExpert, '/api/v1/delete_expert', endpoint="deleteExpert")
 api.add_resource(ImportExpert, '/api/v1/import_expert', endpoint="importExpert")
+api.add_resource(SearchWorks, '/api/v1/searchworks', endpoint='searchworks')
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", debug=True)
