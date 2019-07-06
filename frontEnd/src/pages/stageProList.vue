@@ -236,7 +236,7 @@
               this.total_item = this.search_list.length;
               this.handleType(this.search_list);
               this.handleData(this.search_list);
-              this.rows = this.search_list;
+              this.rows = this.search_list.slice(0,this.pageSize);
             }
           }, function (res) {
             alert(res);
