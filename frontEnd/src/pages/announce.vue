@@ -132,6 +132,15 @@
                 } else {
                     // this.$Message.success('成功上传')
                     file.url = res.url;
+                    var list = this.$refs.uploadDoc.fileList
+                    console.log(file)
+                    console.log(list)
+                    for(var item of list){
+                        if(item.name == file.name && list.indexOf(item)!=list.length-1){
+                            this.$refs.uploadDoc.fileList.splice(list.indexOf(item),1)
+                        break
+                        }
+                    }
                 }
             },
             handleRemoveDoc(file, fileList) {
@@ -159,7 +168,7 @@
                     desc: '文件  ' + file.name + ' 过大，不能超过20M'
                 });
             },
-            handleBeforeUploadDoc() {
+            handleBeforeUploadDoc(file) {
                 const check = this.uploadDocList.length < 100;
                 if (!check) {
                     this.$Notice.warning({
