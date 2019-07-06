@@ -348,7 +348,7 @@
         },
         data(){
             return{
-                current: 3,
+                current: 0,
                 readonly: false,
                 project_id: '',
                 photo_cnt: 0,
