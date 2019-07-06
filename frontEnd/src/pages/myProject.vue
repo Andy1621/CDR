@@ -146,6 +146,9 @@
                         var length = tmp_list.length;
                         for(var i=0; i<length; i++){
                             switch(tmp_list[i].project_status){
+                                case -2:
+                                    tmp_list[i].project_status = '未通过初审';
+                                    break;
                                 case -1:
                                     tmp_list[i].project_status = '未提交';
                                     break;
