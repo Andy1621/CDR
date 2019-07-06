@@ -109,6 +109,20 @@
                                     props: {
                                         type: 'primary',
                                         size: 'small',
+                                    },
+                                    style: {
+                                        marginRight: '5px',
+                                    },
+                                    on: {
+                                        click: () => {
+                                            this.to_competition(params.row.competition_id, this.role)
+                                        }
+                                    }
+                                }, '竞赛详情'),
+                                h('Button', {
+                                    props: {
+                                        type: 'primary',
+                                        size: 'small',
                                         disabled: params.row.com_status == "未开始"
                                     },
                                     style: {
@@ -126,7 +140,7 @@
                                             })
                                         }
                                     }
-                                }, '竞赛入口'),
+                                }, '查看作品'),
                                 h('Button', {
                                     props: {
                                         type: 'success',
@@ -145,22 +159,7 @@
                                 }, '报名竞赛'),
                                 h('Button', {
                                     props: {
-                                        type: 'primary',
-                                        size: 'small',
-                                    },
-                                    style: {
-                                        marginRight: '5px',
-                                        display: this.role === 'student'? '' :'none',
-                                    },
-                                    on: {
-                                        click: () => {
-                                            this.to_competition(params.row.competition_id)
-                                        }
-                                    }
-                                }, '竞赛详情'),
-                                h('Button', {
-                                    props: {
-                                        type: 'primary',
+                                        type: 'warning',
                                         size: 'small',
                                     },
                                     style: {
@@ -225,13 +224,13 @@
                                 }, [
                                     h('Button', {
                                         props: {
-                                            type: 'primary',
+                                            type: 'warning',
                                             size: 'small',
                                         },
                                         style: {
 
                                         }
-                                    }, '最终成绩导入')
+                                    }, '导入成绩')
                                 ])
                             ])
                         }
@@ -327,13 +326,14 @@
                         this.$Message.error('Failed')
                     })
             },
-            to_competition(competition_id){
+            to_competition(competition_id, role){
                 this.$router.push({
                     path : '/messageDetail',
                     query: {
                         type: 'competition',
                         from: 'list',
                         competitionID: competition_id,
+                        who: role,
                     }
                 })
             },

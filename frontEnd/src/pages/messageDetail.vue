@@ -31,6 +31,18 @@
                         <Col span="4"><span class="info-title">报名截止时间：</span></Col>
                         <Col span="19"><p class="info-competition">{{competitionDetail.submission_ddl}}</p></Col>
                     </Row>
+                    <Row class="info-detail" v-if="isSchool">
+                        <Col span="4"><span class="info-title">初审截止时间：</span></Col>
+                        <Col span="19"><p class="info-competition">{{competitionDetail.first_review_ddl}}</p></Col>
+                    </Row>
+                    <Row class="info-detail" v-if="isSchool">
+                        <Col span="4"><span class="info-title">专家初评截止时间：</span></Col>
+                        <Col span="19"><p class="info-competition">{{competitionDetail.expert_comments_ddl}}</p></Col>
+                    </Row>
+                    <Row class="info-detail" v-if="isSchool">
+                        <Col span="4"><span class="info-title">现场答辩截止时间：</span></Col>
+                        <Col span="19"><p class="info-competition">{{competitionDetail.live_selection_ddl}}</p></Col>
+                    </Row>
                     <Row class="info-detail">
                         <Col span="4"><span class="info-title">竞赛结束时间：</span></Col>
                         <Col span="19"><p class="info-competition">{{competitionDetail.end_time}}</p></Col>
@@ -92,6 +104,7 @@
                 detailType: '',
                 competitionDetail: {},
                 newsDetail: {},
+                isSchool: false,
             }
         },
         methods: {
@@ -128,6 +141,9 @@
                 if (query.from == 'list') {
                     this.listName = '竞赛列表'
                     this.isFromList = true
+                }
+                if(query.who == 'school'){
+                    this.isSchool = true
                 }
                 let params = {
                     'competition_id': this.$route.query.competitionID

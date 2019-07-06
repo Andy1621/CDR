@@ -244,12 +244,14 @@
                 })
             },
             to_competition(competition_id) {
+                let role = this.$cookie.get('role');
                 this.$router.push({
                     path: '/messageDetail',
                     query: {
                         type: 'competition',
                         from: 'index',
                         competitionID: competition_id,
+                        who: role,
                     }
                 })
             }
