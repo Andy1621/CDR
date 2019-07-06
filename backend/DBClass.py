@@ -131,6 +131,7 @@ class DbOperate:
                 project_files = project['project_files']
                 for file in project_files:
                     temp = file['file_path'].split('/')
+                    # temp = os.path.split(file['file_path'])
                     temp_files.append({
                         'file_name': temp[-1].split('_', 1)[-1],
                         'file_path': Config.DOMAIN_NAME + '/' + '/'.join(temp[-3:]),
