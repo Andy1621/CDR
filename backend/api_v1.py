@@ -101,7 +101,7 @@ class DeleteFile(Resource):
             return jsonify(res)
 
 
-# 上传公告附件
+# 上传公告附件  这是黎昆昌的电脑，这是李昊天的电脑，这是赵楠的电脑，这是胡琦的电脑，这是郭子溢的电脑，这是这是。这是。这是？？？？
 class UpAnnounceFile(Resource):
     def post(self):
         res = {"state": "fail", 'reason': '网络错误或未知原因'}

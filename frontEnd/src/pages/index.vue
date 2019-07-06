@@ -23,7 +23,7 @@
                             </a>
                             <ul>
                                 <li v-for="(item,index) in latest_news.slice(0,5)" :key="index"
-                                    @click="show_detail(item.news_id)">
+                                    @click="show_detail(item.news_code)">
                                     <!--                                <a :href="item.url" target="_blank">-->
                                     <Row>
                                         <Col span="18">
@@ -78,7 +78,7 @@
                 <div class="news-list">
                     <ul style="list-style-type:none">
                         <li v-for="(item,index) in show_news.slice((pageNum-1)*pageSize, pageNum*pageSize)" :key="index"
-                            @click="show_detail(item.news_id)">
+                            @click="show_detail(item.news_code)">
                             <div class="paper-detail">
                                 <!--                                    <a :href="item.url" target="_blank">-->
                                 <Row>
@@ -233,13 +233,13 @@
             back_to_index() {
                 this.isMoreNews = false;
             },
-            show_detail(news_id) {
+            show_detail(news_code) {
                 this.$router.push({
                     path: '/messageDetail',
                     query: {
                         'type': 'news',
                         'from': this.isMoreNews ? 'list' : 'index',
-                        'newsID': news_id,
+                        'newsID': news_code,
                     }
                 })
             },

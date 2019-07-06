@@ -38,6 +38,7 @@
                         :on-exceeded-size="handleMaxSizeDoc"
                         :before-upload="handleBeforeUploadDoc"
                         :action="up_url"
+                        :data=data
                         style="display: inline-block">
                     <Button icon="ios-document" style="width: 100px">上传</Button>
                 </Upload>
@@ -58,6 +59,8 @@
         data() {
             return {
                 readonly: false,
+                data: {},
+                news_code: '',
                 announceInfo: {
                     title: '',
                     content: '',
@@ -89,6 +92,7 @@
                         console.log(time)
 
                         let params = {
+                            'news_code': this.news_code,
                             'title': this.announceInfo.title,
                             'time': time,
                             'content': this.announceInfo.content,
@@ -128,6 +132,15 @@
                 } else {
                     // this.$Message.success('成功上传')
                     file.url = res.url;
+                    var list = this.$refs.uploadDoc.fileList
+                    console.log(file)
+                    console.log(list)
+                    for(var item of list){
+                        if(item.name == file.name && list.indexOf(item)!=list.length-1){
+                            this.$refs.uploadDoc.fileList.splice(list.indexOf(item),1)
+                        break
+                        }
+                    }
                 }
             },
             handleRemoveDoc(file, fileList) {
@@ -155,7 +168,7 @@
                     desc: '文件  ' + file.name + ' 过大，不能超过20M'
                 });
             },
-            handleBeforeUploadDoc() {
+            handleBeforeUploadDoc(file) {
                 const check = this.uploadDocList.length < 100;
                 if (!check) {
                     this.$Notice.warning({
@@ -173,7 +186,22 @@
             });
         },
         created() {
-
+            this.$http.get(this.$baseURL + '/api/v1/random_news')
+                .then(function(res){
+                    console.log(res)
+                    var detail = res.body;
+                    if(detail.state == 'success'){
+                        this.news_code = detail.news_code
+                        this.data = {
+                            'news_code': detail.news_code
+                        }
+                    }
+                    else{
+                        this.$Message.error(detail.reason)
+                    }
+                },function(res){
+                    this.$Message.error("Failed")
+                })
         },
     }
 </script>

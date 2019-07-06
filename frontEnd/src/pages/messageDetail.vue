@@ -159,7 +159,7 @@
                     this.isFromList = true
                 }
                 let params = {
-                    'news_id': this.$route.query.newsID,
+                    'news_code': this.$route.query.newsID,
                 }
                 this.$http.post(this.$baseURL + '/api/v1/get_news_detail', params)
                     .then(function (res) {

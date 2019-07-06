@@ -509,7 +509,7 @@ class DbOperate:
             return res
 
     '''
-    获取公告列表
+    获取有标题公告列表
     '''
     def get_news(self):
         res = {'state': 'fail', 'reason': "未知错误"}
@@ -518,7 +518,8 @@ class DbOperate:
             news_list = list()
             for news in origin_news:
                 news.pop('_id')
-                news_list.append(news)
+                if news['title'] != '':
+                    news_list.append(news)
             res['state'] = 'success'
             res['reason'] = None
             res['news_list'] = news_list
@@ -1309,7 +1310,7 @@ class DbOperate:
                 flag = True
                 for pf in project_files:
                     if file_path == pf.get('file_path'):
-                        res['success'] = 'success'
+                        res['state'] = 'success'
                         res['reason'] = '附件已覆盖'
                         flag = False
                         break
