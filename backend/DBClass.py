@@ -93,7 +93,6 @@ class DbOperate:
                     'project_code': code,
                     'competition_id': competition_id,
                     'project_status': -1,
-                    'ac_exp_num': 0,
                     'registration_form': {'workCode': code, 'mainTitle': '',
                                           'department': '', 'mainType': '',
                                           'name': '', 'stuId': '', 'birthday': '',
@@ -338,6 +337,7 @@ class DbOperate:
                                                              'expert_mail': expert_email})
             if review and review['status'] == -1:
                 review['status'] = 0
+                self.getCol('project').update_one({'project_code':project_code},{'$set'})
                 self.getCol('expert_project').update_one({'project_code': project_code,
                                                           'expert_mail': expert_email}, {'$set': review})
                 res['state'] = 'success'
@@ -386,18 +386,6 @@ class DbOperate:
                 review['status'] = 1
                 self.getCol('expert_project').update_one({'project_code': project_code,
                                                           'expert_mail': expert_email}, {'$set': review})
-                project = self.getCol('project').find_one({'project_code': project_code})
-                if project:
-                    try:
-                        ac_exp_num = project['ac_exp_num']
-                    except:
-                        ac_exp_num = 0
-                    if ac_exp_num == 0:
-                        res['reason'] = '一些奇怪的错误发生了！该项目没有专家评审。'
-                        return res
-                    ac_exp_num -= 1
-                    self.getCol('project').update_one({'project_code': project_code},
-                                                      {'$set': {'ac_exp_num': ac_exp_num}})
                 res['state'] = 'success'
                 res['status'] = review['status']
                 res['reason'] = ''
@@ -421,17 +409,6 @@ class DbOperate:
                     review['status'] = 1
                     self.getCol('expert_project').update_one({'project_code': project_code,
                                                               'expert_mail': expert_email}, {'$set': review})
-                    project = self.getCol('project').find_one({'project_code': project_code})
-                    if project:
-                        try:
-                            ac_exp_num = project['ac_exp_num']
-                        except:
-                            ac_exp_num = 0
-                        if ac_exp_num == 0:
-                            res['reason'] = '一些奇怪的错误发生了！该项目没有专家评审。'
-                            return res
-                        ac_exp_num -= 1
-                        self.getCol('project').update_one({'project_code': project_code}, {'$set': {'ac_exp_num': ac_exp_num}})
                     res['cnt'] += 1
                 else:
                     res['reason'] = "项目不存在或专家没有权利处理是否评审"
@@ -840,12 +817,6 @@ class DbOperate:
             if pro is None:
                 res['reason'] = "未找到项目"
                 return res
-            try:
-                ac_exp_num = pro["ac_exp_num"]
-            except:
-                ac_exp_num = 0
-            ac_exp_num += 1
-            project.update_one({'project_code': project_code}, {'$set': {'ac_exp_num': ac_exp_num}})
             project_name = pro["project_name"]
             comp_code = pro["competition_id"]
             competition = self.getCol('competition')
@@ -855,8 +826,8 @@ class DbOperate:
                 return res
             comp_name = comp["competition_name"]
             header = comp_name + "项目评审邀请"
-            front_ip = "http://localhost:8080"
-            # front_ip = "http://114.116.189.128"
+            # front_ip = "http://localhost:8080"
+            front_ip = "http://114.116.189.128"
             accept_addr = front_ip + "/#/?token=" + invitation_code + \
                           "&email=" + mail + \
                           "&project_code=" + project_code + "&is_accept=" + "true"
@@ -905,12 +876,6 @@ class DbOperate:
                         res['reason'] = "未找到项目"
                         continue
                     res['cnt'] += 1
-                    try:
-                        ac_exp_num = pro["ac_exp_num"]
-                    except:
-                        ac_exp_num = 0
-                    ac_exp_num += 1
-                    project.update_one({'project_code': project_code}, {'$set': {'ac_exp_num': ac_exp_num}})
                     project_name = pro["project_name"]
                     comp_code = pro["competition_id"]
                     if code_str == "":
@@ -924,8 +889,8 @@ class DbOperate:
                 return res
             comp_name = comp["competition_name"]
             header = comp_name + "项目评审邀请"
-            front_ip = "http://localhost:8080"
-            # front_ip = "http://114.116.189.128"
+            # front_ip = "http://localhost:8080"
+            front_ip = "http://114.116.189.128"
             accept_addr = front_ip + "/#/?token=" + invitation_code + \
                           "&email=" + mail + \
                           "&project_code=" + code_str + "&is_accept=" + "true"
@@ -1017,10 +982,8 @@ class DbOperate:
     def check_code(self, mail, invitation_code, project_code, is_accept):
         res = {'state': 'fail', 'reason': '网络错误或其他问题!'}
         try:
-            print('a')
             user = self.getCol('user')
             expert = user.find_one({'user_type': 'expert', 'mail': mail})
-            print('b')
             if expert is None:
                 res['reason'] = "未找到专家"
                 return res
@@ -1043,22 +1006,10 @@ class DbOperate:
                     new_status = 0
                 else:
                     new_status = 1
-                    project = self.getCol('project').find_one({'project_code': project_code})
-                    if project:
-                        try:
-                            ac_exp_num = project['ac_exp_num']
-                        except:
-                            ac_exp_num = 0
-                        if ac_exp_num == 0:
-                            res['reason'] = '一些奇怪的错误发生了！该项目没有专家评审。'
-                            return res
-                        ac_exp_num -= 1
-                        self.getCol('project').update_one({'project_code': project_code},
-                                                          {'$set': {'ac_exp_num': 3}})
                 expert_project.update_many({'expert_mail': mail, 'project_code': project_code}, {"$set": {'status': new_status}})
                 # res['operation_ok'] = True
             else:
-                pass  # res['operation_ok'] = False
+                1  # res['operation_ok'] = False
             res['state'] = 'success'
         except:
             return res
@@ -1095,21 +1046,8 @@ class DbOperate:
                         new_status = 0
                     else:
                         new_status = 1
-                        project = self.getCol('project').find_one({'project_code': project_code})
-                        if project:
-                            try:
-                                ac_exp_num = project['ac_exp_num']
-                            except:
-                                ac_exp_num = 0
-                            if ac_exp_num == 0:
-                                res['reason'] = '一些奇怪的错误发生了！该项目没有专家评审。'
-                                return res
-                            ac_exp_num -= 1
-                            self.getCol('project').update_one({'project_code': project_code},
-                                                              {'$set': {'ac_exp_num': 3}})
                     expert_project.update_many({'expert_mail': mail, 'project_code': project_code},
                                                {"$set": {'status': new_status}})
-                    print('b')
                     res['cnt'] += 1
             if res['cnt'] > 0:
                 res['state'] = 'success'
@@ -1595,7 +1533,7 @@ class DbOperate:
             projects = []
             for item in project_collection.find({'competition_id': competition_id}, {'_id': 0}):
                 projects.append(item)
-            projects.sort(key=lambda x: x['project_status'], reverse=True)
+            projects = sorted(projects, key=lambda x: x['project_status'])
             com_status = com_collection.find_one({'_id': ObjectId(competition_id)})['com_status']
             competition_name = com_collection.find_one({'_id': ObjectId(competition_id)})['competition_name']
             res['com_status'] = com_status
@@ -1685,12 +1623,12 @@ class DbOperate:
         res = {'state': 'fail', 'reason': '网络出错或BUG出现！'}
         try:
             # 清空之前的评判结果
-            project_collection.update_many({'competition_id': competition_id, 'project_status': {'$gt': 3}},
-                                           {'$set': {'project_status': 3}})
+            project_collection.update({'project_status': {'$gt': 3}}, {'$set': {'project_status': 3}})
             for item in code_award_list:
                 code = str(item[0])
                 award = self.award2status(item[1])
                 project_collection.update({'project_code': code}, {'$set': {'project_status': award}})
+                print(project_collection.update({'project_code': code}, { '$set': {'project_status': award}}))
             res['state'] = 'success'
         except Exception as e:
             print(str(e))
