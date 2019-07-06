@@ -26,7 +26,7 @@ db = DbOperate()
 
 # 合法的后缀集
 ALLOWED_EXTENSIONS_PIC = ['png', 'jpg', 'JPG', 'PNG', 'gif', 'GIF']
-ALLOWED_EXTENSIONS_VIDEO = ['mp4', 'MP4', 'flv', 'FLV']
+ALLOWED_EXTENSIONS_VIDEO = ['mp4', 'MP4']
 ALLOWED_EXTENSIONS_DOC = ['pdf', 'PDF']
 
 

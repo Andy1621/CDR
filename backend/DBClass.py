@@ -1265,7 +1265,8 @@ class DbOperate:
                 flag = True
                 for pf in project_files:
                     if file_path == pf.get('file_path'):
-                        res['reason'] = '附件已存在'
+                        res['success'] = 'success'
+                        res['reason'] = '附件已覆盖'
                         flag = False
                         break
                 if flag:
@@ -1559,7 +1560,7 @@ class DbOperate:
             projects = []
             for item in project_collection.find({'competition_id': competition_id}, {'_id': 0}):
                 projects.append(item)
-            projects = sorted(projects, key=lambda x: x['project_status'])
+            projects = sorted(projects, key=lambda x: x['project_status'], reverse=True)
             com_status = com_collection.find_one({'_id': ObjectId(competition_id)})['com_status']
             competition_name = com_collection.find_one({'_id': ObjectId(competition_id)})['competition_name']
             res['com_status'] = com_status
@@ -1649,12 +1650,12 @@ class DbOperate:
         res = {'state': 'fail', 'reason': '网络出错或BUG出现！'}
         try:
             # 清空之前的评判结果
-            project_collection.update({'project_status': {'$gt': 3}}, {'$set': {'project_status': 3}})
+            project_collection.update_many({'competition_id': competition_id, 'project_status': {'$gt': 3}},
+                                           {'$set': {'project_status': 3}})
             for item in code_award_list:
                 code = str(item[0])
                 award = self.award2status(item[1])
                 project_collection.update({'project_code': code}, {'$set': {'project_status': award}})
-                print(project_collection.update({'project_code': code}, { '$set': {'project_status': award}}))
             res['state'] = 'success'
         except Exception as e:
             print(str(e))
