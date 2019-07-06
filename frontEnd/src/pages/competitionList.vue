@@ -25,17 +25,21 @@
                     {
                         title: '竞赛名称',
                         key: 'competition_name',
-                        width: 250
+                        width: 280
                     },
                     {
                         title: '报名开始时间',
                         key: 'begin_time',
-                        width: 150
+                        sortable: true,
+                        sortMethod: this.sortDate,
+                        width: 160
                     },
                     {
                         title: '报名截止时间',
                         key: 'end_time',
-                        width: 150
+                        sortable: true,
+                        sortMethod: this.sortDate,
+                        width: 160
                     },
                     {
                         title: '参赛作品总数',
@@ -289,7 +293,8 @@
                                     break;
                             }
                         }
-                        this.rows = detail.contests
+                        detail.contests.reverse();
+                        this.rows = detail.contests;
                     }
                 }, function (res) {
                     alert(res);
@@ -349,6 +354,9 @@
                         title: '成功导入结果'
                     });
                 }
+            },
+            sortDate(a, b, type){
+                return type == "asc" ? Date.parse(a) - Date.parse(b) : Date.parse(b) - Date.parse(a);
             },
         }
     }
