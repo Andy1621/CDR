@@ -5,7 +5,7 @@
             <div v-if="!isMoreNews">
                 <h3>雨我无瓜科技竞赛</h3>
                 <Divider style="margin: 3px"/>
-                <Carousel autoplay :autoplay-speed="3000" :height="250" v-model="value2" loop>
+                <Carousel autoplay :autoplay-speed="3000" :height="450" v-model="value2" loop>
                     <CarouselItem v-for="(item,index) in carousel_pic" :key="index">
                         <img :src="item.url" class="carousel">
                     </CarouselItem>
@@ -123,23 +123,23 @@
                 carousel_pic: [
                     {
                         'name': 'pic1',
-                        'url': '../../static/picture/test1.jpg'
+                        'url': '../../static/picture/pic1.png'
                     },
                     {
                         'name': 'pic2',
-                        'url': '../../static/picture/test2.jpg'
+                        'url': '../../static/picture/pic2.png'
                     },
                     {
                         'name': 'pic3',
-                        'url': '../../static/picture/test3.jpg'
+                        'url': '../../static/picture/pic3.jpg'
                     },
                     {
                         'name': 'pic4',
-                        'url': '../../static/picture/test4.jpg'
+                        'url': '../../static/picture/pic4.jpg'
                     },
                     {
                         'name': 'pic5',
-                        'url': '../../static/picture/test5.jpg'
+                        'url': '../../static/picture/pic5.jpg'
                     }
                 ],
                 msgDetail: {
