@@ -1114,9 +1114,9 @@ class DbOperate:
             for review in review_list:
                 invite_date = datetime.datetime.strptime(review['invite_date'], '%Y-%m-%d %H:%M:%S')
                 if invite_date <= before_7:
-                    self.getCol('expert_project').update_one({'expert_mail': review['name'],
-                                                          'project_code': review['project_code']},
-                                                         {"$set": {"status": 1}})
+                    self.getCol('expert_project').update_one({'expert_mail': review['expert_mail'],
+                                                              'project_code': review['project_code']},
+                                                             {"$set": {"status": 1}})
             res['state'] = 'success'
         except:
             pass
