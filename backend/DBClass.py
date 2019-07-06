@@ -93,6 +93,7 @@ class DbOperate:
                     'project_code': code,
                     'competition_id': competition_id,
                     'project_status': -1,
+                    'ac_exp_num': 0,
                     'registration_form': {'workCode': code, 'mainTitle': '',
                                           'department': '', 'mainType': '',
                                           'name': '', 'stuId': '', 'birthday': '',
@@ -1310,7 +1311,7 @@ class DbOperate:
                 if not flag:
                     self.getCol('project').update_one({'project_code': project_code},
                                                   {"$set": {"project_files": project_files}})
-                    res['state'] = 'Success'
+                    res['state'] = 'success'
                     res['reason'] = 'None'
                 else:
                     res['state'] = '附件不存在'
@@ -1334,10 +1335,10 @@ class DbOperate:
                 project_files = find_project.get('project_files')
                 if len(project_files) > 0:
                     res['project_files'] = project_files
-                    res['state'] = 'Success'
-                    res['reason'] = 'None'
+                    res['state'] = 'success'
+                    res['reason'] = ''
                 else:
-                    res['state'] = '该项目无附件'
+                    res['reason'] = '该项目无附件'
             # 项目不存在
             else:
                 res['reason'] = '项目不存在'
@@ -1376,12 +1377,12 @@ class DbOperate:
                     }
                     project_lists.append(project_list)
 
-                res['state'] = 'Success'
+                res['state'] = 'success'
                 res['reason'] = 'None'
                 res['project_lists'] = project_lists
             # 专家不存在
             else:
-                res['state'] = 'Success'
+                res['state'] = 'success'
                 res['reason'] = '专家没有评审的项目'
         except:
             pass
