@@ -38,6 +38,7 @@
                         :on-exceeded-size="handleMaxSizeDoc"
                         :before-upload="handleBeforeUploadDoc"
                         :action="up_url"
+                        :data=data
                         style="display: inline-block">
                     <Button icon="ios-document" style="width: 100px">上传</Button>
                 </Upload>
@@ -58,6 +59,8 @@
         data() {
             return {
                 readonly: false,
+                data: {},
+                news_code: '',
                 announceInfo: {
                     title: '',
                     content: '',
@@ -89,6 +92,7 @@
                         console.log(time)
 
                         let params = {
+                            'news_code': this.news_code,
                             'title': this.announceInfo.title,
                             'time': time,
                             'content': this.announceInfo.content,
@@ -173,7 +177,22 @@
             });
         },
         created() {
-
+            this.$http.get(this.$baseURL + '/api/v1/random_news')
+                .then(function(res){
+                    console.log(res)
+                    var detail = res.body;
+                    if(detail.state == 'success'){
+                        this.news_code = detail.news_code
+                        this.data = {
+                            'news_code': detail.news_codes
+                        }
+                    }
+                    else{
+                        this.$Message.error(detail.reason)
+                    }
+                },function(res){
+                    this.$Message.error("Failed")
+                })
         },
     }
 </script>

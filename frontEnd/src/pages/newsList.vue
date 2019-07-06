@@ -10,7 +10,7 @@
                 <Divider/>
                     <div class="news-list">
                         <ul style="list-style-type:none">
-                            <li v-for="(item,index) in latest_news.slice((pageNum-1)*pageSize, pageNum*pageSize)" :key="index" @click="show_detail(item.news_id)">
+                            <li v-for="(item,index) in latest_news.slice((pageNum-1)*pageSize, pageNum*pageSize)" :key="index" @click="show_detail(item.news_code)">
                                 <div class="paper-detail">
 <!--                                    <a :href="item.url" target="_blank">-->
                                         <Row>
@@ -77,13 +77,13 @@
                     path: '/index'
                 })
             },
-            show_detail(news_id){
+            show_detail(news_code){
                 this.$router.push({
                     path: '/messageDetail',
                     query:{
                         'type': 'news',
                         'from': 'list',
-                        'newsID': news_id,
+                        'newsID': news_code,
                     }
                 })
             },
