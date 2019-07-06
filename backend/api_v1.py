@@ -1157,7 +1157,9 @@ class ChangeInfo(Resource):
             data = request.get_json()
             mail = data.get('mail')
             user_name = data.get('username')
-            field = data.get('field')
+            field = ''
+            if data.get('field'):
+                field = data.get('field')
             res = db.change_info(mail, user_name, field)
         except:
             pass
