@@ -1327,5 +1327,5 @@ api.add_resource(SearchWorks, '/api/v1/searchworks', endpoint='searchworks')
 
 if __name__ == "__main__":
     # 正式版本begin_job需要在前，debug设为false
-    app.run(host="127.0.0.1", debug=True)
     begin_job()
+    app.run(host="127.0.0.1", debug=False)
