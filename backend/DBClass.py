@@ -178,22 +178,21 @@ class DbOperate:
             if project:
                 files = self.getCol('project').find_one({'project_code': project_code},  {'project_files': 1})
                 project_files = files['project_files']
-                flag = True
                 basedir = os.path.abspath(os.path.dirname(__file__))
+                res['reason'] = None
                 for pf in project_files:
                     file_path = basedir + "/static/" + pf['file_type'] + "/" + pf["file_path"]
                     if not os.path.exists(file_path):
                         res['reason'] = '附件不存在，请联系管理员'
-                        flag = False
-                        break
-                    os.remove(file_path)
-                if flag:
-                    html_path = basedir + "/static/export_html/" + project_code + '.html'
-                    if os.path.exists(html_path):
-                        os.remove(html_path)
-                    self.getCol('project').remove({'project_code': project_code})
-                    res['state'] = 'success'
-                    res['reason'] = ''
+                    else:
+                        os.remove(file_path)
+                html_path = basedir + "/static/export_html/" + project_code + '.html'
+                if os.path.exists(html_path):
+                    os.remove(html_path)
+                else:
+                    res['reason'] = '附件不存在，请联系管理员'
+                self.getCol('project').remove({'project_code': project_code})
+                res['state'] = 'success'
             else:
                 res['reason'] = "项目不存在"
         except:
@@ -1350,9 +1349,10 @@ class DbOperate:
                     self.getCol('project').update_one({'project_code': project_code},
                                                   {"$set": {"project_files": project_files}})
                     res['state'] = 'Success'
-                    res['reason'] = 'None'
+                    res['reason'] = None
                 else:
-                    res['state'] = '附件不存在'
+                    res['state'] = 'Success'
+                    res['reason'] = '附件并不存在该项目中，请联系管理员'
             # 项目不存在
             else:
                 res['reason'] = '项目不存在'

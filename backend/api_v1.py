@@ -87,9 +87,9 @@ class DeleteFile(Resource):
             path = basedir + "/static/" + file_type + "/"
             file_path = path + project_code + '_' + file_name
             if not os.path.exists(file_path):
-                res['reason'] = 'The file does not exists'
-                raise FError("Error")
-            os.remove(file_path)
+                res['reason'] = "附件在服务器不存在，请联系管理员"
+            else:
+                os.remove(file_path)
             db_res = db.delete_attachment(project_code, file_path)
             if db_res.get('state') == 'fail':
                 res['reason'] = db_res.get('reason')
@@ -134,9 +134,9 @@ class DeleteAnnounceFile(Resource):
             path = basedir + "/static/announce_file/"
             file_path = path + file_path.split('/')[-1]
             if not os.path.exists(file_path):
-                res['reason'] = 'The file does not exists'
-                raise FError("Error")
-            os.remove(file_path)
+                res['reason'] = "附件在服务器不存在，请联系管理员"
+            else:
+                os.remove(file_path)
             res['state'] = 'success'
         except:
             pass
