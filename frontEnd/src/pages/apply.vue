@@ -715,9 +715,19 @@
                     this.$refs.uploadPhoto.fileList.splice(fileList.indexOf(file), 1);
                 }
                 else{
-                    this.$Message.success('成功上传')
+                    this.$Message.success('成功上传 '+file.name)
                     file.url = res.url;
                     this.photo_cnt += 1
+                    var list = this.$refs.uploadPhoto.fileList
+                    // console.log(file)
+                    // console.log(list)
+                    for(var item of list){
+                        if(item.name == file.name && list.indexOf(item)!=list.length-1){
+                            this.$refs.uploadPhoto.fileList.splice(list.indexOf(item),1)
+                            this.photo_cnt -= 1
+                            break
+                        }
+                    }
                     // this.refresh_list()
                     console.log(this.uploadPhotoList)
                 }
@@ -756,9 +766,19 @@
                 if(res.state == 'fail')
                     this.$Message.error('上传失败 ' + res.reason);
                 else{
-                    // this.$Message.success('成功上传')
+                    this.$Message.success('成功上传 '+file.name)
                     file.url = res.file_path;
                     this.video_cnt += 1;
+                    var list = this.$refs.uploadVideo.fileList
+                    // console.log(file)
+                    // console.log(list)
+                    for(var item of list){
+                        if(item.name == file.name && list.indexOf(item)!=list.length-1){
+                            this.$refs.uploadVideo.fileList.splice(list.indexOf(item),1)
+                            this.video_cnt -= 1
+                            break
+                        }
+                    }
                 }
             },
             handleRemoveVideo(file){
@@ -848,8 +868,17 @@
                 if(res.state == 'fail')
                     this.$Message.error('上传失败 ' + res.reason);
                 else{
-                    // this.$Message.success('成功上传')
+                    this.$Message.success('成功上传 '+file.name)
                     file.url = res.file_path;
+                    var list = this.$refs.uploadDoc.fileList
+                    // console.log(file)
+                    // console.log(list)
+                    for(var item of list){
+                        if(item.name == file.name && list.indexOf(item)!=list.length-1){
+                            this.$refs.uploadDoc.fileList.splice(list.indexOf(item),1)
+                            break
+                        }
+                    }
                 }
             },
             handleRemoveDoc (file, fileList){
