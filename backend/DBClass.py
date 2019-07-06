@@ -1659,7 +1659,7 @@ class DbOperate:
         com_collection = self.getCol('competition')
         project_collection = self.getCol('project')
         try:
-            if com_collection.count()<1:
+            if com_collection.count() < 1:
                 res['reason'] = '竞赛列表为空'
             else:
                 res['state'] = 'success'
@@ -1704,6 +1704,38 @@ class DbOperate:
                 award = self.award2status(item[1])
                 project_collection.update({'project_code': code}, {'$set': {'project_status': award}})
             res['state'] = 'success'
+        except Exception as e:
+            print(str(e))
+        finally:
+            return res
+
+    '''
+    校团委搜索作品列表
+    '''
+    def searchworks(self, competition_id, current, keyword):
+        res = {'state': 'fail', 'reason': '网络出错或BUG出现！', 'search_list': [], }
+        com_collection = self.getCol('competition')
+        project_collection = self.getCol('project')
+        try:
+            search_list = []
+            res_before_search = self.get_contest_projects(competition_id)
+            if current == 0:
+                tmp_list = res_before_search['E_List']
+            elif current == 1:
+                tmp_list = res_before_search['A_List']
+            elif current == 2:
+                tmp_list = res_before_search['B_List']
+            elif current == 3:
+                tmp_list = res_before_search['C_List']
+            elif current == 4:
+                tmp_list = res_before_search['D_List']
+            for item in tmp_list:
+                if keyword in item['author_name'] or keyword in item['project_name']:
+                    search_list.append(item)
+            if len(search_list) == 0:
+                res['reason'] = '搜索结果为空'
+            res['state'] = 'success'
+            res['search_list'] = search_list
         except Exception as e:
             print(str(e))
         finally:
