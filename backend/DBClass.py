@@ -1734,6 +1734,7 @@ class DbOperate:
             if len(search_list) == 0:
                 res['reason'] = '搜索结果为空'
             res['state'] = 'success'
+            res['search_list'] = search_list
         except Exception as e:
             print(str(e))
         finally:
