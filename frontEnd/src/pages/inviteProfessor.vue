@@ -223,6 +223,7 @@
                 console.log(res);
                 if (res.body.state === 'success'){
                     this.project_list = res.body.B_List;
+                    this.rows1 = this.project_list;
                 }
                 else{
                     this.$Message.error('获取数据失败！');
@@ -237,6 +238,7 @@
                 console.log(res);
                 if (res.body.state === 'success'){
                     this.expert_list = res.body.list;
+                    this.rows2 = this.expert_list;
                 }
                 else{
                     this.$Message.error('获取数据失败！');
@@ -248,88 +250,6 @@
         },
         methods: {
             selectType(value) {
-                this.rows1 = [
-                    {
-                        'project_code':'0.6617120534282326',
-                        'project_name':'0'
-                    },
-                    {
-                        'project_code':'0.46977305630422306',
-                        'project_name':'1'
-                    },
-                    {
-                        'project_code':'0.47249010376488754',
-                        'project_name':'2'
-                    },
-                    {
-                        'project_code':'0.3887876101532005',
-                        'project_name':'3'
-                    },
-                    {
-                        'project_code':'0.5262874469302421',
-                        'project_name':'4'
-                    },
-                    {
-                        'project_code':'0.18664691216111706',
-                        'project_name':'5'
-                    },
-                    {
-                        'project_code':'0.3115852325657822',
-                        'project_name':'6'
-                    },
-                    {
-                        'project_code':'0.24722786077135284',
-                        'project_name':'7'
-                    },
-                    {
-                        'project_code':'0.5633343161150174',
-                        'project_name':'8'
-                    },
-                    {
-                        'project_code':'0.03332417260924592',
-                        'project_name':'9'
-                    },
-                    {
-                        'project_code':'0.5250401700104717',
-                        'project_name':'10'
-                    },
-                    {
-                        'project_code':'0.6403490394519126',
-                        'project_name':'11'
-                    },
-
-            ];
-
-                this.rows2 = [
-                    {
-                        'name':'2',
-                        'email':'5',
-                    },
-                    {
-                        'name':'4',
-                        'email':'6',
-                    },
-                    {
-                        'name':'7',
-                        'email':'3',
-                    },
-                    {
-                        'name':'5',
-                        'email':'2',
-                    },
-                    {
-                        'name':'2',
-                        'email':'5',
-                    },
-                    {
-                        'name':'4',
-                        'email':'1',
-                    },
-                    {
-                        'name':'2',
-                        'email':'5',
-                    },
-                ]
 
                 this.t_project_list = [];
                 this.t_expert_list = [];
