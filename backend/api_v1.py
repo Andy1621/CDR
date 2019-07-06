@@ -16,7 +16,6 @@ from flask_cors import *
 from DBClass import DbOperate
 import Config
 from utils import encode, make_zip
-import time
 import threading
 import datetime
 
@@ -88,9 +87,9 @@ class DeleteFile(Resource):
             path = basedir + "/static/" + file_type + "/"
             file_path = path + project_code + '_' + file_name
             if not os.path.exists(file_path):
-                res['reason'] = 'The file does not exists'
-                raise FError("Error")
-            os.remove(file_path)
+                res['reason'] = "附件在服务器不存在，请联系管理员"
+            else:
+                os.remove(file_path)
             db_res = db.delete_attachment(project_code, file_path)
             if db_res.get('state') == 'fail':
                 res['reason'] = db_res.get('reason')
@@ -102,17 +101,17 @@ class DeleteFile(Resource):
             return jsonify(res)
 
 
-# 上传公告附件
+# 上传公告附件  这是黎昆昌的电脑，这是李昊天的电脑，这是赵楠的电脑，这是胡琦的电脑，这是郭子溢的电脑，这是这是。这是。这是？？？？
 class UpAnnounceFile(Resource):
     def post(self):
         res = {"state": "fail", 'reason': '网络错误或未知原因'}
         try:
+            news_code = request.form.get('news_code')
             file = request.files.get('file')
             basedir = os.path.abspath(os.path.dirname(__file__))
             path = basedir + '/static/announce_file/'
-            timestamp = int(round(time.time()))
-            # 存文件到文件夹
-            file_name = str(timestamp) + '_' + file.filename
+            # 存文件到文件夹，修改为 公告编码+文件名
+            file_name = news_code + '_' + file.filename
             file_path = path + file_name
             file.save(file_path)
             res['state'] = "success"
@@ -135,9 +134,9 @@ class DeleteAnnounceFile(Resource):
             path = basedir + "/static/announce_file/"
             file_path = path + file_path.split('/')[-1]
             if not os.path.exists(file_path):
-                res['reason'] = 'The file does not exists'
-                raise FError("Error")
-            os.remove(file_path)
+                res['reason'] = "附件在服务器不存在，请联系管理员"
+            else:
+                os.remove(file_path)
             res['state'] = 'success'
         except:
             pass
@@ -631,25 +630,41 @@ class MultiRefuseReview(Resource):
 
 
 '''
+随机生成新公告ID
+'''
+class RandomNews(Resource):
+    def get(self):
+        res = {"state": "fail"}
+        try:
+            res = db.random_news()
+        except:
+            pass
+        finally:
+            return jsonify(res)
+
+
+'''
 新增公告
 参数：
-    1.题目title
-    2.时间time
-    3.内容content
-    4.附件files
+    1.公告编码news_code
+    2.题目title
+    3.时间time
+    4.内容content
+    5.附件files
 '''
 class AddNews(Resource):
     def post(self):
         res = {"state": "fail"}
         try:
             data = request.get_json()
+            new_code = data.get('news_code')
             title = data.get('title')
             time = data.get('time')
             content = data.get('content')
             files = list()
             if data.get('files'):
                 files = data.get('files')
-            res = db.add_news(title, time, content, files)
+            res = db.add_news(new_code, title, time, content, files)
         except:
             pass
         finally:
@@ -672,14 +687,16 @@ class GetNews(Resource):
 
 '''
 获取公告详情
+参数：
+    公告编码news_code
 '''
 class GetNewsDetail(Resource):
     def post(self):
         res = {"state": "fail"}
         try:
             data = request.get_json()
-            news_id = data.get('news_id')
-            res = db.get_news_detail(news_id)
+            news_code = data.get('news_code')
+            res = db.get_news_detail(news_code)
         except:
             pass
         finally:
@@ -689,15 +706,15 @@ class GetNewsDetail(Resource):
 '''
 删除公告
 参数：
-    公告ID
+    公告编码
 '''
 class DeleteNews(Resource):
     def get(self):
         res = {"state": "fail"}
         try:
             data = request.args
-            news_id = data.get('news_id')
-            res = db.delete_news(news_id)
+            news_code = data.get('news_code')
+            res = db.delete_news(news_code)
         except:
             pass
         finally:
@@ -1233,6 +1250,23 @@ class DeleteExpert(Resource):
             pass
         finally:
             return jsonify(res)
+
+'''
+校团委搜索作品
+'''
+class SearchWorks(Resource):
+    def post(self):
+        res = {'state': 'fail', 'reason': '网络错误或未知错误'}
+        try:
+            data = request.get_json()
+            competition_id = data['competition_id']
+            current = data['current']
+            keyword = data['keyword']
+            res = db.searchworks(competition_id, current, keyword)
+        except Exception as e:
+            print(str(e))
+        finally:
+            return jsonify(res)
 ################################################################################################################
 
 # 添加api资源
@@ -1276,6 +1310,7 @@ api.add_resource(GetNews, '/api/v1/get_news', endpoint='getNews')
 api.add_resource(GetNewsDetail, '/api/v1/get_news_detail', endpoint='getNewsDetail')
 api.add_resource(DeleteNews, '/api/v1/delete_news', endpoint='seleteNews')
 api.add_resource(AddNews, '/api/v1/add_news', endpoint='addNews')
+api.add_resource(RandomNews, '/api/v1/random_news', endpoint='random_news')
 api.add_resource(UpAnnounceFile, '/api/v1/up_announce_file', endpoint='upAnnounceFile')
 api.add_resource(DeleteAnnounceFile, "/api/v1/delete_announce_file", endpoint="deleteAnnounceFile")
 api.add_resource(EnterDefenseList, '/api/v1/enter_defense_list', endpoint='enterDefenseList')
@@ -1288,7 +1323,9 @@ api.add_resource(CheckXlsxHeader, '/api/v1/check_xlsx_header', endpoint="checkXl
 api.add_resource(GetExpertList, '/api/v1/get_expert_list', endpoint="getExpertList")
 api.add_resource(DeleteExpert, '/api/v1/delete_expert', endpoint="deleteExpert")
 api.add_resource(ImportExpert, '/api/v1/import_expert', endpoint="importExpert")
+api.add_resource(SearchWorks, '/api/v1/searchworks', endpoint='searchworks')
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", debug=True)
+    # 正式版本begin_job需要在前，debug设为false
     begin_job()
+    app.run(host="127.0.0.1", debug=False)

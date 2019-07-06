@@ -19,6 +19,8 @@
       <Table  stripe border :columns="columns" :data="rows" ref="selection" style="margin-right: 9%;margin-left:6%"
               @on-selection-change="selectionChange"></Table>
       <div style="margin-right: 9%;margin-top:2%;overflow: hidden">
+        <Input search v-model="keyword" placeholder="输入搜索关键字" clearable style="margin-left: 7%  ;width: 200px"
+               @keyup.enter.native="search" @on-clear="cancelSearch" @on-change="changeSearch"/>
         <div style="float: right;">
           <Page :total="total_item" :current="pageNum" :page-size="pageSize"	 @on-change="changePage"></Page>
         </div>
@@ -41,6 +43,8 @@
       },
       data(){
         return{
+          keyword:'',
+          searchflag:0,
           total_item:1,
           pageSize:2,
           pageNum:1,
@@ -56,6 +60,7 @@
           B_list:[],
           C_list:[],
           D_list:[],
+          search_list:[],
           select:{type: 'selection', width: 48,align: 'center',},
           score:{title: '平均分',key: 'score',width:73,sortable: true},
           columns: [
@@ -165,23 +170,35 @@
                     },
                     style: {
                       marginRight:'5px',
-                      display:(this.current==0||this.current==1||this.current==4)?"inline-block":"none"
+                      display:(this.current==0)?"inline-block":"none"
                     },
                     on: {
                       click: () => {
-                        if(this.com_status==0)
                           this.rejectPro(params.row.project_code);
-                        else if(this.com_status==1){
-                          this.downloadFile(params.row.project_code);
-                        }
                       }
                     }
-                    },this.current==0?"退回":"下载附件"),
+                  }, "退回"),
+                    h('Button', {
+                        props: {
+                            type: 'primary',
+                            size: 'small',
+                            disabled: params.row.project_status=="编辑中"
+                        },
+                        style: {
+                            marginRight:'5px',
+                            display: "inline-block",
+                        },
+                        on: {
+                            click: () => {
+                                this.downloadFile(params.row.project_code);
+                            }
+                        }
+                    }, "下载附件"),
                   h('Button', {
                     props: {
                       type: 'error',
                       size: 'small',
-                      disabled:(params.row.project_status=="通过初审")
+                      disabled:(params.row.project_status!="已提交")
                     },
                     style: {
                       marginRight:'5px',
@@ -211,18 +228,43 @@
         this.getProList();
       },
       methods:{
-        changeTitle(){
-            if(this.com_status ==0 && this.current==0){
-              return "退回"
+        search(){
+          if(this.keyword==""){this.cancelSearch();return;}
+          let params = {'competition_id':this.competition_id,'keyword':this.keyword,'current':this.current};
+          this.$http.post(this.$baseURL + "/api/v1/searchworks",params,{
+            headers:{
+              'Content-Type':"application/json",
             }
-          if(this.com_status ==1 && this.current==1){
-            return "下载附件"
-          }
+          }).then(function (res) {
+            var detail = (res.body);
+            console.log(detail);
+            if(detail.state =="fail"){
+              this.$Notice.open({title: "搜索失败",duration:0.5});
+            }
+            else{
+              this.selectnum = 0;
+              this.searchflag = 1;
+              this.search_list = detail.search_list;
+              this.total_item = this.search_list.length;
+              this.handleType(this.search_list);
+              this.handleData(this.search_list);
+              this.rows = this.search_list.slice(0,this.pageSize);
+            }
+          }, function (res) {
+            alert(res);
+          });
+        },
+        changeSearch(){
+          this.search();
+        },
+        cancelSearch(){
+          this.searchflag = 0;
+          this.changeList();
         },
         selectionChange(data){
-          this.selectnum=0;
+          this.selectnum=data.length;
           this.selectItem.length = 0;
-          this.selectnum = data.length;
+          console.log("data",data);
           if(this.com_status==1) {
             for (var i of data) {
               this.selectItem.push({'proj_id': i.project_code, 're': 'True'})
@@ -233,10 +275,11 @@
               this.selectItem.push(i.project_code)
             }
           }
+          //this.selectnum = this.selectItem.length;
+          console.log(this.selectItem)
         },
         rejectPro(id){
           let params = {'project_code':id};
-          console.log(params);
           this.$http.post(this.$baseURL + "/api/v1/reject_project",params,{
             headers:{
               'Content-Type':"application/json",
@@ -434,9 +477,14 @@
           });
         },
         changePage(value){
+          this.selectnum = 0;
           this.pageNum = value;
           let a = this.pageSize*(this.pageNum-1);
           let b = this.pageSize*this.pageNum;
+          if(this.searchflag ==1){
+            this.rows=this.search_list.slice(a,b);
+            return
+          }
           switch (this.current) {
             case 0:
               this.rows = this.E_list.slice(a,b);
@@ -456,6 +504,7 @@
           }
           document.body.scrollTop = 0;
           document.documentElement.scrollTop = 0;
+          console.log(222,this.selectItem)
         },
       }
     }

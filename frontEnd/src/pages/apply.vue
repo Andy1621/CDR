@@ -715,9 +715,19 @@
                     this.$refs.uploadPhoto.fileList.splice(fileList.indexOf(file), 1);
                 }
                 else{
-                    this.$Message.success('成功上传')
+                    this.$Message.success('成功上传 '+file.name)
                     file.url = res.url;
                     this.photo_cnt += 1
+                    var list = this.$refs.uploadPhoto.fileList
+                    // console.log(file)
+                    // console.log(list)
+                    for(var item of list){
+                        if(item.name == file.name && list.indexOf(item)!=list.length-1){
+                            this.$refs.uploadPhoto.fileList.splice(list.indexOf(item),1)
+                            this.photo_cnt -= 1
+                            break
+                        }
+                    }
                     // this.refresh_list()
                     console.log(this.uploadPhotoList)
                 }
@@ -746,16 +756,29 @@
             //upload video
             videoView(file){
                 console.log(file)
-                window.open(file.response.url)
+                if(file.url)
+                    window.open(file.url)
+                else
+                    window.open(file.response.url)
             },
             handleSuccessVideo (res, file) {
                 console.log(res);
                 if(res.state == 'fail')
                     this.$Message.error('上传失败 ' + res.reason);
                 else{
-                    // this.$Message.success('成功上传')
+                    this.$Message.success('成功上传 '+file.name)
                     file.url = res.file_path;
                     this.video_cnt += 1;
+                    var list = this.$refs.uploadVideo.fileList
+                    // console.log(file)
+                    // console.log(list)
+                    for(var item of list){
+                        if(item.name == file.name && list.indexOf(item)!=list.length-1){
+                            this.$refs.uploadVideo.fileList.splice(list.indexOf(item),1)
+                            this.video_cnt -= 1
+                            break
+                        }
+                    }
                 }
             },
             handleRemoveVideo(file){
@@ -785,27 +808,77 @@
                     desc: '文件  ' + file.name + ' 过大，不能超过100M'
                 });
             },
-            handleBeforeUploadVideo () {
+            handleBeforeUploadVideo (file) {
                 const check = this.video_cnt < 1;
                 if (!check) {
                     this.$Notice.warning({
                         title: '最多只能上传1个视频'
                     });
                 }
-                return check;
+                console.log(file)
+                var url = URL.createObjectURL(file);
+                 //经测试，发现audio也可获取视频的时长
+                var audioElement = new Audio(url);
+                var time
+                var duration
+                var that = this
+                // audioElement.addEventListener("loadedmetadata", function (_event) {
+                //     time = audioElement.duration;
+                //     console.log(time);
+                //     duration = time <= 5*60 ? true : false
+                //     console.log(duration)
+                //     if (!duration) {
+                //         that.$Notice.warning({
+                //             title: '视频时长不得大于5分钟'
+                //         });
+                //     }
+                //     console.log(check && duration)
+                //     return check && duration;
+                // });
+                var promise = new Promise(function(resolve, reject){
+                    audioElement.addEventListener("loadedmetadata", function (_event) {
+                        time = audioElement.duration;
+                        // console.log(time);
+                        duration = time <= 5*60+1 ? true : false
+                        // console.log(duration)
+                        if (!duration) {
+                            that.$Notice.warning({
+                                title: '视频时长不得大于5分钟'
+                            });
+                        }
+                        // console.log(check && duration)
+                        if(check && duration)
+                            resolve()
+                        else
+                            reject()
+                    })
+                });
+                return promise;
             },
             //upload file
             docView(file){
                 console.log(file)
-                window.open(file.response.url)
+                if(file.url)
+                    window.open(file.url)
+                else
+                    window.open(file.response.url)
             },
             handleSuccessDoc (res, file) {
                 console.log(res);
                 if(res.state == 'fail')
                     this.$Message.error('上传失败 ' + res.reason);
                 else{
-                    // this.$Message.success('成功上传')
+                    this.$Message.success('成功上传 '+file.name)
                     file.url = res.file_path;
+                    var list = this.$refs.uploadDoc.fileList
+                    // console.log(file)
+                    // console.log(list)
+                    for(var item of list){
+                        if(item.name == file.name && list.indexOf(item)!=list.length-1){
+                            this.$refs.uploadDoc.fileList.splice(list.indexOf(item),1)
+                            break
+                        }
+                    }
                 }
             },
             handleRemoveDoc (file, fileList){
