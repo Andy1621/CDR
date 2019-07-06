@@ -26,7 +26,7 @@ db = DbOperate()
 
 # 合法的后缀集
 ALLOWED_EXTENSIONS_PIC = ['png', 'jpg', 'JPG', 'PNG', 'gif', 'GIF']
-ALLOWED_EXTENSIONS_VIDEO = ['mp4', 'MP4', 'flv', 'FLV']
+ALLOWED_EXTENSIONS_VIDEO = ['mp4', 'MP4']
 ALLOWED_EXTENSIONS_DOC = ['pdf', 'PDF']
 
 
@@ -1072,6 +1072,7 @@ def get_interval_secs():
 def do_job():
     try:
         global timer
+        db.refuse_gugu_expert()
         db.remind_all()
         timer = threading.Timer(86400, do_job)   # 86400秒就是一天
         timer.start()
@@ -1086,7 +1087,8 @@ def do_job():
 def begin_job():
     try:
         global timer
-        # db.remind_all()
+        db.refuse_gugu_expert()
+        db.remind_all()
         timer = threading.Timer(get_interval_secs(), do_job)
         timer.start()
     except:
@@ -1289,4 +1291,4 @@ api.add_resource(ImportExpert, '/api/v1/import_expert', endpoint="importExpert")
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", debug=True)
-    # begin_job()
+    begin_job()

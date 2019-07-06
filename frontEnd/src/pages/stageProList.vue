@@ -26,7 +26,7 @@
       <div v-if="(current==1&&com_status==1)||(current==3&&com_status==3)" style="background-color: #9acfea;margin-top:1%;width:85%;margin-left: 6%;border-radius: 3px;height:40px;
         line-height:40px;">
         <span style="margin-left: 2%">已选中 {{this.selectnum}} 项</span>
-        <button style=";margin-left: 75%;background-color: red;border: none;width: 10%" @click="pass(com_status)">通过</button>
+        <button style=";margin-left: 75%;background-color: #aeb7c4;border: none;width: 10%" @click="pass(com_status)">通过</button>
       </div>
     </div>
   </div>
@@ -56,7 +56,7 @@
           B_list:[],
           C_list:[],
           D_list:[],
-          select:{type: 'selection', width: 60,align: 'center',},
+          select:{type: 'selection', width: 48,align: 'center',},
           score:{title: '平均分',key: 'score',width:73,sortable: true},
           columns: [
             {
@@ -67,7 +67,6 @@
             {
               title: '作品类别',
               key: 'type',
-              width:105,
               filters:[
                 {
                   label:"机械控制",
@@ -112,17 +111,19 @@
               }
             },
             {
-              title: '第一作者',
-              key: 'author_name'
+                title: '第一作者',
+                key: 'author_name',
+                width: 140
             },
             {
-              title: '状态',
-              key: 'project_status'
+                title: '状态',
+                key: 'project_status',
+                width: 140
             },
             {
               title: '操作',
               key: 'oper',
-              width: 170,
+              width: 197,
               align: 'center',
               render: (h, params) => {
                 return h('div', [
