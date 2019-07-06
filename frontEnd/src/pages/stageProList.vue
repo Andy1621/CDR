@@ -46,7 +46,7 @@
           keyword:'',
           searchflag:0,
           total_item:1,
-          pageSize:2,
+          pageSize:6,
           pageNum:1,
           current:-2,
           selectnum:0,
