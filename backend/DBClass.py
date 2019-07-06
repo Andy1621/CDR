@@ -1259,11 +1259,13 @@ class DbOperate:
             if finded_user is None:
                 res['reason'] = "未找到用户"
                 return res
-            if finded_user['user_type']=='expert':
+            if finded_user['user_type'] == 'expert':
                 user.update_one({'mail': mail}, {
-                            "$set": {'username': user_name, 'field':field}})
+                            "$set": {'username': user_name, 'field': field}})
+                self.getCol('expert_project').update({'expert_mail': mail}, {
+                    "$set": {'username': user_name}}, False, True)
             else:
-                user.update_one({'mail':mail},{"$set":{'username':user_name}})
+                user.update_one({'mail': mail}, {"$set": {'username': user_name}})
             res['state'] = 'success'
             res['reason'] = ''
             return res
