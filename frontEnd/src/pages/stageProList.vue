@@ -170,23 +170,35 @@
                     },
                     style: {
                       marginRight:'5px',
-                      display:(this.current==0||this.current==1||this.current==4)?"inline-block":"none"
+                      display:(this.current==0)?"inline-block":"none"
                     },
                     on: {
                       click: () => {
-                        if(this.com_status==0)
                           this.rejectPro(params.row.project_code);
-                        else if(this.com_status==1){
-                          this.downloadFile(params.row.project_code);
-                        }
                       }
                     }
-                    },this.current==0?"退回":"下载附件"),
+                  }, "退回"),
+                    h('Button', {
+                        props: {
+                            type: 'primary',
+                            size: 'small',
+                            disabled: params.row.project_status=="编辑中"
+                        },
+                        style: {
+                            marginRight:'5px',
+                            display: "inline-block",
+                        },
+                        on: {
+                            click: () => {
+                                this.downloadFile(params.row.project_code);
+                            }
+                        }
+                    }, "下载附件"),
                   h('Button', {
                     props: {
                       type: 'error',
                       size: 'small',
-                      disabled:(params.row.project_status=="通过初审")
+                      disabled:(params.row.project_status!="已提交")
                     },
                     style: {
                       marginRight:'5px',
