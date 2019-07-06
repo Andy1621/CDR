@@ -979,6 +979,8 @@ class MultiInviteMail(Resource):
                     res['cnt'] += res1['cnt']
             if res['cnt'] > 0:
                 res['state'] = 'success'
+            else:
+                res['reason'] = '所选的专家都已邀请过。'
         except:
             pass
         finally:
@@ -1087,6 +1089,7 @@ def get_interval_secs():
 def do_job():
     try:
         global timer
+        db.refuse_gugu_expert()
         db.remind_all()
         timer = threading.Timer(86400, do_job)   # 86400秒就是一天
         timer.start()
@@ -1101,7 +1104,8 @@ def do_job():
 def begin_job():
     try:
         global timer
-        # db.remind_all()
+        db.refuse_gugu_expert()
+        db.remind_all()
         timer = threading.Timer(get_interval_secs(), do_job)
         timer.start()
     except:
