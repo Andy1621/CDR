@@ -36,7 +36,7 @@
                     },
                     {
                         title: '报名截止时间',
-                        key: 'end_time',
+                        key: 'submission_ddl',
                         sortable: true,
                         sortMethod: this.sortDate,
                         width: 160

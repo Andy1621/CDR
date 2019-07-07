@@ -188,7 +188,8 @@ class DbOperate:
                     os.remove(file_path)
                 if flag:
                     html_path = basedir + "/static/export_html/" + project_code + '.html'
-                    os.remove(html_path)
+                    if os.path.exists(html_path):
+                        os.remove(html_path)
                     self.getCol('project').remove({'project_code': project_code})
                     res['state'] = 'success'
                     res['reason'] = ''
