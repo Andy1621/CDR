@@ -48,8 +48,8 @@
                         :mask-closable="false"
                         @on-ok="okPro">
                         <LInput v-model="professorEmailRegister" labelContent="邮箱：" :disabled=true></LInput>
-                        <LInput v-model="professorPasswordRegister" labelContent="密码：" type="password"></LInput>
-                        <LInput v-model="professorPasswordConfirm" labelContent="确认密码：" type="password"></LInput>
+                        <LInput v-model="professorPasswordRegister" labelContent="设置密码：" inputType="password"></LInput>
+                        <LInput v-model="professorPasswordConfirm" labelContent="确认密码：" inputType="password"></LInput>
                     </Modal>
                 </div>
             </div>
@@ -196,10 +196,17 @@
                     return;
                 }
                 this.$http.post(url, data).then(function (res) {
-                    console.log(res)
+                    console.log(res);
+                    this.$cookie.set('mail', this.professorEmailRegister);
+                    this.$cookie.set('role', 'expert');
+                    this.$cookie.set('username', this.professorEmailRegister);
+                    this.$router.push({
+                        path: '/index',
+                    });
                 }, function (res) {
                     console.log(res)
                 })
+
             },
         }
     }
