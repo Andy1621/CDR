@@ -45,11 +45,13 @@
                         title="请输入您的邮箱"
                         ok-text="确认"
                         width="460"
-                        :mask-closable="false"
-                        @on-ok="okPro">
+                        :mask-closable="false">
                         <LInput v-model="professorEmailRegister" labelContent="邮箱：" :disabled=true></LInput>
                         <LInput v-model="professorPasswordRegister" labelContent="设置密码：" inputType="password"></LInput>
                         <LInput v-model="professorPasswordConfirm" labelContent="确认密码：" inputType="password"></LInput>
+                        <div slot="footer">
+                            <Button type="primary" @click="okPro">确定</Button>
+                        </div>
                     </Modal>
                 </div>
             </div>
@@ -172,7 +174,7 @@
                 this.$http.post(this.$baseURL + "/api/v1/registerstudent", data).then(function (res) {
                     console.log(res);
                     if (res.body.state === 'fail') {
-                        this.$Message.error(res.body.reason)
+                        this.$Message.error(res.body.reason);
                         return
                     }
                     this.$cookie.set('mail', this.emailRegister);
@@ -198,7 +200,7 @@
                 this.$http.post(url, data).then(function (res) {
                     console.log(res);
                     this.$cookie.set('mail', this.professorEmailRegister);
-                    this.$cookie.set('role', 'expert');
+                    this.$cookie.set('role', 'professor');
                     this.$cookie.set('username', this.professorEmailRegister);
                     this.$router.push({
                         path: '/index',
