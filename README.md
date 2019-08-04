@@ -50,9 +50,9 @@ Competition Declaration and Review
 
 - **对象字段要求**：
 
-	```python
-{"mail":string,"username":string,"password":string,"user_type":string('^(admin|user|expert)$'),"ID":string,"department":string,"field":string,"admission_year":int,"phone":string,'invitation_code':string,'realm':string}
-	```
+  ```python
+  {"mail":string,"username":string,"password":string,"user_type":string('^(admin|user|expert)$'),"ID":string,"department":string,"field":string,"admission_year":int,"phone":string,'invitation_code':string,'realm':string}
+  ```
 
 #### project
 
@@ -154,20 +154,20 @@ Competition Declaration and Review
 
   - "project_status"字段编码解释：
 
-  	```
-  -1：未开始
-  0：报名提交阶段
-  1：校团委初审阶段
-  2：专家初评阶段
-  3：现场答辩阶段
-  4：最终结果公布
-  5：已结束
-  	```
+    ```
+    -1：未开始
+    0：报名提交阶段
+    1：校团委初审阶段
+    2：专家初评阶段
+    3：现场答辩阶段
+    4：最终结果公布
+    5：已结束
+    ```
 
 - **对象字段要求**：
 
   ```python
-  {"competition_name":string,"":string}
+  {"competition_name":string,"":string}...
   ```
 
 #### news
