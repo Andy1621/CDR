@@ -1,6 +1,4 @@
-HOST = '180.76.96.46'
-# HOST = '139.199.96.196'
-PORT_DB = 27017
-DATABASE = 'CDR'
-DOMAIN_NAME = "http://180.76.96.46"
-# DOMAIN_NAME = "http://127.0.0.1:5000"
+HOST = 'Your mongodb service address'
+PORT_DB = 27017 	# The default port for mongodb
+DATABASE = 'CDR'	# The name of your database
+DOMAIN_NAME = 'Your backend service address'	# For wxample http://192.66.66.66
